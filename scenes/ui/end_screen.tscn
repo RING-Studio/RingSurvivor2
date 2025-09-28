@@ -1,0 +1,172 @@
+[gd_scene load_steps=15 format=3 uid="uid://7axbopas4824"]
+
+[ext_resource type="Script" uid="uid://cocxlvkw4f3lv" path="res://scenes/ui/end_screen.gd" id="1_xf2cy"]
+[ext_resource type="PackedScene" uid="uid://dmu80fq6rvrp" path="res://scenes/ui/sound_button.tscn" id="2_cswyq"]
+[ext_resource type="AudioStream" uid="uid://bxfchkjnlc7av" path="res://Assets/audio/jingles_victory.ogg" id="2_dmg40"]
+[ext_resource type="AudioStream" uid="uid://j67adia0x2ml" path="res://Assets/audio/jingles_defeat.ogg" id="3_jqah1"]
+[ext_resource type="Shader" uid="uid://ck37gsdwfvg4d" path="res://Shader/SimpleBlur.gdshader" id="4_e4cmn"]
+[ext_resource type="Texture2D" uid="uid://co53hmtb1xmjb" path="res://Assets/UIAssets/gameUIset_16_01_blue_append_v104/log_bg.png" id="5_dlhjq"]
+
+[sub_resource type="Animation" id="Animation_momv2"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_qsx0v"]
+resource_name = "in"
+length = 0.15
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_g8sap"]
+resource_name = "out"
+length = 0.15
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_7no0y"]
+_data = {
+&"RESET": SubResource("Animation_momv2"),
+&"in": SubResource("Animation_qsx0v"),
+&"out": SubResource("Animation_g8sap")
+}
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dlhjq"]
+shader = ExtResource("4_e4cmn")
+shader_parameter/blur_amount = 0.553
+shader_parameter/mix_amount = 0.268
+shader_parameter/color_over = Color(0.551013, 0.33269, 0.469083, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_eok5x"]
+texture = ExtResource("5_dlhjq")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h1n6l"]
+bg_color = Color(0.812712, 0.499252, 0.51417, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w8f1j"]
+bg_color = Color(0.812712, 0.499252, 0.51417, 1)
+
+[node name="EndScreen" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_xf2cy")
+continue_scene = &"res://scenes/main/MainScene.tscn"
+quit_scene = &"res://Levels/MainMenu.tscn"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_7no0y")
+}
+autoplay = "in"
+
+[node name="VictoryStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_dmg40")
+volume_db = -5.0
+
+[node name="DefeatStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_jqah1")
+volume_db = -5.0
+
+[node name="ColorRect" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_dlhjq")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.607843, 0.298039, 0.639216, 0.352941)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxTexture_eok5x")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer"]
+custom_minimum_size = Vector2(253.275, 0)
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(800, 600)
+layout_mode = 2
+theme_override_constants/separation = 96
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BlueOutlineLabel"
+theme_override_colors/font_color = Color(0.479422, 0.678308, 0.743958, 1)
+theme_override_font_sizes/font_size = 77
+text = "Victory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"BlueOutlineLabel"
+theme_override_colors/font_color = Color(0.597998, 0.360593, 0.707033, 1)
+theme_override_font_sizes/font_size = 41
+text = "You won!"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="ContinueButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" instance=ExtResource("2_cswyq")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_h1n6l")
+text = "Continue"
+
+[node name="QuitButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer" instance=ExtResource("2_cswyq")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("StyleBoxFlat_w8f1j")
+text = "Quit to Menu"

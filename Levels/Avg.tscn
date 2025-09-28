@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3 uid="uid://jwjpdj5wp2ov"]
+
+[ext_resource type="Script" uid="uid://ci15ov181polm" path="res://Scripts/AVGUI.gd" id="1_2tyad"]
+[ext_resource type="Resource" uid="uid://ct45l4m0ytb3d" path="res://DialogueData/Dialogue1.dialogue" id="2_2tyad"]
+[ext_resource type="Texture2D" uid="uid://b7gq2sk0xrn47" path="res://Assets/UIAssets/A59_C_まとめてDL/A59_A_6.png" id="3_7kb8n"]
+[ext_resource type="Texture2D" uid="uid://drom0w6k62o5d" path="res://Assets/UIAssets/A61_C_まとめてDL/A61_A_BG.png" id="3_obymx"]
+[ext_resource type="Texture2D" uid="uid://ctvaqvvmmnq03" path="res://Assets/UIAssets/A61_C_まとめてDL/A61_B_4.png" id="4_lncvo"]
+
+[node name="AVG" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2tyad")
+resource = ExtResource("2_2tyad")
+next_scene = &"res://Levels/MilitaryCamp.tscn"
+
+[node name="TextureRect3" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_obymx")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -83.0
+offset_top = 154.0
+offset_right = 896.0
+offset_bottom = 2037.0
+texture = ExtResource("3_7kb8n")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 837.0
+offset_top = 83.0
+offset_right = 2162.0
+offset_bottom = 2107.0
+texture = ExtResource("4_lncvo")
+expand_mode = 1
+stretch_mode = 4

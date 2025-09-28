@@ -1,0 +1,89 @@
+[gd_scene load_steps=8 format=3 uid="uid://df4t54mvpcrr6"]
+
+[ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_0rtxc"]
+[ext_resource type="Script" uid="uid://bjy4bsk7e4lvg" path="res://Scripts/UI/LoadUI.gd" id="2_guntw"]
+[ext_resource type="Texture2D" uid="uid://drom0w6k62o5d" path="res://Assets/UIAssets/A61_C_まとめてDL/A61_A_BG.png" id="3_w11cy"]
+[ext_resource type="PackedScene" uid="uid://h1sa8vc61vba" path="res://TSCN/UI/ConfirmPanel.tscn" id="4_guntw"]
+[ext_resource type="Texture2D" uid="uid://bksksy2gkowv8" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_click_01.png" id="5_qians"]
+[ext_resource type="Texture2D" uid="uid://bgexuvotnwila" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_click_02.png" id="6_smtpi"]
+[ext_resource type="Texture2D" uid="uid://nhi4fsusi3a1" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_hover_01.png" id="7_7nle3"]
+
+[node name="LoadUI" type="Control" node_paths=PackedStringArray("button_template", "button_root", "confirm_panel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_0rtxc")
+script = ExtResource("2_guntw")
+button_template = NodePath("ScrollContainer/VBoxContainer/Button")
+button_root = NodePath("ScrollContainer/VBoxContainer")
+confirm_panel = NodePath("ConfirmPanel")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_w11cy")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 0
+offset_left = 35.0
+offset_top = 138.0
+offset_right = 1098.0
+offset_bottom = 913.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Button" type="Button" parent="ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(937.095, 125.845)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "第一天 章节名 进度"
+
+[node name="Button" type="Button" parent="ScrollContainer/VBoxContainer/Button"]
+self_modulate = Color(1, 0.493775, 0.792724, 1)
+layout_mode = 0
+offset_left = 954.0
+offset_top = 19.0
+offset_right = 1038.0
+offset_bottom = 114.0
+text = "删"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 31.0
+theme_override_font_sizes/font_size = 71
+text = "读取 LOAD"
+
+[node name="ConfirmPanel" parent="." instance=ExtResource("4_guntw")]
+visible = false
+layout_mode = 1
+
+[node name="Exit" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1688.0
+offset_top = 54.0
+offset_right = 1868.0
+offset_bottom = 118.0
+texture_normal = ExtResource("5_qians")
+texture_pressed = ExtResource("6_smtpi")
+texture_hover = ExtResource("7_7nle3")
+
+[node name="Label" type="Label" parent="Exit"]
+layout_mode = 0
+offset_top = 5.0
+offset_right = 178.0
+offset_bottom = 63.0
+text = "EXIT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="button_up" from="Exit" to="." method="_on_exit_button_up"]

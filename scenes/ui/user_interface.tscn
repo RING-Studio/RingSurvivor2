@@ -1,0 +1,100 @@
+[gd_scene load_steps=7 format=3 uid="uid://dwqj1cmy27rl3"]
+
+[ext_resource type="Script" uid="uid://xdqgpo8cq64m" path="res://scenes/user_interface.gd" id="1_di1f0"]
+[ext_resource type="Texture2D" uid="uid://dvwqwyn5kedu2" path="res://Assets/UIAssets/Unitframe/HealthBarUnder.png" id="1_xpt2d"]
+[ext_resource type="Texture2D" uid="uid://emiu42ea7i7j" path="res://Assets/UIAssets/Unitframe/HealthBarOver.png" id="2_m32rf"]
+[ext_resource type="Texture2D" uid="uid://dt61wrbrwqkto" path="res://Assets/UIAssets/Unitframe/MainBar.png" id="3_odmdq"]
+[ext_resource type="Texture2D" uid="uid://cosrombo03vwo" path="res://Assets/UIAssets/Unitframe/BlueBar.png" id="4_fi4ec"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_sl0uq"]
+font_size = 26
+font_color = Color(0.960784, 0.717647, 0.423529, 1)
+
+[node name="UserInterface" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_di1f0")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="InfoBar" type="Control" parent="MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HealthBarUnder" type="TextureRect" parent="MarginContainer/InfoBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_xpt2d")
+
+[node name="HealthBar" type="TextureProgressBar" parent="MarginContainer/InfoBar/HealthBarUnder"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+texture_progress = ExtResource("3_odmdq")
+
+[node name="HealthLabel" type="Label" parent="MarginContainer/InfoBar/HealthBarUnder/HealthBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 96.0
+offset_top = -15.0
+offset_right = 191.0
+offset_bottom = -15.0
+grow_vertical = 2
+text = "1000/1000"
+label_settings = SubResource("LabelSettings_sl0uq")
+vertical_alignment = 1
+
+[node name="XPBar" type="TextureProgressBar" parent="MarginContainer/InfoBar/HealthBarUnder"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_progress = ExtResource("4_fi4ec")
+
+[node name="HealthBarOver" type="TextureRect" parent="MarginContainer/InfoBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_m32rf")
+
+[node name="LevelLabel" type="Label" parent="MarginContainer/InfoBar/HealthBarOver"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 1.0
+grow_vertical = 2
+text = "1"
+label_settings = SubResource("LabelSettings_sl0uq")
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://bnl28d230kkir"]
+
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_tad67"]
+
+[node name="GameCamera" type="Camera2D"]
+
+[node name="PhantomCameraHost" type="Node" parent="."]
+process_priority = 300
+process_physics_priority = 300
+script = ExtResource("1_tad67")
+metadata/_custom_type_script = "uid://bd046eokvcnu2"

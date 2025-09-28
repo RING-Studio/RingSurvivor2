@@ -1,0 +1,192 @@
+[gd_scene load_steps=4 format=3 uid="uid://d0u5mgfkftp52"]
+
+[ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_e83m6"]
+[ext_resource type="Script" uid="uid://8tn5cf51fbia" path="res://Scripts/TechScene.gd" id="2_qq5lf"]
+[ext_resource type="Texture2D" uid="uid://dhbi0esgjwgew" path="res://Assets/UIAssets/Accessories/激光压制.jpg" id="3_u2y7f"]
+
+[node name="TechScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_e83m6")
+script = ExtResource("2_qq5lf")
+back_scene = &"res://Levels/MilitaryCamp.tscn"
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+
+[node name="ReturnButton" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(150, 80)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "BACK"
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(500, 500)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+texture = ExtResource("3_u2y7f")
+expand_mode = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(1400, 700)
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 220
+theme_override_constants/v_separation = 90
+columns = 4
+
+[node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button2" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button3" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button4" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button5" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button6" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button7" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button8" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button9" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button10" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button11" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button12" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button13" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button14" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button15" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button16" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button17" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button18" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button19" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="Button20" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+layout_mode = 2
+text = "选项"
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 85
+
+[node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 65.86)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "选项名称/等级"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "选项信息
+"
+horizontal_alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "升级"
+
+[node name="Button2" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "降级"
+
+[connection signal="button_up" from="PanelContainer/HBoxContainer/VBoxContainer/ReturnButton" to="." method="_back_to_menu"]

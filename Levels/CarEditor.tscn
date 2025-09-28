@@ -1,0 +1,473 @@
+[gd_scene load_steps=20 format=3 uid="uid://b7iwxb02eygo1"]
+
+[ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_6xktn"]
+[ext_resource type="Script" uid="uid://bapwi62e8a8qv" path="res://Scripts/CarEditor.gd" id="2_ybk8i"]
+[ext_resource type="FontFile" uid="uid://bub8aguvpvu0v" path="res://Assets/Fonts/ChillRoundM.ttf" id="4_6lbh8"]
+[ext_resource type="Script" uid="uid://ba5yiss8gndc8" path="res://Scripts/UI/UIEquipments.gd" id="4_wac13"]
+[ext_resource type="Texture2D" uid="uid://ce8bf0kg17uh3" path="res://Assets/UIAssets/Accessories/榴弹炮.jpg" id="8_61kah"]
+[ext_resource type="Texture2D" uid="uid://ntib5r1kxa2t" path="res://Assets/UIAssets/gameUIset_16_blue_v101/arrow_01_left_hover.png" id="8_ybk8i"]
+[ext_resource type="Shader" uid="uid://cr5x8ib6pou1m" path="res://Shader/Grayscale.gdshader" id="9_46m37"]
+[ext_resource type="Texture2D" uid="uid://b5ksnst7h00ul" path="res://Assets/UIAssets/gameUIset_16_blue_v101/arrow_01_right_hover.png" id="10_5yjm6"]
+[ext_resource type="Texture2D" uid="uid://67ejppt4mo77" path="res://Assets/UIAssets/Accessories/无线电设备.jpg" id="11_5yjm6"]
+[ext_resource type="Script" uid="uid://co2g25qvbtnlq" path="res://Scripts/UI/ListDisplay.gd" id="11_jigr5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ybk8i"]
+bg_color = Color(0.392384, 0.683559, 0.347588, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wac13"]
+shader = ExtResource("9_46m37")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5yjm6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yjm6"]
+bg_color = Color(0.35717, 0.650381, 0.718692, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_46m37"]
+shader = ExtResource("9_46m37")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46m37"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wac13"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jigr5"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wf7xt"]
+shader = ExtResource("9_46m37")
+
+[node name="CarEditor" type="Control" node_paths=PackedStringArray("vehicle_display", "vehicle_name", "car_name", "property_list", "property_list_button", "choice_list", "list_display", "vehicle_unlock_button", "ui_equipments", "disabled_controls")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_6xktn")
+script = ExtResource("2_ybk8i")
+vehicle_display = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/TextureRect")
+vehicle_name = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/TextureRect/VehicleName")
+car_name = NodePath("HBoxContainer/VBoxContainer/RichTextLabel")
+back_scene = &"res://Levels/MilitaryCamp.tscn"
+property_list = NodePath("HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/GridContainer")
+property_list_button = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList/Button")
+choice_list = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList")
+list_display = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Display")
+vehicle_unlock_button = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/UnlockButton")
+ui_equipments = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments")
+disabled_controls = [NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList"), NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer"), NodePath("HBoxContainer/VBoxContainer/HBoxContainer2")]
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.996, 0.863, 0.918, 0.723)
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 92.0
+offset_top = -483.0
+offset_right = 462.0
+offset_bottom = -423.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(3.85046e-07, 0.557315, 0.49301, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/shadow_outline_size = 45
+theme_override_fonts/font = ExtResource("4_6lbh8")
+theme_override_font_sizes/font_size = 56
+text = "载具编辑界面"
+autowrap_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(1000, 1080)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ybk8i")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "初级配件档"
+
+[node name="Equipments" type="HBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer" node_paths=PackedStringArray("textures", "main_weapon", "armor")]
+layout_mode = 2
+script = ExtResource("4_wac13")
+textures = [NodePath("TextureRect/ColorRect"), NodePath("TextureRect2/ColorRect"), NodePath("TextureRect3/ColorRect"), NodePath("TextureRect4/ColorRect")]
+main_weapon = NodePath("../../../PanelContainer3/HBoxContainer/MainWeapon")
+armor = NodePath("../../../PanelContainer3/HBoxContainer/MainWeapon2")
+
+[node name="TextureRect" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.387153, 0.414012, 0.436725, 1)
+
+[node name="ColorRect" type="TextureRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Button" type="Button" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect2" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.387153, 0.414012, 0.436725, 1)
+
+[node name="ColorRect" type="TextureRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Button2" type="Button" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect2"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect3" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.387153, 0.414012, 0.436725, 1)
+
+[node name="ColorRect" type="TextureRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Button3" type="Button" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect3"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect4" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.387153, 0.414012, 0.436725, 1)
+
+[node name="ColorRect" type="TextureRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Button4" type="Button" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect4"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="HBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 105
+
+[node name="Left" type="TextureButton" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("8_ybk8i")
+
+[node name="VehicleShowcase" type="VBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer"]
+material = SubResource("ShaderMaterial_wac13")
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = -27
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase"]
+layout_mode = 2
+text = "车型预览图"
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase"]
+custom_minimum_size = Vector2(572.385, 424.526)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("8_61kah")
+expand_mode = 1
+
+[node name="VehicleName" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/TextureRect"]
+layout_mode = 0
+offset_left = 385.467
+offset_top = 440.096
+offset_right = 498.467
+offset_bottom = 500.096
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0.845306, 0.365668, 0.43249, 1)
+text = "Name"
+
+[node name="UnlockButton" type="Button" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "解锁"
+
+[node name="Right" type="TextureButton" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("10_5yjm6")
+
+[node name="PanelContainer3" type="PanelContainer" parent="HBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxEmpty_5yjm6")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3"]
+custom_minimum_size = Vector2(0, 72.425)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 115
+
+[node name="MainWeapon" type="TextureButton" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer"]
+z_index = 1
+z_as_relative = false
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon"]
+z_index = -1
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+offset_right = 300.0
+offset_bottom = 300.0
+mouse_filter = 2
+color = Color(0.169072, 0.213053, 0.0633335, 1)
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon"]
+layout_mode = 0
+offset_top = -3.22499
+offset_right = 301.0
+offset_bottom = 38.775
+theme_override_colors/font_color = Color(0.669316, 0.669315, 0.669316, 1)
+theme_override_colors/font_shadow_color = Color(0.334122, 0.334122, 0.334122, 1)
+theme_override_font_sizes/font_size = 41
+text = "车载主武器"
+horizontal_alignment = 1
+
+[node name="MainWeapon2" type="TextureButton" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer"]
+z_index = 1
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon2"]
+z_index = -1
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 0
+offset_right = 300.0
+offset_bottom = 300.0
+mouse_filter = 2
+color = Color(0.169072, 0.213053, 0.0633335, 1)
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon2"]
+layout_mode = 0
+offset_top = -3.99999
+offset_right = 313.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.775063, 0.775063, 0.775063, 1)
+theme_override_font_sizes/font_size = 40
+text = "装甲"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="ReturnButton" type="Button" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(150, 80)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+text = "BACK"
+
+[node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 30
+bbcode_enabled = true
+text = "车型名称ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd33333333333"
+scroll_active = false
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5yjm6")
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainer/PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(600, 85.92)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 2
+columns = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(2.33, 6.985)
+layout_mode = 2
+size_flags_vertical = 6
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(300, 612)
+layout_mode = 2
+horizontal_scroll_mode = 2
+
+[node name="ChoiceList" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer"]
+material = SubResource("ShaderMaterial_46m37")
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList"]
+visible = false
+custom_minimum_size = Vector2(224.33, 64.015)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.889338, 0, 0.455082, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/hover = SubResource("StyleBoxFlat_46m37")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_wac13")
+theme_override_styles/normal = SubResource("StyleBoxFlat_jigr5")
+text = "test"
+alignment = 0
+
+[node name="Display" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer" node_paths=PackedStringArray("title", "icon", "label", "parts_unlock_button", "load_button", "unload_button")]
+material = SubResource("ShaderMaterial_wf7xt")
+layout_mode = 2
+script = ExtResource("11_jigr5")
+title = NodePath("PartName")
+icon = NodePath("TextureRect")
+label = NodePath("Label")
+parts_unlock_button = NodePath("../../HBoxContainer2/PartsUnlockButton")
+load_button = NodePath("../../HBoxContainer2/Load")
+unload_button = NodePath("../../HBoxContainer2/Unload")
+
+[node name="PartName" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer/Display"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "部件名"
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/VBoxContainer/HBoxContainer/Display"]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("11_5yjm6")
+expand_mode = 1
+
+[node name="Label" type="RichTextLabel" parent="HBoxContainer/VBoxContainer/HBoxContainer/Display"]
+custom_minimum_size = Vector2(500, 250)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 41
+text = "有冷却时间，开启后对所有瞄准玩家的远程怪造成持续伤害"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="PartsUnlockButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+text = "解锁"
+
+[node name="Load" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+text = "装备"
+
+[node name="Unload" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+text = "卸下"
+
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect/Button" to="." method="switch_to_Accessories" binds= [0]]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect2/Button2" to="." method="switch_to_Accessories" binds= [1]]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect3/Button3" to="." method="switch_to_Accessories" binds= [2]]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect4/Button4" to="." method="switch_to_Accessories" binds= [3]]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Left" to="." method="left_button_pressed"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/UnlockButton" to="." method="unlock_vehicle"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Right" to="." method="right_button_pressed"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon" to="." method="switch_to_main_weapon"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon2" to="." method="switch_to_armor"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/ReturnButton" to="." method="_back_to_menu"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer2/PartsUnlockButton" to="." method="unlock_part"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer2/Load" to="." method="equip_part"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer2/Unload" to="." method="unload_part"]

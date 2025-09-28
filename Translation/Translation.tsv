@@ -1,0 +1,41 @@
+	en	ja	ZH
+key_1	Master	[color=green]音量[i][/i][/color]	音量
+key_2	Continue	ゲームを続けます	继续游戏
+key_3	Music	音楽	音乐
+ui_displaymode	 DISPLAYMODE	 DISPLAYMODE	 显示模式
+ui_displaymode_windowed	 WINDOWED	 windowed	 窗口
+ui_displaymode_exclusivefullscreen	EXCLUSIVEFULLSCREEN	windowed	全屏
+ui_displaymode_fullscreenwindow	FULLSCREEN	windowed	全屏
+ui_fullscreen	Fullscreen	フルスクリーン	全屏
+key_5	Language	言语	语言
+ui_return_mainmenu	MAIN MENU	メニューに戻ります	返回主菜单
+ui_quit	Quit To Desktop	ゲームをやめる	退出游戏
+ui_game_title	PUSH BOX 3D	ui_game_title	推箱子3D
+ui_play	Play	开始	开始
+ui_replay	REPLAY	Replay	重玩
+ui_return	 RETURN	 return	 返回
+ui_restart	RESTART	Restart	重新开始
+ui_upgrades	Upgrades	Upgrades	升级
+ui_common_options	OPTIONS	Restart	选项
+ui_level_selection	 LEVEL SELECTION	 Level Selection	 关卡选择
+ui_level	 LEVEL	 Level	 关卡
+ui_autopassing_insufficient	RESOLVED TOKEN NOT ENOUGH	ui_autopassing_insufficient	自动过关次数不足
+ui_reach_ad_limit	 ui_reach_ad_limit	 ui_reach_ad_limit	 今日观看广告次数达到上限
+ui_get_reward	 AQUIRE 1 RESOLVED TOKEN	 get_reward	" 获得""自动过关"""
+ui_reward_failed	GET AWARD FAILED	ui_reward_failed	 获取奖励失败
+ui_next_level	NEXT LEVEL	ui_next_level	下一关
+ui_steps	 STEPS	 Steps	 步数
+ui_autopassing	 RESOLVING	 autopassing	 自动通关中...
+ui_victory	 VICTORY	 VICTORY	 过关
+ui_world1	 STAGE1	 World1	 世界1
+ui_world2	 STAGE2	 World2	 世界2
+ui_world3	 STAGE3	 World3	 世界3
+ui_world4	 STAGE4	 World4	 世界4
+ui_rule	  RULES:	 RULES:	 游戏规则:
+ui_help	 To move a box` the player walks up to it and pushes it to an empty square directly beyond the box. Boxes cannot be pushed to squares with walls or other boxes` and they cannot be pulled. The number of boxes matches the number of storage locations. The puzzle is solved when all boxes occupy the storage locations.	 	 推动箱子。向左、右、上、下的地方移动。将箱子移动到指定点，达到指定数量，即可过关。
+sound_1	Master	音量	音量
+sound_2	Music	音楽	音乐
+sound_3	SFX	音效	音效
+lang_en	English	英語	英语
+lang_ja	Japanese	日本語	日语
+lang_ZH	Chinese	中国語	中文
