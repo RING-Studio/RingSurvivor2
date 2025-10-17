@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://b7iwxb02eygo1"]
+[gd_scene load_steps=21 format=3 uid="uid://b7iwxb02eygo1"]
 
 [ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_6xktn"]
 [ext_resource type="Script" uid="uid://bapwi62e8a8qv" path="res://Scripts/CarEditor.gd" id="2_ybk8i"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://ba5yiss8gndc8" path="res://Scripts/UI/UIEquipments.gd" id="4_wac13"]
 [ext_resource type="Texture2D" uid="uid://ce8bf0kg17uh3" path="res://Assets/UIAssets/Accessories/榴弹炮.jpg" id="8_61kah"]
 [ext_resource type="Texture2D" uid="uid://ntib5r1kxa2t" path="res://Assets/UIAssets/gameUIset_16_blue_v101/arrow_01_left_hover.png" id="8_ybk8i"]
+[ext_resource type="Script" uid="uid://6ewqx46a2gkg" path="res://Scripts/PropertyList.gd" id="9_5yjm6"]
 [ext_resource type="Shader" uid="uid://cr5x8ib6pou1m" path="res://Shader/Grayscale.gdshader" id="9_46m37"]
 [ext_resource type="Texture2D" uid="uid://b5ksnst7h00ul" path="res://Assets/UIAssets/gameUIset_16_blue_v101/arrow_01_right_hover.png" id="10_5yjm6"]
 [ext_resource type="Texture2D" uid="uid://67ejppt4mo77" path="res://Assets/UIAssets/Accessories/无线电设备.jpg" id="11_5yjm6"]
@@ -34,7 +35,7 @@ shader = ExtResource("9_46m37")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wf7xt"]
 shader = ExtResource("9_46m37")
 
-[node name="CarEditor" type="Control" node_paths=PackedStringArray("vehicle_display", "vehicle_name", "car_name", "property_list", "property_list_button", "choice_list", "list_display", "vehicle_unlock_button", "ui_equipments", "disabled_controls")]
+[node name="CarEditor" type="Control" node_paths=PackedStringArray("vehicle_display", "vehicle_name", "car_name", "weapon_name", "property_list", "weapon_property_list", "property_list_button", "choice_list", "list_display", "vehicle_unlock_button", "ui_equipments", "disabled_controls")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,8 +47,10 @@ script = ExtResource("2_ybk8i")
 vehicle_display = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/TextureRect")
 vehicle_name = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/TextureRect/VehicleName")
 car_name = NodePath("HBoxContainer/VBoxContainer/RichTextLabel")
+weapon_name = NodePath("HBoxContainer/VBoxContainer/RichTextLabel2")
 back_scene = &"res://Levels/MilitaryCamp.tscn"
 property_list = NodePath("HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/GridContainer")
+weapon_property_list = NodePath("HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/GridContainer")
 property_list_button = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList/Button")
 choice_list = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList")
 list_display = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Display")
@@ -380,6 +383,36 @@ size_flags_vertical = 4
 theme_override_constants/h_separation = 40
 theme_override_constants/v_separation = 2
 columns = 2
+script = ExtResource("9_5yjm6")
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 30
+bbcode_enabled = true
+text = "主武器"
+scroll_active = false
+
+[node name="PanelContainer2" type="PanelContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5yjm6")
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/VBoxContainer/PanelContainer2"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer"]
+custom_minimum_size = Vector2(600, 85.92)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 2
+columns = 2
+script = ExtResource("9_5yjm6")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 custom_minimum_size = Vector2(2.33, 6.985)
@@ -387,7 +420,7 @@ layout_mode = 2
 size_flags_vertical = 6
 
 [node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(300, 612)
+custom_minimum_size = Vector2(300, 590)
 layout_mode = 2
 horizontal_scroll_mode = 2
 

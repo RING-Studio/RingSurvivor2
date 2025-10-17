@@ -17,11 +17,11 @@ func set_icon(texture:Texture2D) -> void:
 func set_label(text:String) -> void:
 	label.text = text
 
-func update_info(id:int, table_name:String, vehicle_id:int) -> void:
+func update_info(id:int, table_name:String, vehicle_id:int) -> Dictionary:
 	var table = JsonManager.get_category(table_name)
 	var field = table.get(id)
 	if field == null:
-		return    
+		return field
 
 	set_title( field["Name"] )    
 
@@ -43,4 +43,5 @@ func update_info(id:int, table_name:String, vehicle_id:int) -> void:
 	icon.use_parent_material = !unlocked
 	label.use_parent_material = !unlocked
 	
-	
+	# 返回当前选项的属性，用于更新属性面板
+	return field

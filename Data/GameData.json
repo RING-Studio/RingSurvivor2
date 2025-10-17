@@ -794,7 +794,6 @@
 			"ArmorThickness": 0,
 			"CollisionDamage": 0,
 			"ArmorCoverage": 0,
-			"SoftAttackMultiplierPercent": 60,
 			"Remarks": "不能搭载武器，不能原地转向"
 		},
 		{
@@ -807,7 +806,6 @@
 			"ArmorThickness": 50,
 			"CollisionDamage": 0,
 			"ArmorCoverage": 0.3,
-			"SoftAttackMultiplierPercent": 60,
 			"Remarks": "不能原地转向"
 		},
 		{
@@ -820,7 +818,6 @@
 			"ArmorThickness": 100,
 			"CollisionDamage": 0,
 			"ArmorCoverage": 0.6,
-			"SoftAttackMultiplierPercent": 60,
 			"Remarks": ""
 		},
 		{
@@ -833,7 +830,6 @@
 			"ArmorThickness": 200,
 			"CollisionDamage": 10,
 			"ArmorCoverage": 0.9,
-			"SoftAttackMultiplierPercent": 45,
 			"Remarks": ""
 		}
 	],

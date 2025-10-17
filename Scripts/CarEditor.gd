@@ -3,8 +3,10 @@ extends Control
 @export var vehicle_display: TextureRect
 @export var vehicle_name: Label
 @export var car_name: RichTextLabel
+@export var weapon_name: RichTextLabel
 @export var back_scene: StringName = &""
-@export var property_list : GridContainer
+@export var property_list : PropertyList #车辆属性面板
+@export var weapon_property_list : PropertyList #主武器属性面板
 @export var property_list_button : Button
 @export var choice_list : Control
 @export var list_display : ListDisplay
@@ -27,17 +29,17 @@ func _ready() -> void:
 
 	_update_vehicle_selection()
 
-	switch_to_main_weapon()
+	switch_to_main_weapon(true)
 
 func switch_to_Accessories(id:int):
 	selected_slot = "配件"
 	refresh_choice_list(selected_slot)
 	_on_part_selected(0)
 
-func switch_to_main_weapon():
+func switch_to_main_weapon(enter_scene: bool = false):
 	selected_slot = "主武器类型"
 	refresh_choice_list(selected_slot)
-	_on_part_selected(0)
+	_on_part_selected(0, not enter_scene)
 
 func switch_to_armor():
 	selected_slot = "装甲类型"
@@ -76,26 +78,22 @@ func refresh_choice_list(slot:String) -> void:
 			button.use_parent_material = true
 
 
-func _on_part_selected( id ) -> void:
-	list_display.update_info( id, selected_slot, selected_vehicle)
+func _on_part_selected( id, update_property_list: bool = true ) -> void:
+	var part_property = list_display.update_info( id, selected_slot, selected_vehicle)
+	
+	if selected_slot == "主武器类型":
+		weapon_name.text = part_property.get("Name", "未知车辆")
+		weapon_property_list.replace_property(part_property)
+	
 	selected_part_id = id
 
 func refresh_card_data(id:int) -> void:
+	# 车辆名称
 	car_name.text = JsonManager.get_card_name_by_id(id)
 
-	for child in property_list.get_children():
-		property_list.remove_child(child)
-
 	vehicle_data = JsonManager.get_category("车辆类型")
-	var data = vehicle_data.get(id)
-	if data:
-		for key in data.keys():
-			if key == "Id" or key == "Name":
-				continue
-
-			var label = Label.new()
-			label.text = TranslationServer.translate(key) + " : " + str(data[key])
-			property_list.add_child(label)
+	
+	property_list.replace_property(vehicle_data.get(id))
 
 	ui_equipments.update_equipment(id)
 
@@ -168,7 +166,8 @@ func unlock_part():
 			GameManager.unlocked_parts[selected_slot] = []
 		GameManager.unlocked_parts[selected_slot].append(id)
 
-		_update_vehicle_selection()						
+		_update_vehicle_selection()
+
 		
 func equip_part():
 	GameManager.equip_part( selected_vehicle, selected_slot, selected_part_id )
