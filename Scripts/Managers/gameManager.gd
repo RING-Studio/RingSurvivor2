@@ -42,6 +42,9 @@ var unlocked_parts := {
 #升级数据
 var current_upgrades = {}
 
+#科技数据(TODO:下面的方法还没写科技升级的影响)
+var tech_upgrades: Dictionary
+
 func is_vehicle_unlocked(id:int):
 	for vehicle_id in unlocked_vehicles:
 		if vehicle_id == id:

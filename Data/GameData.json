@@ -13,7 +13,8 @@
 			"FireRatePerMinute": 0,
 			"CriticalRate": 0,
 			"CriticalDamageMultiplier": 0,
-			"ExpModifier": 0
+			"ExpModifier": 0,
+			"Remarks": "引擎备注"
 		},
 		{
 			"ID": 1,
@@ -107,7 +108,7 @@
 		},
 		{
 			"ID": 7,
-			"Name": "污染转化率（经验值倍率）",
+			"Name": "污染转化率",
 			"UpgradePrice": 100,
 			"MaxLevel": 5,
 			"WeightKgModifier": 0,
