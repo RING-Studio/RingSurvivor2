@@ -1,0 +1,83 @@
+[gd_scene load_steps=3 format=3 uid="uid://ce7nk4t0s1c3w"]
+
+[ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_a0dox"]
+[ext_resource type="Script" uid="uid://bmp8itbg4pcwl" path="res://Scripts/UI/HUD.gd" id="1_gqhqa"]
+
+[node name="Hud" type="CenterContainer" node_paths=PackedStringArray("day", "pollution", "money", "current_mission")]
+z_index = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -1000.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_a0dox")
+script = ExtResource("1_gqhqa")
+day = NodePath("HBoxContainer/天数/Label2")
+pollution = NodePath("HBoxContainer/污染度/Label2")
+money = NodePath("HBoxContainer/能量值/Label2")
+current_mission = NodePath("HBoxContainer/当前任务/Label2")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 100
+
+[node name="能量值" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/能量值"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "能量值："
+
+[node name="Label2" type="Label" parent="HBoxContainer/能量值"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "114"
+
+[node name="污染度" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/污染度"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "污染度："
+
+[node name="Label2" type="Label" parent="HBoxContainer/污染度"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "114"
+
+[node name="当前任务" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/当前任务"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "当前任务："
+
+[node name="Label2" type="Label" parent="HBoxContainer/当前任务"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "114"
+
+[node name="天数" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/天数"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "经过天数："
+
+[node name="Label2" type="Label" parent="HBoxContainer/天数"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "114"

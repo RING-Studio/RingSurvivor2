@@ -45,6 +45,9 @@ var current_upgrades = {}
 #科技数据(TODO:下面的方法还没写科技升级的影响)
 var tech_upgrades: Dictionary
 
+# 能量值(钱)
+var money: int = 0
+
 func is_vehicle_unlocked(id:int):
 	for vehicle_id in unlocked_vehicles:
 		if vehicle_id == id:

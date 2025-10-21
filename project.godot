@@ -29,6 +29,7 @@ GameEvents="*res://scenes/autoload/game_events.tscn"
 JsonManager="*res://Scripts/Managers/JsonManager.gd"
 GlobalSaveData="*res://Scripts/Save/SaveData.gd"
 GlobalFomulaManager="*res://Scripts/Managers/FomulaManager.gd"
+HUD="*res://Levels/HUD.tscn"
 
 [debug]
 

@@ -27,6 +27,7 @@ func save_game(file_path := "user://autosave.json") -> void:
 		"unlocked_vehicles": GameManager.unlocked_vehicles,
 		"unlocked_parts": GameManager.unlocked_parts,
 		"tech_upgrades": GameManager.tech_upgrades,
+		"money": GameManager.money,
 		"save_time": formatted_time,
 	}
 
@@ -63,6 +64,7 @@ func load_game(file_path := "user://autosave.json") -> void:
 	GameManager.unlocked_vehicles = save_data["unlocked_vehicles"]
 	GameManager.unlocked_parts = save_data["unlocked_parts"]
 	GameManager.tech_upgrades = save_data["tech_upgrades"]
+	GameManager.money = save_data["money"]
 
 func HasSave(save_slot_name: String):
 	var file_path = "user://" + save_slot_name + ".json"
