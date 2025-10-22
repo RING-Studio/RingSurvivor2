@@ -133,7 +133,7 @@ func unload_part( vehicle_id:int, slot:String, part_id:int ):
 func get_player_property(property_name:String):
 	var vehicle_config_data = get_vehicle_config(current_vehicle)
 	if vehicle_config_data == null:
-		return [0, 0, 0] # [装备属性, 装甲属性, 配件属性]
+		return [0, 0, 0, 0] # [装备属性, 装甲属性, 配件属性, 科技属性]
 
 	var equipment_value = 0
 	var id = vehicle_config_data.get("主武器类型")

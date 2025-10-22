@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://o2u7g05bqs4x"]
 
-[ext_resource type="Script" path="res://scenes/ui/pause_menu.gd" id="1_ckvn8"]
+[ext_resource type="Script" uid="uid://dykbiqwe82mj6" path="res://scenes/ui/pause_menu.gd" id="1_ckvn8"]
 [ext_resource type="PackedScene" uid="uid://dmu80fq6rvrp" path="res://scenes/ui/sound_button.tscn" id="3_xe5h1"]
 
 [sub_resource type="Animation" id="Animation_7imu1"]
@@ -37,8 +37,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_8iiss"]
 _data = {
-"RESET": SubResource("Animation_7imu1"),
-"default": SubResource("Animation_mectc")
+&"RESET": SubResource("Animation_7imu1"),
+&"default": SubResource("Animation_mectc")
 }
 
 [node name="PauseMenu" type="CanvasLayer"]
@@ -47,7 +47,7 @@ script = ExtResource("1_ckvn8")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_8iiss")
+&"": SubResource("AnimationLibrary_8iiss")
 }
 
 [node name="ColorRect" type="ColorRect" parent="."]

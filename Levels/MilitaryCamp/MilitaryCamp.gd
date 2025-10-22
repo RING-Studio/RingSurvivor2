@@ -12,6 +12,7 @@ func _ready() -> void:
 	Transitions.transition( Transitions.transition_type.Diamond , true)
 	
 func depart():
+	#TODO:检查是否满足条件
 	Transitions.set_next_scene(next_scene)
 	Transitions.transition( Transitions.transition_type.Diamond )
 
