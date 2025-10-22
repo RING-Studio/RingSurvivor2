@@ -42,11 +42,11 @@ var unlocked_parts := {
 #升级数据
 var current_upgrades = {}
 
-#科技数据(TODO:下面的方法还没写科技升级的影响)
+#科技数据(TODO:科技升级的数值可能有bug)
 var tech_upgrades: Dictionary
 
 # 能量值(钱)
-var money: int = 0
+var money: int = 100000
 
 func is_vehicle_unlocked(id:int):
 	for vehicle_id in unlocked_vehicles:
@@ -153,7 +153,7 @@ func get_player_property(property_name:String):
 			if tmp != null:
 				armor_value = tmp
 
-	var part_value = 0;
+	var part_value = 0
 	var parts = vehicle_config_data.get("配件")
 	if parts != null:
 		for part_id in parts:
@@ -167,48 +167,55 @@ func get_player_property(property_name:String):
 
 					tmp *= level
 					part_value += tmp
+	
+	var tech_value = 0
+	var techs : Dictionary[int, Variant] = {}
+	for tech in JsonManager.get_category("科研"):
+		var tech_id := int(tech["ID"])
+		if tech.has(property_name):
+			tech_value += float(tech[property_name]) * tech_upgrades[tech_id]
 
-	return [equipment_value, armor_value, part_value]
+	return [equipment_value, armor_value, part_value, tech_value]
 
 #基础伤害
 func get_player_base_damage():
 	var values = get_player_property("BaseDamage")
-	return values[0] * ( 1.0 + values[1] + values[2] )
+	return values[0] * ( 1.0 + values[1] + values[2] + values[3] )
 
 #基础伤害修改比例
 func get_player_base_damage_modifier_ratio():
 	var values = get_player_property("BaseDamageModifierRatio")
-	return values[0] + values[1] + values[2]
+	return values[0] + values[1] + values[2] + values[3]
 
 #穿甲攻击倍率
 func get_player_penetration_attack_multiplier_percent():
 	var values = get_player_property("PenetrationAttackMultiplierPercent")
-	return values[0] + values[1] + values[2]
+	return values[0] + values[1] + values[2] + values[3]
 
 #软攻倍率
 func get_player_soft_attack_multiplier_percent():
 	var values = get_player_property("SoftAttackMultiplierPercent")
-	return values[0] + values[1] + values[2]
+	return values[0] + values[1] + values[2] + values[3]
 
 #穿深
 func get_player_penetration_depth_mm():
 	var values = get_player_property("PenetrationDepthMm")
-	return values[0] + values[1] + values[2]
+	return values[0] + values[1] + values[2] + values[3]
 
 #装甲厚度
 func get_player_armor_thickness():
 	var values = get_player_property("ArmorThickness")
-	return values[0] + values[1] * (1.0 + values[2])
+	return values[0] + values[1] * (1.0 + values[2] + values[3])
 
 #覆甲率
 func get_player_armor_coverage():
 	var values = get_player_property("ArmorCoverage")
-	return values[0] + values[1] + values[2]
+	return values[0] + values[1] + values[2] + values[3]
 
 #击穿伤害减免
 func get_player_armor_damage_reduction_percent():
 	var values = get_player_property("ArmorDamageReductionPercent")
-	return values[0] + values[1] + values[2]
+	return values[0] + values[1] + values[2] + values[3]
 
 func get_player_max_health():
 	var data = JsonManager.get_category_by_id("车辆类型", GameManager.current_vehicle)

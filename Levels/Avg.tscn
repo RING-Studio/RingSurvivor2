@@ -15,7 +15,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2tyad")
 resource = ExtResource("2_2tyad")
-next_scene = &"res://Levels/MilitaryCamp.tscn"
+next_scene = &"res://Levels/MilitaryCamp/MilitaryCamp.tscn"
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 1

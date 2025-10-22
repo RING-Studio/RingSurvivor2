@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://2tjcnb2um8aa"]
+[gd_scene load_steps=10 format=3 uid="uid://2tjcnb2um8aa"]
 
 [ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_2ld8x"]
 [ext_resource type="Script" uid="uid://l3kjrjag3ery" path="res://Scripts/MainMenu.gd" id="2_2k6u6"]
@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://bksksy2gkowv8" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_click_01.png" id="5_17ajd"]
 [ext_resource type="Texture2D" uid="uid://bgexuvotnwila" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_click_02.png" id="6_xun1b"]
 [ext_resource type="Texture2D" uid="uid://nhi4fsusi3a1" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_hover_01.png" id="7_uty7f"]
-[ext_resource type="Script" uid="uid://bugt753midasi" path="res://Scripts/FilterLayer.gd" id="8_17ajd"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_17ajd"]
 texture = ExtResource("3_17ajd")
@@ -27,7 +26,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_2ld8x")
 script = ExtResource("2_2k6u6")
-next_scene = &"res://Levels/MilitaryCamp.tscn"
+next_scene = &"res://Levels/MilitaryCamp/MilitaryCamp.tscn"
 load_scene = &"res://Levels/LoadUI.tscn"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
@@ -110,7 +109,6 @@ vertical_alignment = 1
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 128
-script = ExtResource("8_17ajd")
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
 material = SubResource("ShaderMaterial_xun1b")

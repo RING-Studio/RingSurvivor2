@@ -51,13 +51,22 @@ func change_previewed_item(id: int) -> void:
 		upgrade_button.visible = true
 
 func upgrade_current_tech() -> void:
-	#TODO: 扣钱
+	# 扣钱
+	if GameManager.money < techs[previewed_tech_id]["UpgradePrice"]:
+		#TODO:钱不够是否要disable按钮
+		return
+	GameManager.money -= techs[previewed_tech_id]["UpgradePrice"]
+	
 	if not GameManager.tech_upgrades.has(previewed_tech_id):
 		GameManager.tech_upgrades[previewed_tech_id] = 0
 	GameManager.tech_upgrades[previewed_tech_id] += 1
 	change_previewed_item(previewed_tech_id)
 
 func reset_all_tech() -> void:
-	#TODO: 还钱
+	# 还钱
+	var total_cost := 0
+	for tech_id in GameManager.tech_upgrades.keys():
+		total_cost += techs[tech_id]["UpgradePrice"] * GameManager.tech_upgrades[tech_id]
+	GameManager.money += total_cost
 	GameManager.tech_upgrades = {}
 	change_previewed_item(previewed_tech_id)

@@ -9,7 +9,7 @@ func _process(delta: float) -> void:
 	day.text = str(GameManager.day)
 	pollution.text = str(GameManager.pollution)
 	money.text = str(GameManager.money)
-	current_mission.text = "无"
+	current_mission.text = GameManager.mission_progress
 
 func enable():
 	process_mode = Node.PROCESS_MODE_INHERIT

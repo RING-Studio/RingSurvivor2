@@ -1,0 +1,151 @@
+[gd_scene load_steps=7 format=3 uid="uid://bfv1b28x6gory"]
+
+[ext_resource type="Script" uid="uid://bhlwj7houqqaf" path="res://Levels/MilitaryCamp/MilitaryCamp.gd" id="1_usjsl"]
+[ext_resource type="PackedScene" uid="uid://d2yk5w6oa7ajm" path="res://Levels/MilitaryCamp/Player.tscn" id="2_17cg1"]
+[ext_resource type="Script" uid="uid://bd8r4dnrd28hr" path="res://Levels/MilitaryCamp/Building.gd" id="3_nt0gt"]
+[ext_resource type="Texture2D" uid="uid://17jh1f7rktdr" path="res://Background.png" id="4_12rnp"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gmq1o"]
+size = Vector2(484.5, 278.75)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mj6vd"]
+size = Vector2(579, 357)
+
+[node name="MilitaryCamp2" type="Node2D" node_paths=PackedStringArray("player")]
+script = ExtResource("1_usjsl")
+player = NodePath("Player")
+next_scene = &"res://scenes/main/MainScene.tscn"
+npc_scene = &"res://Levels/Avg.tscn"
+car_editor_scene = &"res://Levels/CarEditor.tscn"
+tech_scene = &"res://Levels/TechScene.tscn"
+save_scene = &"res://Levels/SaveUI.tscn"
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0, 0, 0, 1)
+
+[node name="Player" parent="." instance=ExtResource("2_17cg1")]
+position = Vector2(850, 614)
+
+[node name="Buildings" type="Node2D" parent="."]
+
+[node name="TechBase" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
+position = Vector2(-8, -161)
+script = ExtResource("3_nt0gt")
+image = NodePath("Area2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="Buildings/TechBase"]
+modulate = Color(0.7, 0.9, 1, 1)
+position = Vector2(1003, 188)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_12rnp")
+
+[node name="Collision" type="StaticBody2D" parent="Buildings/TechBase"]
+position = Vector2(303, -112)
+
+[node name="Shape" type="CollisionShape2D" parent="Buildings/TechBase/Collision"]
+position = Vector2(698.75, 300.625)
+shape = SubResource("RectangleShape2D_gmq1o")
+
+[node name="Area2D" type="Area2D" parent="Buildings/TechBase"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/TechBase/Area2D"]
+position = Vector2(999.5, 198.5)
+shape = SubResource("RectangleShape2D_mj6vd")
+
+[node name="Depart" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
+position = Vector2(-648, 8)
+script = ExtResource("3_nt0gt")
+image = NodePath("Area2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="Buildings/Depart"]
+modulate = Color(0.7, 0.9, 1, 1)
+position = Vector2(1003, 188)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_12rnp")
+
+[node name="Collision" type="StaticBody2D" parent="Buildings/Depart"]
+position = Vector2(303, -112)
+
+[node name="Shape" type="CollisionShape2D" parent="Buildings/Depart/Collision"]
+position = Vector2(698.75, 300.625)
+shape = SubResource("RectangleShape2D_gmq1o")
+
+[node name="Area2D" type="Area2D" parent="Buildings/Depart"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Depart/Area2D"]
+position = Vector2(999.5, 198.5)
+shape = SubResource("RectangleShape2D_mj6vd")
+
+[node name="npc" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
+position = Vector2(827, -125)
+script = ExtResource("3_nt0gt")
+image = NodePath("Area2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="Buildings/npc"]
+modulate = Color(0.7, 0.9, 1, 1)
+position = Vector2(1003, 188)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_12rnp")
+
+[node name="Collision" type="StaticBody2D" parent="Buildings/npc"]
+position = Vector2(303, -112)
+
+[node name="Shape" type="CollisionShape2D" parent="Buildings/npc/Collision"]
+position = Vector2(698.75, 300.625)
+shape = SubResource("RectangleShape2D_gmq1o")
+
+[node name="Area2D" type="Area2D" parent="Buildings/npc"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/npc/Area2D"]
+position = Vector2(999.5, 198.5)
+shape = SubResource("RectangleShape2D_mj6vd")
+
+[node name="Save" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
+position = Vector2(632, 626)
+script = ExtResource("3_nt0gt")
+image = NodePath("Area2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="Buildings/Save"]
+modulate = Color(0.7, 0.9, 1, 1)
+position = Vector2(1003, 188)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_12rnp")
+
+[node name="Collision" type="StaticBody2D" parent="Buildings/Save"]
+position = Vector2(303, -112)
+
+[node name="Shape" type="CollisionShape2D" parent="Buildings/Save/Collision"]
+position = Vector2(698.75, 300.625)
+shape = SubResource("RectangleShape2D_gmq1o")
+
+[node name="Area2D" type="Area2D" parent="Buildings/Save"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Save/Area2D"]
+position = Vector2(999.5, 198.5)
+shape = SubResource("RectangleShape2D_mj6vd")
+
+[node name="CarEditor" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
+position = Vector2(-722, 601)
+script = ExtResource("3_nt0gt")
+image = NodePath("Area2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="Buildings/CarEditor"]
+modulate = Color(0.7, 0.9, 1, 1)
+position = Vector2(1003, 188)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_12rnp")
+
+[node name="Collision" type="StaticBody2D" parent="Buildings/CarEditor"]
+position = Vector2(303, -112)
+
+[node name="Shape" type="CollisionShape2D" parent="Buildings/CarEditor/Collision"]
+position = Vector2(698.75, 300.625)
+shape = SubResource("RectangleShape2D_gmq1o")
+
+[node name="Area2D" type="Area2D" parent="Buildings/CarEditor"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/CarEditor/Area2D"]
+position = Vector2(999.5, 198.5)
+shape = SubResource("RectangleShape2D_mj6vd")
