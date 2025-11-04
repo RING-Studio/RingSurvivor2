@@ -1,15 +1,20 @@
-[gd_scene load_steps=7 format=3 uid="uid://bfv1b28x6gory"]
+[gd_scene load_steps=12 format=3 uid="uid://bfv1b28x6gory"]
 
 [ext_resource type="Script" uid="uid://bhlwj7houqqaf" path="res://Levels/MilitaryCamp/MilitaryCamp.gd" id="1_usjsl"]
 [ext_resource type="PackedScene" uid="uid://d2yk5w6oa7ajm" path="res://Levels/MilitaryCamp/Player.tscn" id="2_17cg1"]
+[ext_resource type="Texture2D" uid="uid://g0xf5lmh33e8" path="res://Assets/MilitaryBackground.png" id="2_nt0gt"]
 [ext_resource type="Script" uid="uid://bd8r4dnrd28hr" path="res://Levels/MilitaryCamp/Building.gd" id="3_nt0gt"]
-[ext_resource type="Texture2D" uid="uid://17jh1f7rktdr" path="res://Background.png" id="4_12rnp"]
+[ext_resource type="Texture2D" uid="uid://cjro5dg7avxoh" path="res://Assets/科技处.png" id="5_6n3g5"]
+[ext_resource type="Texture2D" uid="uid://b7vv05gqjgmy7" path="res://Assets/车.png" id="6_miboc"]
+[ext_resource type="Texture2D" uid="uid://dlkmdsdekvi3g" path="res://Assets/NPC.png" id="7_g38c5"]
+[ext_resource type="Texture2D" uid="uid://dbbqs2yhbo2c1" path="res://Assets/营地.png" id="8_ajm0s"]
+[ext_resource type="Texture2D" uid="uid://be8nqrssnqgpy" path="res://Assets/配装界面.png" id="9_qq10p"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gmq1o"]
-size = Vector2(484.5, 278.75)
+size = Vector2(262, 270)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mj6vd"]
-size = Vector2(579, 357)
+size = Vector2(334, 314)
 
 [node name="MilitaryCamp2" type="Node2D" node_paths=PackedStringArray("player")]
 script = ExtResource("1_usjsl")
@@ -20,132 +25,113 @@ car_editor_scene = &"res://Levels/CarEditor.tscn"
 tech_scene = &"res://Levels/TechScene.tscn"
 save_scene = &"res://Levels/SaveUI.tscn"
 
-[node name="Background" type="ColorRect" parent="."]
-offset_right = 1920.0
-offset_bottom = 1080.0
-color = Color(0, 0, 0, 1)
+[node name="Background" type="Sprite2D" parent="."]
+scale = Vector2(1.875, 1.875)
+texture = ExtResource("2_nt0gt")
+centered = false
 
 [node name="Player" parent="." instance=ExtResource("2_17cg1")]
-position = Vector2(850, 614)
+position = Vector2(1007, 494)
 
 [node name="Buildings" type="Node2D" parent="."]
 
 [node name="TechBase" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
-position = Vector2(-8, -161)
+position = Vector2(281, 820)
 script = ExtResource("3_nt0gt")
 image = NodePath("Area2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="Buildings/TechBase"]
 modulate = Color(0.7, 0.9, 1, 1)
-position = Vector2(1003, 188)
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("4_12rnp")
+texture = ExtResource("5_6n3g5")
 
 [node name="Collision" type="StaticBody2D" parent="Buildings/TechBase"]
-position = Vector2(303, -112)
 
 [node name="Shape" type="CollisionShape2D" parent="Buildings/TechBase/Collision"]
-position = Vector2(698.75, 300.625)
 shape = SubResource("RectangleShape2D_gmq1o")
 
 [node name="Area2D" type="Area2D" parent="Buildings/TechBase"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/TechBase/Area2D"]
-position = Vector2(999.5, 198.5)
+position = Vector2(2, 4)
 shape = SubResource("RectangleShape2D_mj6vd")
 
 [node name="Depart" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
-position = Vector2(-648, 8)
+position = Vector2(1632, 883)
 script = ExtResource("3_nt0gt")
 image = NodePath("Area2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="Buildings/Depart"]
 modulate = Color(0.7, 0.9, 1, 1)
-position = Vector2(1003, 188)
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("4_12rnp")
+texture = ExtResource("6_miboc")
 
 [node name="Collision" type="StaticBody2D" parent="Buildings/Depart"]
-position = Vector2(303, -112)
 
 [node name="Shape" type="CollisionShape2D" parent="Buildings/Depart/Collision"]
-position = Vector2(698.75, 300.625)
 shape = SubResource("RectangleShape2D_gmq1o")
 
 [node name="Area2D" type="Area2D" parent="Buildings/Depart"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Depart/Area2D"]
-position = Vector2(999.5, 198.5)
 shape = SubResource("RectangleShape2D_mj6vd")
 
 [node name="npc" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
-position = Vector2(827, -125)
+position = Vector2(698, 183)
 script = ExtResource("3_nt0gt")
 image = NodePath("Area2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="Buildings/npc"]
 modulate = Color(0.7, 0.9, 1, 1)
-position = Vector2(1003, 188)
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("4_12rnp")
+texture = ExtResource("7_g38c5")
 
 [node name="Collision" type="StaticBody2D" parent="Buildings/npc"]
-position = Vector2(303, -112)
 
 [node name="Shape" type="CollisionShape2D" parent="Buildings/npc/Collision"]
-position = Vector2(698.75, 300.625)
 shape = SubResource("RectangleShape2D_gmq1o")
 
 [node name="Area2D" type="Area2D" parent="Buildings/npc"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/npc/Area2D"]
-position = Vector2(999.5, 198.5)
 shape = SubResource("RectangleShape2D_mj6vd")
 
 [node name="Save" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
-position = Vector2(632, 626)
+position = Vector2(930, 833)
 script = ExtResource("3_nt0gt")
 image = NodePath("Area2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="Buildings/Save"]
 modulate = Color(0.7, 0.9, 1, 1)
-position = Vector2(1003, 188)
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("4_12rnp")
+texture = ExtResource("8_ajm0s")
 
 [node name="Collision" type="StaticBody2D" parent="Buildings/Save"]
-position = Vector2(303, -112)
 
 [node name="Shape" type="CollisionShape2D" parent="Buildings/Save/Collision"]
-position = Vector2(698.75, 300.625)
 shape = SubResource("RectangleShape2D_gmq1o")
 
 [node name="Area2D" type="Area2D" parent="Buildings/Save"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/Save/Area2D"]
-position = Vector2(999.5, 198.5)
 shape = SubResource("RectangleShape2D_mj6vd")
 
 [node name="CarEditor" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
-position = Vector2(-722, 601)
+position = Vector2(1435, 184)
 script = ExtResource("3_nt0gt")
 image = NodePath("Area2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="Buildings/CarEditor"]
 modulate = Color(0.7, 0.9, 1, 1)
-position = Vector2(1003, 188)
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("4_12rnp")
+texture = ExtResource("9_qq10p")
 
 [node name="Collision" type="StaticBody2D" parent="Buildings/CarEditor"]
-position = Vector2(303, -112)
 
 [node name="Shape" type="CollisionShape2D" parent="Buildings/CarEditor/Collision"]
-position = Vector2(698.75, 300.625)
 shape = SubResource("RectangleShape2D_gmq1o")
 
 [node name="Area2D" type="Area2D" parent="Buildings/CarEditor"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/CarEditor/Area2D"]
-position = Vector2(999.5, 198.5)
 shape = SubResource("RectangleShape2D_mj6vd")

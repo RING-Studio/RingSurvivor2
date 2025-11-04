@@ -1,6 +1,5 @@
 [gd_scene load_steps=28 format=4 uid="uid://dx05dc8n15yic"]
 
-[ext_resource type="Texture2D" uid="uid://b0sq6wypg07o8" path="res://scenes/game_object/wizard_enemy/wizard_enemy.png" id="1_d8tai"]
 [ext_resource type="Script" uid="uid://dkhophq3r2c41" path="res://scenes/game_object/wizard_enemy/wizard_enemy.gd" id="1_rdmrw"]
 [ext_resource type="PackedScene" uid="uid://bfr1vtlsrf5io" path="res://scenes/component/death_component.tscn" id="2_hsdcc"]
 [ext_resource type="PackedScene" uid="uid://dj43c6qi3nu43" path="res://scenes/component/velocity_component.tscn" id="2_l3pee"]
@@ -10,6 +9,7 @@
 [ext_resource type="Shader" uid="uid://dtmbnxft27cu0" path="res://scenes/component/hit_flash_component.gdshader" id="6_5mwqj"]
 [ext_resource type="PackedScene" uid="uid://n6jd5id3a0wg" path="res://scenes/component/vial_drop_component.tscn" id="7_mjgkc"]
 [ext_resource type="PackedScene" uid="uid://gwn2a37qg20t" path="res://scenes/component/random_stream_player_2d_component.tscn" id="8_podkx"]
+[ext_resource type="Texture2D" uid="uid://cqd1aybe87ouu" path="res://Assets/敌人2small.png" id="9_7kpoi"]
 [ext_resource type="Script" uid="uid://cbhmw3okmc8eb" path="res://scenes/component/enemy_hurtbox_component.gd" id="11_7kpoi"]
 
 [sub_resource type="Animation" id="Animation_7vmvs"]
@@ -206,7 +206,7 @@ streams = Array[AudioStream]([SubResource("AudioStreamOggVorbis_0rhdk"), SubReso
 [node name="Visuals" type="Node2D" parent="."]
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals"]
-texture = ExtResource("1_d8tai")
+texture = ExtResource("9_7kpoi")
 offset = Vector2(0, -8)
 
 [node name="HurtboxComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_i3anw")]
