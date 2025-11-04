@@ -12,7 +12,7 @@ config_version=5
 
 config/name="花园都市的沙心水源"
 run/main_scene="uid://2tjcnb2um8aa"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
 
 [audio]
 
