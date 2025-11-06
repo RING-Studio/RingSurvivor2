@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://d0u5mgfkftp52"]
+[gd_scene load_steps=8 format=3 uid="uid://d0u5mgfkftp52"]
 
 [ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_sf1yk"]
 [ext_resource type="Script" uid="uid://8tn5cf51fbia" path="res://Scripts/TechScene.gd" id="2_i0fql"]
@@ -6,6 +6,12 @@
 [ext_resource type="Texture2D" uid="uid://dhbi0esgjwgew" path="res://Assets/UIAssets/Accessories/激光压制.jpg" id="3_j2etg"]
 [ext_resource type="Script" uid="uid://qv0cxbqbgyd" path="res://Scripts/TechList.gd" id="4_kbfwb"]
 [ext_resource type="Theme" uid="uid://bf0bcwl6wh86i" path="res://Assets/Theme/UpgradeTheme.tres" id="6_fn6up"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fn6up"]
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
 
 [node name="TechScene" type="Control" node_paths=PackedStringArray("tech_list", "preview_icon", "preview_tech_name", "preview_tech_info", "upgrade_button")]
 layout_mode = 3
@@ -23,6 +29,18 @@ preview_tech_name = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelC
 preview_tech_info = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer/Label2")
 upgrade_button = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2/Button")
 
+[node name="BG" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("3_fvcdr")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.52156866, 0.52156866, 0.52156866, 0.49803922)
+
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -30,21 +48,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="BG" type="TextureRect" parent="PanelContainer"]
-layout_mode = 2
-texture = ExtResource("3_fvcdr")
-
-[node name="ColorRect" type="ColorRect" parent="PanelContainer"]
-layout_mode = 2
-color = Color(0.52156866, 0.52156866, 0.52156866, 0.49803922)
+theme_override_styles/panel = SubResource("StyleBoxTexture_fn6up")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
 layout_mode = 2
-theme_override_constants/separation = 40
+theme_override_constants/separation = 20
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 2
 
 [node name="ReturnButton" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -68,10 +80,11 @@ text = "重置"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 10
 theme_override_constants/separation = 40
 
 [node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2"]
-custom_minimum_size = Vector2(1380, 700)
+custom_minimum_size = Vector2(1360, 700)
 layout_mode = 2
 
 [node name="GridContainer" type="GridContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer" node_paths=PackedStringArray("button_template")]
@@ -85,6 +98,7 @@ script = ExtResource("4_kbfwb")
 button_template = NodePath("Button")
 
 [node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+visible = false
 custom_minimum_size = Vector2(300, 150)
 layout_mode = 2
 theme = ExtResource("6_fn6up")
@@ -102,7 +116,7 @@ color = Color(0.52156866, 0.52156866, 0.52156866, 0.69803923)
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 20
+theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 

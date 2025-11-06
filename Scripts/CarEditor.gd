@@ -71,9 +71,9 @@ func refresh_choice_list(slot:String) -> void:
 		if GameManager.is_vehicle_unlocked(selected_vehicle):
 			if unlocked:
 				if GameManager.is_equipped( selected_vehicle, slot, id ):
-					button.modulate = Color(1,0,0,1)
+					button.modulate = Color(0.5,1,0,1)
 				else:
-					button.modulate = Color(0,1,1,1)
+					button.modulate = Color(0.5,1,1,1)
 		else:
 			button.use_parent_material = true
 

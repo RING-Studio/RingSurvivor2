@@ -48,6 +48,7 @@ theme_override_font_sizes/font_size = 36
 text = "第一天 章节名 进度"
 
 [node name="Button" type="Button" parent="ScrollContainer/VBoxContainer/Button"]
+visible = false
 self_modulate = Color(1, 0.493775, 0.792724, 1)
 layout_mode = 0
 offset_left = 954.0

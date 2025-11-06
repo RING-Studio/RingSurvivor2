@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://b7iwxb02eygo1"]
+[gd_scene load_steps=19 format=3 uid="uid://b7iwxb02eygo1"]
 
 [ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_6xktn"]
 [ext_resource type="Script" uid="uid://bapwi62e8a8qv" path="res://Scripts/CarEditor.gd" id="2_ybk8i"]
@@ -9,11 +9,12 @@
 [ext_resource type="Script" uid="uid://6ewqx46a2gkg" path="res://Scripts/PropertyList.gd" id="9_5yjm6"]
 [ext_resource type="Shader" uid="uid://cr5x8ib6pou1m" path="res://Shader/Grayscale.gdshader" id="9_46m37"]
 [ext_resource type="Texture2D" uid="uid://b5ksnst7h00ul" path="res://Assets/UIAssets/gameUIset_16_blue_v101/arrow_01_right_hover.png" id="10_5yjm6"]
+[ext_resource type="Theme" uid="uid://bf0bcwl6wh86i" path="res://Assets/Theme/UpgradeTheme.tres" id="10_jigr5"]
 [ext_resource type="Texture2D" uid="uid://67ejppt4mo77" path="res://Assets/UIAssets/Accessories/无线电设备.jpg" id="11_5yjm6"]
 [ext_resource type="Script" uid="uid://co2g25qvbtnlq" path="res://Scripts/UI/ListDisplay.gd" id="11_jigr5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ybk8i"]
-bg_color = Color(0.392384, 0.683559, 0.347588, 1)
+bg_color = Color(1, 1, 1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wac13"]
 shader = ExtResource("9_46m37")
@@ -21,16 +22,10 @@ shader = ExtResource("9_46m37")
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5yjm6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yjm6"]
-bg_color = Color(0.35717, 0.650381, 0.718692, 1)
+bg_color = Color(0.45149916, 0.7487167, 0.8173456, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_46m37"]
 shader = ExtResource("9_46m37")
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46m37"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wac13"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jigr5"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wf7xt"]
 shader = ExtResource("9_46m37")
@@ -94,7 +89,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
+
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer"]
+layout_mode = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="HBoxContainer"]
 custom_minimum_size = Vector2(1000, 1080)
@@ -103,7 +100,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_ybk8i")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer"]
 layout_mode = 2
-theme_override_constants/separation = 9
 
 [node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -111,6 +107,7 @@ layout_mode = 2
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
+size_flags_vertical = 8
 
 [node name="Label" type="Label" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -124,7 +121,7 @@ main_weapon = NodePath("../../../PanelContainer3/HBoxContainer/MainWeapon")
 armor = NodePath("../../../PanelContainer3/HBoxContainer/MainWeapon2")
 
 [node name="TextureRect" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
-custom_minimum_size = Vector2(200, 200)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.387153, 0.414012, 0.436725, 1)
@@ -134,6 +131,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -146,11 +145,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TextureRect2" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
-custom_minimum_size = Vector2(200, 200)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.387153, 0.414012, 0.436725, 1)
@@ -176,7 +177,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TextureRect3" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
-custom_minimum_size = Vector2(200, 200)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.387153, 0.414012, 0.436725, 1)
@@ -202,7 +203,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TextureRect4" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments"]
-custom_minimum_size = Vector2(200, 200)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.387153, 0.414012, 0.436725, 1)
@@ -271,6 +272,7 @@ text = "Name"
 [node name="UnlockButton" type="Button" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase"]
 layout_mode = 2
 size_flags_horizontal = 4
+theme = ExtResource("10_jigr5")
 text = "解锁"
 
 [node name="Right" type="TextureButton" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer"]
@@ -281,11 +283,10 @@ texture_normal = ExtResource("10_5yjm6")
 [node name="PanelContainer3" type="PanelContainer" parent="HBoxContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
+size_flags_vertical = 6
 theme_override_styles/panel = SubResource("StyleBoxEmpty_5yjm6")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3"]
-custom_minimum_size = Vector2(0, 72.425)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 115
@@ -301,7 +302,7 @@ stretch_mode = 5
 [node name="ColorRect" type="ColorRect" parent="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon"]
 z_index = -1
 custom_minimum_size = Vector2(300, 300)
-layout_mode = 2
+layout_mode = 0
 offset_right = 300.0
 offset_bottom = 300.0
 mouse_filter = 2
@@ -344,16 +345,31 @@ theme_override_font_sizes/font_size = 40
 text = "装甲"
 horizontal_alignment = 1
 
+[node name="VSeparator2" type="VSeparator" parent="HBoxContainer"]
+layout_mode = 2
+
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 5
 
-[node name="ReturnButton" type="Button" parent="HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(150, 80)
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 8
+
+[node name="HBoxContainer0" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Info" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer0"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "配装信息"
+
+[node name="ReturnButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer0"]
+custom_minimum_size = Vector2(120, 60)
+layout_mode = 2
+size_flags_horizontal = 10
 size_flags_vertical = 0
+theme = ExtResource("10_jigr5")
 text = "BACK"
 
 [node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer/VBoxContainer"]
@@ -377,7 +393,7 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainer/PanelContainer/MarginContainer"]
-custom_minimum_size = Vector2(600, 85.92)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/h_separation = 40
@@ -406,7 +422,7 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer"]
-custom_minimum_size = Vector2(600, 85.92)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/h_separation = 40
@@ -414,15 +430,17 @@ theme_override_constants/v_separation = 2
 columns = 2
 script = ExtResource("9_5yjm6")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(2.33, 6.985)
+[node name="HSeparator2" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 6
+theme_override_constants/separation = 16
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
-custom_minimum_size = Vector2(300, 590)
+custom_minimum_size = Vector2(300, 400)
 layout_mode = 2
-horizontal_scroll_mode = 2
 
 [node name="ChoiceList" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer"]
 material = SubResource("ShaderMaterial_46m37")
@@ -431,19 +449,18 @@ layout_mode = 2
 
 [node name="Button" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList"]
 visible = false
-custom_minimum_size = Vector2(224.33, 64.015)
+custom_minimum_size = Vector2(240, 80)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.889338, 0, 0.455082, 1)
+theme = ExtResource("10_jigr5")
 theme_override_font_sizes/font_size = 26
-theme_override_styles/hover = SubResource("StyleBoxFlat_46m37")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_wac13")
-theme_override_styles/normal = SubResource("StyleBoxFlat_jigr5")
 text = "test"
 alignment = 0
 
 [node name="Display" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer" node_paths=PackedStringArray("title", "icon", "label", "parts_unlock_button", "load_button", "unload_button")]
 material = SubResource("ShaderMaterial_wf7xt")
 layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 0
 script = ExtResource("11_jigr5")
 title = NodePath("PartName")
 icon = NodePath("TextureRect")
@@ -458,7 +475,7 @@ size_flags_horizontal = 4
 text = "部件名"
 
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer/VBoxContainer/HBoxContainer/Display"]
-custom_minimum_size = Vector2(300, 300)
+custom_minimum_size = Vector2(280, 280)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
@@ -466,30 +483,39 @@ texture = ExtResource("11_5yjm6")
 expand_mode = 1
 
 [node name="Label" type="RichTextLabel" parent="HBoxContainer/VBoxContainer/HBoxContainer/Display"]
-custom_minimum_size = Vector2(500, 250)
+custom_minimum_size = Vector2(500, 160)
 layout_mode = 2
-theme_override_font_sizes/normal_font_size = 41
+theme_override_font_sizes/normal_font_size = 32
 text = "有冷却时间，开启后对所有瞄准玩家的远程怪造成持续伤害"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
+size_flags_vertical = 10
 
 [node name="PartsUnlockButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(150, 60)
 layout_mode = 2
+theme = ExtResource("10_jigr5")
 text = "解锁"
 
 [node name="Load" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(150, 60)
 layout_mode = 2
+theme = ExtResource("10_jigr5")
 text = "装备"
 
 [node name="Unload" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
 custom_minimum_size = Vector2(150, 60)
 layout_mode = 2
+theme = ExtResource("10_jigr5")
 text = "卸下"
+
+[node name="HSeparator3" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VSeparator3" type="VSeparator" parent="HBoxContainer"]
+layout_mode = 2
 
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect/Button" to="." method="switch_to_Accessories" binds= [0]]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect2/Button2" to="." method="switch_to_Accessories" binds= [1]]
@@ -500,7 +526,7 @@ text = "卸下"
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Right" to="." method="right_button_pressed"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon" to="." method="switch_to_main_weapon"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer/MainWeapon2" to="." method="switch_to_armor"]
-[connection signal="button_up" from="HBoxContainer/VBoxContainer/ReturnButton" to="." method="_back_to_menu"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer0/ReturnButton" to="." method="_back_to_menu"]
 [connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer2/PartsUnlockButton" to="." method="unlock_part"]
 [connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer2/Load" to="." method="equip_part"]
 [connection signal="button_up" from="HBoxContainer/VBoxContainer/HBoxContainer2/Unload" to="." method="unload_part"]
