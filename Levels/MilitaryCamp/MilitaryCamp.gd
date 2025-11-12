@@ -33,7 +33,7 @@ func save():
 	Transitions.transition( Transitions.transition_type.Diamond )
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):
+	if event.is_action_pressed("interact"):
 		var building := can_interact()
 		if building != null:
 			if building.name == "TechBase":

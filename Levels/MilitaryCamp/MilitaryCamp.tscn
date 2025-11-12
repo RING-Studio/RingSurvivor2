@@ -16,7 +16,7 @@ size = Vector2(262, 270)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mj6vd"]
 size = Vector2(334, 314)
 
-[node name="MilitaryCamp2" type="Node2D" node_paths=PackedStringArray("player")]
+[node name="MilitaryCamp" type="Node2D" node_paths=PackedStringArray("player")]
 script = ExtResource("1_usjsl")
 player = NodePath("Player")
 next_scene = &"res://scenes/main/MainScene.tscn"
