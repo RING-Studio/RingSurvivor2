@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var move_speed: float = 300.0
+@export var move_speed: float = 1000.0
 @export var interaction_hint: Label
 @onready var shape: Rect2 = $CollisionShape2D.shape.get_rect()
 @onready var sprite: Sprite2D = $Sprite

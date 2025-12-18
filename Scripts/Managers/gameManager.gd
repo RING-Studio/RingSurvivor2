@@ -169,8 +169,8 @@ func get_player_property(property_name:String):
 					part_value += tmp
 	
 	var tech_value = 0
-	var techs : Dictionary[int, Variant] = {}
-	for tech in JsonManager.get_category("科研"):
+	var tech_data = JsonManager.get_category("科研")
+	for tech in tech_data:
 		var tech_id := int(tech["ID"])
 		if tech.has(property_name):
 			tech_value += float(tech[property_name]) * tech_upgrades[tech_id]

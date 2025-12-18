@@ -1,5 +1,7 @@
 extends PanelContainer
 
+#### 在當前工程中暫時沒用
+
 @onready var name_label: Label = $%NameLabel
 @onready var description_label: Label = $%DescriptionLabel
 @onready var progress_bar = $%ProgressBar
@@ -51,5 +53,3 @@ func on_purchase_pressed():
 	MetaProgression.save()
 	get_tree().call_group("meta_upgrade_card", "update_progress")
 	$AnimationPlayer.play("selected")
-
-

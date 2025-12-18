@@ -72,5 +72,5 @@ func create_button(text: String):
 
 
 func _on_exit_button_up() -> void:
-	Transitions.set_next_scene("res://Levels/MilitaryCamp/MilitaryCamp.tscn")
+	Transitions.set_next_scene("res://Levels/MainMenu.tscn")
 	Transitions.transition(Transitions.transition_type.Diamond)
