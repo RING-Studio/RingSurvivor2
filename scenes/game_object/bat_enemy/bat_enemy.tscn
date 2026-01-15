@@ -8,7 +8,7 @@
 [ext_resource type="Shader" uid="uid://dtmbnxft27cu0" path="res://scenes/component/hit_flash_component.gdshader" id="6_snwd1"]
 [ext_resource type="PackedScene" uid="uid://bfr1vtlsrf5io" path="res://scenes/component/death_component.tscn" id="7_7t1gg"]
 [ext_resource type="PackedScene" uid="uid://gwn2a37qg20t" path="res://scenes/component/random_stream_player_2d_component.tscn" id="8_dc8ri"]
-[ext_resource type="Texture2D" uid="uid://cqd1aybe87ouu" path="res://Assets/敌人2small.png" id="9_rfkwm"]
+[ext_resource type="Texture2D" uid="uid://bkn3ie6cleson" path="res://Assets/敌人1.png" id="9_rfkwm"]
 [ext_resource type="PackedScene" uid="uid://xekbbeidb2pu" path="res://scenes/component/hurtbox_component.tscn" id="10_v41hw"]
 
 [sub_resource type="Animation" id="Animation_7vmvs"]
@@ -168,6 +168,8 @@ texture = ExtResource("9_rfkwm")
 
 [node name="HurtboxComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("10_v41hw")]
 position = Vector2(0, -7)
+collision_layer = 4
+collision_mask = 0
 health_component = NodePath("../HealthComponent")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]

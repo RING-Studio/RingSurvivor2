@@ -4,7 +4,7 @@ extends Control
 @export var next_scene: StringName = &""
 
 func _ready() -> void:
-	Transitions.transition( 3 , true)
+	Transitions.transition(Transitions.transition_type.Diamond, true)
 	DialogueManager.show_dialogue_balloon(resource, "start")
 
 func _enter_tree() -> void:

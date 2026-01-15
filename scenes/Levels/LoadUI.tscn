@@ -1,14 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://df4t54mvpcrr6"]
+[gd_scene load_steps=7 format=3 uid="uid://df4t54mvpcrr6"]
 
 [ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_0rtxc"]
 [ext_resource type="Script" uid="uid://bjy4bsk7e4lvg" path="res://Scripts/UI/LoadUI.gd" id="2_guntw"]
 [ext_resource type="Texture2D" uid="uid://drom0w6k62o5d" path="res://Assets/UIAssets/A61_C_まとめてDL/A61_A_BG.png" id="3_w11cy"]
-[ext_resource type="PackedScene" uid="uid://h1sa8vc61vba" path="res://TSCN/UI/ConfirmPanel.tscn" id="4_guntw"]
 [ext_resource type="Texture2D" uid="uid://bksksy2gkowv8" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_click_01.png" id="5_qians"]
 [ext_resource type="Texture2D" uid="uid://bgexuvotnwila" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_click_02.png" id="6_smtpi"]
 [ext_resource type="Texture2D" uid="uid://nhi4fsusi3a1" path="res://Assets/UIAssets/gameUIset_16_blue_v101/button_round_hover_01.png" id="7_7nle3"]
 
-[node name="LoadUI" type="Control" node_paths=PackedStringArray("button_template", "button_root", "confirm_panel")]
+[node name="LoadUI" type="Control" node_paths=PackedStringArray("button_template", "button_root")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,7 +18,6 @@ theme = ExtResource("1_0rtxc")
 script = ExtResource("2_guntw")
 button_template = NodePath("ScrollContainer/VBoxContainer/Button")
 button_root = NodePath("ScrollContainer/VBoxContainer")
-confirm_panel = NodePath("ConfirmPanel")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -63,10 +61,6 @@ offset_right = 40.0
 offset_bottom = 31.0
 theme_override_font_sizes/font_size = 71
 text = "读取 LOAD"
-
-[node name="ConfirmPanel" parent="." instance=ExtResource("4_guntw")]
-visible = false
-layout_mode = 1
 
 [node name="Exit" type="TextureButton" parent="."]
 layout_mode = 0

@@ -1,7 +1,7 @@
 [gd_scene load_steps=20 format=4 uid="uid://bfr1vtlsrf5io"]
 
 [ext_resource type="Script" uid="uid://cbpmdq54rv0g2" path="res://scenes/component/death_component.gd" id="1_sxd7q"]
-[ext_resource type="Texture2D" uid="uid://blf0amfwao884" path="res://scenes/game_object/basic_enemy/basic_enemy.png" id="1_tk5mv"]
+[ext_resource type="Texture2D" uid="uid://c1efdw5lm8ey5" path="res://Assets/敌人1small.png" id="1_tk5mv"]
 [ext_resource type="PackedScene" uid="uid://gwn2a37qg20t" path="res://scenes/component/random_stream_player_2d_component.tscn" id="3_6mltj"]
 
 [sub_resource type="Animation" id="Animation_ny7rl"]
@@ -131,4 +131,5 @@ interpolate = false
 process_material = SubResource("ParticleProcessMaterial_btjnj")
 
 [node name="HitRandomAudioPlayerComponent" parent="." instance=ExtResource("3_6mltj")]
+bus = &"Master"
 streams = Array[AudioStream]([SubResource("AudioStreamOggVorbis_0rhdk"), SubResource("AudioStreamOggVorbis_rnj72"), SubResource("AudioStreamOggVorbis_dkrb4"), SubResource("AudioStreamOggVorbis_v4xye"), SubResource("AudioStreamOggVorbis_02uxc")])

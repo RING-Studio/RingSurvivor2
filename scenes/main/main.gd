@@ -7,7 +7,7 @@ var pause_menu_scene = preload("res://scenes/ui/pause_menu.tscn")
 
 func _ready():
 	$%Player.health_component.died.connect(on_player_died)
-	Transitions.transition( 3 , true)
+	Transitions.transition(Transitions.transition_type.Diamond, true)
 
 
 func _unhandled_input(event):

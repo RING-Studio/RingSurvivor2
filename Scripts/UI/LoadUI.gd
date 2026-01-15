@@ -50,7 +50,7 @@ func refresh():
 			confirm_panel.ok.button_up.connect(func():
 				confirm_panel.hide()
 				GlobalSaveData.load_game("user://" + file_path + ".json")
-				Transitions.set_next_scene("res://Levels/MilitaryCamp.tscn")
+				Transitions.set_next_scene("res://scenes/Levels/MilitaryCamp/MilitaryCamp.tscn")
 				Transitions.transition(Transitions.transition_type.Diamond)
 			)
 		)
@@ -72,5 +72,5 @@ func create_button(text: String):
 
 
 func _on_exit_button_up() -> void:
-	Transitions.set_next_scene("res://Levels/MilitaryCamp/MilitaryCamp.tscn")
+	Transitions.set_next_scene("res://scenes/Levels/MilitaryCamp/MilitaryCamp.tscn")
 	Transitions.transition(Transitions.transition_type.Diamond)

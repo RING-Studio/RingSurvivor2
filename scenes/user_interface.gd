@@ -31,10 +31,10 @@ func update_stats_display() -> void:
 	# xp_bar.value = player.stats.xp
 	pass
 
-func health_changed(current:int, max:int):
-	health_bar.max_value = max
+func health_changed(current:int, max_health:int):
+	health_bar.max_value = max_health
 	health_bar.value = current
-	health_label.text = str(current) + " / " + str(max)
+	health_label.text = str(current) + " / " + str(max_health)
 	
 # func open_menu() -> void:
 # 	inventory.visible = true

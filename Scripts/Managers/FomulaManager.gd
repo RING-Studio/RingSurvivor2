@@ -1,7 +1,7 @@
 extends Node
 
-#def damage(基础伤害: int, 基础伤害修改比例: float, 穿甲攻击倍率: float, 软攻倍率: float, 穿深: int, 敌方装甲厚度: int, 敌方覆甲率: float, 敌方击穿伤害减免: float) -> int:
-func calculate_damage( base_damage: int, base_damage_modifier: float, hard_multiplier: float, soft_multiplier: float, penetration: int, enemy_armor_thickness: int, enemy_armor_coverage: float, enemy_penetration_damage_reduction: float) -> int:
+#def damage(基础伤害: float, 基础伤害修改比例: float, 穿甲攻击倍率: float, 软攻倍率: float, 穿深: int, 敌方装甲厚度: int, 敌方覆甲率: float, 敌方击穿伤害减免: float) -> int:
+func calculate_damage( base_damage: float, base_damage_modifier: float, hard_multiplier: float, soft_multiplier: float, penetration: int, enemy_armor_thickness: int, enemy_armor_coverage: float, enemy_penetration_damage_reduction: float) -> int:
 
 	var hard_attack = base_damage * base_damage_modifier * hard_multiplier
 	var soft_attack = base_damage * base_damage_modifier * soft_multiplier

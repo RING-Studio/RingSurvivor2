@@ -1,7 +1,6 @@
 extends Node2D
 class_name MachineGunAbility
 
-const HurtboxComponent = preload("res://scenes/component/hurtbox_component.gd")
 const BleedEffectScene: PackedScene = preload("res://scenes/effects/bleed_effect.tscn")
 const SPLASH_RADIUS = 80
 
@@ -53,14 +52,14 @@ func _on_hitbox_area_entered(area: Area2D):
 	if _hits_remaining <= 0:
 		return
 
-	var owner = area.get_parent()
-	if owner == null or not owner.is_in_group("enemy"):
+	var target = area.get_parent()
+	if !target or not target.is_in_group("enemy"):
 		return
 	
 	# 记录已处理的hurtbox
 	_hit_hurtboxes.append(hurtbox)
 
-	var damage := _compute_damage_against(owner)
+	var damage := _compute_damage_against(target)
 	var damage_type := "weapon"
 	var is_critical := false
 
@@ -73,22 +72,22 @@ func _on_hitbox_area_entered(area: Area2D):
 	apply_damage_to_hurtbox(hurtbox, damage, damage_type)
 
 	# 溅射
-	_trigger_splash(owner, damage)
+	_trigger_splash(target, damage)
 
 	# 溅血（只有暴击且有升级层数时）
 	if is_critical and bleed_layers > 0:
-		_trigger_bleed(owner)
+		_trigger_bleed(target)
 
 	_hits_remaining -= 1
 	if _hits_remaining <= 0:
 		queue_free()
 
-func _trigger_splash(owner: Node2D, source_damage: float):
+func _trigger_splash(target: Node2D, source_damage: float):
 	if splash_count <= 0:
 		return
 
 	var splash_targets = get_tree().get_nodes_in_group("enemy").filter(func(enemy: Node2D):
-		return enemy != owner and enemy.global_position.distance_to(owner.global_position) <= SPLASH_RADIUS
+		return enemy != target and enemy.global_position.distance_to(target.global_position) <= SPLASH_RADIUS
 	)
 	var splash_damage = source_damage * splash_damage_ratio
 	for count in range(splash_count):
@@ -98,14 +97,14 @@ func _trigger_splash(owner: Node2D, source_damage: float):
 				if hb:
 					apply_damage_to_hurtbox(hb, splash_damage, "weapon")
 
-func _trigger_bleed(owner: Node2D):
+func _trigger_bleed(target: Node2D):
 	var effect = BleedEffectScene.instantiate()
-	effect.target = owner
+	effect.target = target
 	effect.layers = bleed_layers
 	# 流血伤害基于基础伤害计算
 	var calculated_bleed_damage = max(_base_damage * bleed_damage_per_layer, 1.0)
 	effect.damage_per_layer = calculated_bleed_damage
-	owner.add_child(effect)
+	target.add_child(effect)
 
 func apply_damage_to_hurtbox(hurtbox: HurtboxComponent, amount: float, damage_type: String):
 	hurtbox.apply_damage(amount, damage_type)

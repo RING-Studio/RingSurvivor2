@@ -53,7 +53,7 @@ func on_audio_slider_changed(value: float, bus_name: String):
 
 
 func on_back_pressed():
-	Transitions.transition( 3 )
+	Transitions.transition(Transitions.transition_type.Diamond)
 	await Transitions.transition_finished
 	back_pressed.emit()
 

@@ -6,8 +6,6 @@ signal hit
 @export var health_component: Node
 
 var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
-const DamageTextHelper = preload("res://Scripts/DamageTextHelper.gd")
-
 
 func _ready():
 	area_entered.connect(on_area_entered)

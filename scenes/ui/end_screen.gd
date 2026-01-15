@@ -34,7 +34,7 @@ func on_continue_button_pressed():
 	get_tree().paused = false
 	# get_tree().change_scene_to_file("res://scenes/ui/meta_menu.tscn")
 	Transitions.set_next_scene(continue_scene)
-	Transitions.transition( 3, false )
+	Transitions.transition(Transitions.transition_type.Diamond, false )
 	
 	
 func on_quit_button_pressed():
@@ -42,7 +42,7 @@ func on_quit_button_pressed():
 	# await ScreenTransition.transitioned_halfway
 	get_tree().paused = false
 	Transitions.set_next_scene(quit_scene)
-	Transitions.transition( 3, false )
+	Transitions.transition(Transitions.transition_type.Diamond, false )
 	
 	
 	

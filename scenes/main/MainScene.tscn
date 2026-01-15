@@ -35,10 +35,6 @@ position = Vector2(408, 337)
 scale = Vector2(0.36, 0.36)
 zoom = Vector2(3.5, 3.5)
 process_callback = 0
-limit_left = -32
-limit_top = -32
-limit_right = 848
-limit_bottom = 672
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = ExtResource("11_50iuv")

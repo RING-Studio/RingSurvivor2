@@ -12,8 +12,6 @@ var _previous_position: Vector2
 var _accum_distance: float = 0.0
 var _floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
 
-const DamageTextHelper = preload("res://Scripts/DamageTextHelper.gd")
-
 func _ready():
 	if target == null:
 		queue_free()
