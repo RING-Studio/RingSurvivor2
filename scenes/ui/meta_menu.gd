@@ -1,7 +1,5 @@
 extends CanvasLayer
 
-#### 在當前工程中暫時沒用
-
 @export var upgrades: Array[MetaUpgrade] = []
 
 @onready var grid_container = $%GridContainer
