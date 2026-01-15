@@ -1,8 +1,7 @@
-[gd_scene load_steps=22 format=3 uid="uid://r6s7eqk3etrs"]
+[gd_scene load_steps=21 format=3 uid="uid://r6s7eqk3etrs"]
 
 [ext_resource type="Script" uid="uid://gr1e02d7fdlj" path="res://scenes/game_object/player/player.gd" id="1_eddko"]
 [ext_resource type="PackedScene" uid="uid://b5pwrnbjb564j" path="res://scenes/component/health_component.tscn" id="2_cdnaj"]
-[ext_resource type="PackedScene" uid="uid://besqsah8pupdc" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="2_h2weo"]
 [ext_resource type="PackedScene" uid="uid://dj43c6qi3nu43" path="res://scenes/component/velocity_component.tscn" id="2_qiym6"]
 [ext_resource type="PackedScene" uid="uid://gwn2a37qg20t" path="res://scenes/component/random_stream_player_2d_component.tscn" id="5_crbgj"]
 [ext_resource type="AudioStream" uid="uid://i2f6byt2xcvu" path="res://Assets/audio/impactMining_000.ogg" id="6_x6j7r"]
@@ -140,8 +139,6 @@ acceleration = 25.0
 [node name="HealthComponent" parent="." instance=ExtResource("2_cdnaj")]
 
 [node name="Abilities" type="Node" parent="."]
-
-[node name="SwordAbilityController" parent="Abilities" instance=ExtResource("2_h2weo")]
 
 [node name="HitRandomStreamPlayer" parent="." instance=ExtResource("5_crbgj")]
 bus = &"Master"

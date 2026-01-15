@@ -34,7 +34,7 @@ func set_upgrade_data(data: Dictionary):
 	description_label.text = data.get("description", "")
 	
 	var current_level = GameManager.current_upgrades.get(data["id"], {"level": 0})["level"]
-		level_label.text = "lv{0}->lv{1}".format([current_level, current_level + 1])
+	level_label.text = "lv{0}->lv{1}".format([current_level, current_level + 1])
 
 
 func select_card():

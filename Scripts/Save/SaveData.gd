@@ -68,11 +68,13 @@ func load_game(file_path := "user://autosave.json") -> void:
 
 func HasSave(save_slot_name: String):
 	var file_path = "user://" + save_slot_name + ".json"
-	return FileAccess.file_exists(file_path)
-
+	
 	if not FileAccess.file_exists(file_path):
 		print("Save file not found.")
 		return
+	
+	return FileAccess.file_exists(file_path)
+
 
 func get_save_time(save_slot_name: String):
 	var file_path = "user://" + save_slot_name + ".json"

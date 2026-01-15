@@ -91,7 +91,7 @@ func _emit_bullet(player_position: Vector2, direction: Vector2):
 	# 现在才 add_child，此时 _ready() 会使用正确的 penetration_capacity
 	get_tree().get_first_node_in_group("foreground_layer").add_child(bullet_instance)
 	bullet_instance.set_base_damage(_compute_bullet_damage())
-	bullet_instance.set_hits_remaining()
+	bullet_instance.set_hits_remaining(bullet_penetration + 1)
 
 func _compute_bullet_damage() -> float:
 	var damage_from_upgrades = upgrade_damage_addition * (base_damage_modifier_ratio + damage_modifier_bonus)

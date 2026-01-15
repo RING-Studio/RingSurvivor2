@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://d2yk5w6oa7ajm"]
 
 [ext_resource type="Script" uid="uid://bo6act4mcmboc" path="res://scenes/Levels/MilitaryCamp/Player.gd" id="1_5a0yq"]
-[ext_resource type="Texture2D" uid="uid://cdr67xakp0j8d" path="res://Assets/Character/player.png" id="2_4rcno"]
+[ext_resource type="Texture2D" uid="uid://c5xaxwrys2efs" path="res://Assets/Character/player.png" id="2_4rcno"]
 [ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="2_5puy3"]
 
 [sub_resource type="RectangleShape2D" id="1"]

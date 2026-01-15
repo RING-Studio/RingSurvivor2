@@ -28,7 +28,8 @@ func apply_upgrade(upgrade_id: String):
 		return
 
 	var max_level = entry.get("max_level", 0)
-	if max_level > 0 and GameManager.current_upgrades[upgrade_id]["level"] >= max_level:
+	# max_level 为 -1 时表示无限升级，不移除
+	if max_level != -1 and GameManager.current_upgrades[upgrade_id]["level"] >= max_level:
 		upgrade_pool.remove_item(upgrade_id)
 
 	GameEvents.emit_ability_upgrade_added(upgrade_id, GameManager.current_upgrades)

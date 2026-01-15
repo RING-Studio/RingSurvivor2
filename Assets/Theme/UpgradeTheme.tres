@@ -12,7 +12,7 @@ texture_margin_left = 33.0
 texture_margin_top = 17.0
 texture_margin_right = 28.0
 texture_margin_bottom = 16.0
-modulate_color = Color(0.89059, 0.89059, 0.8905901, 0.7490196)
+modulate_color = Color(0.89059, 0.89059, 0.89059, 0.74902)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qhqk1"]
 
@@ -1079,7 +1079,7 @@ Button/colors/font_disabled_color = Color(0.875, 0.875, 0.875, 0.5)
 Button/colors/font_focus_color = Color(0.95, 0.95, 0.95, 1)
 Button/colors/font_hover_color = Color(0.95, 0.95, 0.95, 1)
 Button/colors/font_hover_pressed_color = Color(1, 1, 1, 1)
-Button/colors/font_outline_color = Color(0.4506483, 0.4506483, 0.45064825, 1)
+Button/colors/font_outline_color = Color(0.450648, 0.450648, 0.450648, 1)
 Button/colors/font_pressed_color = Color(1, 1, 1, 1)
 Button/colors/icon_disabled_color = Color(1, 1, 1, 0.4)
 Button/colors/icon_focus_color = Color(1, 1, 1, 1)

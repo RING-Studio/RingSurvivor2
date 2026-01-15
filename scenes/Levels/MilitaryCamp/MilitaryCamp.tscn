@@ -32,6 +32,7 @@ centered = false
 
 [node name="Player" parent="." instance=ExtResource("2_17cg1")]
 position = Vector2(1007, 494)
+move_speed = 990.0
 
 [node name="Buildings" type="Node2D" parent="."]
 
