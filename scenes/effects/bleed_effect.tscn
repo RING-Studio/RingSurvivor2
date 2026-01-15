@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmjbqh86bhwmw"]
+
+[ext_resource type="Script" uid="uid://dab5lyl58pxh2" path="res://scenes/effects/bleed_effect.gd" id="1"]
+
+[node name="BleedEffect" type="Node"]
+script = ExtResource("1")

@@ -1,7 +1,7 @@
 extends Node
 
 signal experience_vial_collected(number: float)
-signal ability_upgrade_added(upgrade_id: int, current_upgrades: Dictionary)
+signal ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary)
 signal player_damaged
 signal experience_updated(current_experience: float, target_experience: float)
 signal level_up(new_level: int)
@@ -11,7 +11,7 @@ func emit_experience_vial_collected(number: float):
 	experience_vial_collected.emit(number)
 
 
-func emit_ability_upgrade_added(upgrade_id: int, current_upgrades: Dictionary):
+func emit_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	ability_upgrade_added.emit(upgrade_id, current_upgrades)
 
 

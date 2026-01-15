@@ -1,0 +1,166 @@
+[gd_scene load_steps=8 format=3 uid="uid://d0u5mgfkftp52"]
+
+[ext_resource type="Theme" uid="uid://cqwxag0aegd2e" path="res://Assets/Theme/UITheme.tres" id="1_sf1yk"]
+[ext_resource type="Script" uid="uid://8tn5cf51fbia" path="res://Scripts/TechScene.gd" id="2_i0fql"]
+[ext_resource type="Texture2D" uid="uid://cv6pqx2kahybx" path="res://Assets/UIAssets/gameUIset_16_blue_v101/background_01.png" id="3_fvcdr"]
+[ext_resource type="Texture2D" uid="uid://dhbi0esgjwgew" path="res://Assets/UIAssets/Accessories/激光压制.jpg" id="3_j2etg"]
+[ext_resource type="Script" uid="uid://qv0cxbqbgyd" path="res://Scripts/TechList.gd" id="4_kbfwb"]
+[ext_resource type="Theme" uid="uid://bf0bcwl6wh86i" path="res://Assets/Theme/UpgradeTheme.tres" id="6_fn6up"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fn6up"]
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[node name="TechScene" type="Control" node_paths=PackedStringArray("tech_list", "preview_icon", "preview_tech_name", "preview_tech_info", "upgrade_button")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_sf1yk")
+script = ExtResource("2_i0fql")
+back_scene = &"res://scenes/Levels/MilitaryCamp/MilitaryCamp.tscn"
+tech_list = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer")
+preview_icon = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/Button")
+preview_tech_name = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer/Label")
+preview_tech_info = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer/Label2")
+upgrade_button = NodePath("PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2/Button")
+
+[node name="BG" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("3_fvcdr")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.521569, 0.521569, 0.521569, 0.498039)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_fn6up")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="ReturnButton" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource("6_fn6up")
+text = "BACK"
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(500, 500)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+texture = ExtResource("3_j2etg")
+expand_mode = 1
+
+[node name="ClearButton" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("6_fn6up")
+text = "重置"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/separation = 40
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(1360, 700)
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer" node_paths=PackedStringArray("button_template")]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 4
+script = ExtResource("4_kbfwb")
+button_template = NodePath("Button")
+
+[node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/ScrollContainer/GridContainer"]
+visible = false
+custom_minimum_size = Vector2(300, 150)
+layout_mode = 2
+theme = ExtResource("6_fn6up")
+text = "选项"
+icon_alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer"]
+layout_mode = 2
+color = Color(0.521569, 0.521569, 0.521569, 0.698039)
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 85
+
+[node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(200, 65.86)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource("6_fn6up")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "选项名称/等级"
+
+[node name="Label2" type="Label" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+text = "选项信息
+"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 10
+theme = ExtResource("6_fn6up")
+text = "升级"
+
+[connection signal="button_up" from="PanelContainer/HBoxContainer/VBoxContainer/ReturnButton" to="." method="_back_to_menu"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/VBoxContainer/ClearButton" to="." method="reset_all_tech"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/HBoxContainer/VBoxContainer2/Button" to="." method="upgrade_current_tech"]

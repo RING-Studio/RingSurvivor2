@@ -1,12 +1,13 @@
 extends PanelContainer
 
-signal selected
+signal selected(upgrade_id: String)
 
 @onready var name_label: Label = $%NameLabel
 @onready var description_label: Label = $%DescriptionLabel
 @export var level_label: Label
 
 var disabled = false
+var upgrade_data: Dictionary
 
 
 func _ready():
@@ -24,24 +25,16 @@ func play_discard():
 	$AnimationPlayer.play("discard")
 
 
-func set_ability_upgrade(upgrade_id: int):
-	var data = JsonManager.get_category_by_id("配件", upgrade_id)
+func set_upgrade_data(data: Dictionary):
 	if data == null:
-		push_warning("无法找到配件数据: %s" % upgrade_id)
 		return
+	upgrade_data = data
 
-	name_label.text = data.get("Name")
+	name_label.text = data.get("name", "未知强化")
+	description_label.text = data.get("description", "")
 	
-	var current_level = GameManager.current_upgrades[upgrade_id]["level"]
-
-	if GameManager.is_equipped(GameManager.current_vehicle, "配件", upgrade_id):
+	var current_level = GameManager.current_upgrades.get(data["id"], {"level": 0})["level"]
 		level_label.text = "lv{0}->lv{1}".format([current_level, current_level + 1])
-	else:
-		level_label.text = "装备"
-
-	# description_label.text = TranslationServer.translate("BaseDamage") + ":" + str(data.get("BaseDamage"))
-	# description_label.text += "\n"
-	description_label.text = data.get("Remarks")
 
 
 func select_card():
@@ -54,7 +47,7 @@ func select_card():
 		other_card.play_discard()
 	
 	await $AnimationPlayer.animation_finished
-	selected.emit()
+	selected.emit(upgrade_data["id"])
 
 
 func on_gui_input(event: InputEvent):

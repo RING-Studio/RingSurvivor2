@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://c7bsh0sgpxp0e"]
+
+[ext_resource type="Script" uid="uid://djoccwrj8w2mt" path="res://scenes/ability/machine_gun_ability/machine_gun_ability.gd" id="1_machine_gun"]
+[ext_resource type="PackedScene" uid="uid://bukkiv0tbb2ka" path="res://scenes/component/hitbox_component.tscn" id="2_hitbox"]
+[ext_resource type="Texture2D" uid="uid://c1eq222db36uc" path="res://Assets/particle.png" id="4_particle"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bullet"]
+size = Vector2(4, 4)
+
+[node name="MachineGunAbility" type="Node2D"]
+script = ExtResource("1_machine_gun")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("4_particle")
+
+[node name="HitboxComponent" parent="." instance=ExtResource("2_hitbox")]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("RectangleShape2D_bullet")

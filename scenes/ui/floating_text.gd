@@ -5,8 +5,9 @@ func _ready():
 	pass
 
 
-func start(text: String):
+func start(text: String, color: Color = Color(1, 1, 1, 1)):
 	$Label.text = text
+	$Label.modulate = color
 	
 	scale = Vector2.ZERO
 	

@@ -36,7 +36,7 @@ func on_timer_timeout():
 		anvil_ability.hitbox_component.damage = BASE_DAMAGE
 
 
-func on_ability_upgrade_added(upgrade: int, current_upgrades: Dictionary):
+func on_ability_upgrade_added(upgrade: String, current_upgrades: Dictionary):
 	# if upgrade.id == "anvil_count":
 	# 	anvil_count = current_upgrades["anvil_count"]["quantity"]
 	pass

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://coq3uoed28658"
-path="res://.godot/imported/测试流程图.png-de61f47c24cbe8e12d483259b5333b88.ctex"
+uid="uid://b3l1vd5y8sgdb"
+path="res://.godot/imported/测试流程图.png-cc3a1b04ce99e59b76d20ae2da8f8dc1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Documents/测试流程图.png"
-dest_files=["res://.godot/imported/测试流程图.png-de61f47c24cbe8e12d483259b5333b88.ctex"]
+source_file="res://DOCUMENTS/测试流程图.png"
+dest_files=["res://.godot/imported/测试流程图.png-cc3a1b04ce99e59b76d20ae2da8f8dc1.ctex"]
 
 [params]
 

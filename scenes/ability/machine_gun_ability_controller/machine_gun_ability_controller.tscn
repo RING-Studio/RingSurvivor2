@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://bsce217yvydlh"]
+
+[ext_resource type="Script" uid="uid://qw54i02pnypq" path="res://scenes/ability/machine_gun_ability_controller/machine_gun_ability_controller.gd" id="1_controller"]
+[ext_resource type="PackedScene" uid="uid://c7bsh0sgpxp0e" path="res://scenes/ability/machine_gun_ability/machine_gun_ability.tscn" id="2_bullet"]
+
+[node name="MachineGunAbilityController" type="Node"]
+script = ExtResource("1_controller")
+machine_gun_ability = ExtResource("2_bullet")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.333
+autostart = true

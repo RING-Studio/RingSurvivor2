@@ -37,6 +37,9 @@ func init_player_data():
 	health_component.max_health = health
 	health_component.current_health = health
 
+	# 根据配装添加Ability
+	setup_equipped_abilities()
+
 func _process(delta):
 	var rotation_input = Input.get_action_strength("right") - Input.get_action_strength("left")
 	rotation += rotation_input * rotation_speed * delta
@@ -118,14 +121,12 @@ func on_health_decreased():
 func on_health_changed():
 	update_health_display()
 	
-func on_ability_upgrade_added(upgrade_id: int, current_upgrades: Dictionary):
+func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	# if ability_upgrade is Ability:
 	# 	var ability = ability_upgrade as Ability
 	# 	abilities.add_child(ability.ability_controller_scene.instantiate())
 	# elif ability_upgrade.id == "player_speed":
 	# 	velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * .1)
-	if !GameManager.is_equipped(GameManager.current_vehicle, "配件", upgrade_id):
-		GameManager.equip_part(GameManager.current_vehicle, "配件", upgrade_id)
 
 	print("-------------------")	
 	print("基础伤害: " + str(GameManager.get_player_base_damage()))
@@ -137,6 +138,28 @@ func on_ability_upgrade_added(upgrade_id: int, current_upgrades: Dictionary):
 	print("覆甲率: " + str(GameManager.get_player_armor_coverage()))
 	print("击穿伤害减免: " + str(GameManager.get_player_armor_damage_reduction_percent()))
 	print("-------------------")
+
+func setup_equipped_abilities():
+	"""根据当前车辆配装设置Ability"""
+	var vehicle_config = GameManager.get_vehicle_config(GameManager.current_vehicle)
+	if vehicle_config == null:
+		return
+
+	# 获取主武器类型
+	var main_weapon_id = vehicle_config.get("主武器类型")
+	if main_weapon_id == null:
+		return
+
+	# 根据武器ID添加对应的Ability Controller
+	match main_weapon_id:
+		1:  # 机炮
+			var machine_gun_controller = preload("res://scenes/ability/machine_gun_ability_controller/machine_gun_ability_controller.tscn").instantiate()
+			abilities.add_child(machine_gun_controller)
+			print("已装备机炮")
+		# 这里可以添加其他武器的case
+		# 2:  # 榴弹炮
+		# 3:  # 坦克炮
+		# 4:  # 导弹
 
 func on_arena_difficulty_increased(difficulty: int):
 	var health_regeneration_quantity = MetaProgression.get_upgrade_count("health_regeneration")

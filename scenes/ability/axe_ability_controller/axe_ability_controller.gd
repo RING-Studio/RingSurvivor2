@@ -26,7 +26,7 @@ func on_timer_timeout():
 	axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
 
 
-func on_ability_upgrade_added(upgrade: int, current_upgrades: Dictionary):
+func on_ability_upgrade_added(upgrade: String, current_upgrades: Dictionary):
 	# if upgrade.id == "axe_damage":
 	# 	additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * .1)
 	pass

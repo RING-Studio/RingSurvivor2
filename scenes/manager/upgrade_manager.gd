@@ -3,42 +3,34 @@ extends Node
 @export var experience_manager: Node
 @export var upgrade_screen_scene: PackedScene
 var upgrade_pool: WeightedTable = WeightedTable.new()
-@export var upgrade_skills : Array[int]
 
+var upgrade_catalog: Dictionary = {}
 
 func _ready():
-	for upgrade_id in upgrade_skills:
-		upgrade_pool.add_item(upgrade_id, 10)
-	
-		if GameManager.is_equipped(GameManager.current_vehicle, "配件", upgrade_id):
-			GameManager.current_upgrades[upgrade_id] = {"level": 1	}
-		else:
-			GameManager.current_upgrades[upgrade_id] = {"level": 0	}
+	for entry in AbilityUpgradeData.entries:
+		var upgrade_id = entry["id"]
+		upgrade_catalog[upgrade_id] = entry.duplicate()
+		upgrade_pool.add_item(upgrade_id, entry.get("weight", 10))
+		if not GameManager.current_upgrades.has(upgrade_id):
+			GameManager.current_upgrades[upgrade_id] = {"level": 0}
 
-	
 	GameEvents.level_up.connect(on_level_up)
 
-func apply_upgrade(upgrade_id: int):
-	var has_upgrade = GameManager.current_upgrades.has(upgrade_id)
-	if !has_upgrade:
-		GameManager.current_upgrades[upgrade_id] = {
-			"level": 1
-		}
-	else:
-		GameManager.current_upgrades[upgrade_id]["level"] += 1
-	
-	var data = JsonManager.get_category_by_id("配件", upgrade_id)
-	if data == null:
-		push_warning("无法找到配件数据: %s" % upgrade_id)
+func apply_upgrade(upgrade_id: String):
+	if not GameManager.current_upgrades.has(upgrade_id):
+		GameManager.current_upgrades[upgrade_id] = {"level": 0}
+
+	GameManager.current_upgrades[upgrade_id]["level"] += 1
+
+	var entry = upgrade_catalog.get(upgrade_id)
+	if entry == null:
+		push_warning("无法找到强化数据: %s" % upgrade_id)
 		return
 
-	var max_level = data.get("MaxLevel") 
-	if max_level > 0:
-		var current_quantity = GameManager.current_upgrades[upgrade_id]["level"]
-		if current_quantity == max_level:
-			upgrade_pool.remove_item(upgrade_id)
-	
-	# update_upgrade_pool(upgrade)
+	var max_level = entry.get("max_level", 0)
+	if max_level > 0 and GameManager.current_upgrades[upgrade_id]["level"] >= max_level:
+		upgrade_pool.remove_item(upgrade_id)
+
 	GameEvents.emit_ability_upgrade_added(upgrade_id, GameManager.current_upgrades)
 
 
@@ -49,23 +41,28 @@ func apply_upgrade(upgrade_id: int):
 # 		upgrade_pool.add_item(upgrade_anvil_count, 5)
 
 
-func pick_upgrades():
-	var chosen_upgrades: Array[int] = []
+func pick_upgrades() -> Array[Dictionary]:
+	var chosen_upgrades :Array[Dictionary] = []
+	var exclude := []
 	for i in 3:
-		# if upgrade_pool.items.size() == chosen_upgrades.size():
-		# 	break
-		var chosen_upgrade = upgrade_pool.pick_item(chosen_upgrades)
-		chosen_upgrades.append(chosen_upgrade)
-	
+		if upgrade_pool.items.size() == exclude.size():
+			break
+		var chosen_id = upgrade_pool.pick_item(exclude)
+		if chosen_id == null:
+			break
+		exclude.append(chosen_id)
+		var entry = upgrade_catalog.get(chosen_id)
+		if entry != null:
+			chosen_upgrades.append(entry)
 	return chosen_upgrades
 
 
-func on_upgrade_selected(upgrade: int):
+func on_upgrade_selected(upgrade: String):
 	apply_upgrade(upgrade)
 	
 func on_level_up(current_level: int):
 	var upgrade_screen_instance = upgrade_screen_scene.instantiate()
 	add_child(upgrade_screen_instance)
 	var chosen_upgrades = pick_upgrades()
-	upgrade_screen_instance.set_ability_upgrades(chosen_upgrades as Array[int])
+	upgrade_screen_instance.set_ability_upgrades(chosen_upgrades)
 	upgrade_screen_instance.upgrade_selected.connect(on_upgrade_selected)

@@ -48,6 +48,49 @@ var tech_upgrades: Dictionary
 # 能量值(钱)
 var money: int = 100000
 
+func init_game():
+	"""初始化新游戏数据"""
+	# 重置游戏状态
+	day = 1
+	time_phase = 1
+	pollution = 7000  # 初始污染值
+	mission_progress = "已解锁"
+	chapter = 1
+	npc_dialogues = ""
+	current_vehicle = 0
+	current_skill = ""
+	money = 100000
+
+	# 初始化车辆配置 - 设置默认机炮
+	vehicles_config = {
+		"0": {  # 改进公务车
+			"主武器类型": 1,  # 机炮ID=1
+			"装甲类型": null,
+			"配件": []
+		}
+	}
+
+	# 初始化解锁内容
+	unlocked_vehicles = [0]  # 默认解锁改进公务车
+	unlocked_parts = {
+		"主武器类型": [1],  # 解锁机炮
+		"装甲类型": [],
+		"配件": []
+	}
+
+	# 初始化升级数据
+	current_upgrades = {}
+	tech_upgrades = {
+		0: 0,  # 引擎
+		1: 0,  # 装甲耐久
+		2: 0,  # 装甲
+		3: 0,  # 攻击力
+		4: 0,  # 攻击速度
+		5: 0,  # 暴击
+		6: 0,  # 爆伤
+		7: 0   # 污染转化率
+	}
+
 func is_vehicle_unlocked(id:int):
 	for vehicle_id in unlocked_vehicles:
 		if vehicle_id == id:
