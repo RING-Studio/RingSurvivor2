@@ -18,14 +18,6 @@ extends Node
 		"max_level": -1
 	},
 	{
-		"id": "mg_damage_modifier",
-		"name": "伤害修改强化",
-		"description": "伤害修改比例 +5%",
-		"quality": "white",
-		"weight": 8,
-		"max_level": -1
-	},
-	{
 		"id": "mg_fire_rate_2",
 		"name": "射速强化Ⅱ",
 		"description": "射速 +15%",

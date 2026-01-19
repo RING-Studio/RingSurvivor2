@@ -225,14 +225,9 @@ func get_player_base_damage():
 	var values = get_player_property("BaseDamage")
 	return values[0] * ( 1.0 + values[1] + values[2] + values[3] )
 
-#基础伤害修改比例
-func get_player_base_damage_modifier_ratio():
-	var values = get_player_property("BaseDamageModifierRatio")
-	return values[0] + values[1] + values[2] + values[3]
-
-#穿甲攻击倍率
-func get_player_penetration_attack_multiplier_percent():
-	var values = get_player_property("PenetrationAttackMultiplierPercent")
+#硬攻倍率
+func get_player_hard_attack_multiplier_percent():
+	var values = get_player_property("HardAttackMultiplierPercent")
 	return values[0] + values[1] + values[2] + values[3]
 
 #软攻倍率
@@ -240,9 +235,9 @@ func get_player_soft_attack_multiplier_percent():
 	var values = get_player_property("SoftAttackMultiplierPercent")
 	return values[0] + values[1] + values[2] + values[3]
 
-#穿深
-func get_player_penetration_depth_mm():
-	var values = get_player_property("PenetrationDepthMm")
+#硬攻深度
+func get_player_hard_attack_depth_mm():
+	var values = get_player_property("HardAttackDepthMm")
 	return values[0] + values[1] + values[2] + values[3]
 
 #装甲厚度

@@ -22,7 +22,7 @@ shader = ExtResource("9_46m37")
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5yjm6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yjm6"]
-bg_color = Color(0.45149916, 0.7487167, 0.8173456, 1)
+bg_color = Color(0.451499, 0.748717, 0.817346, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_46m37"]
 shader = ExtResource("9_46m37")
@@ -30,7 +30,7 @@ shader = ExtResource("9_46m37")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_wf7xt"]
 shader = ExtResource("9_46m37")
 
-[node name="CarEditor" type="Control" node_paths=PackedStringArray("vehicle_display", "vehicle_name", "car_name", "weapon_name", "property_list", "weapon_property_list", "property_list_button", "choice_list", "list_display", "vehicle_unlock_button", "ui_equipments", "disabled_controls")]
+[node name="CarEditor" type="Control" node_paths=PackedStringArray("vehicle_display", "vehicle_name", "car_name", "weapon_name", "property_list", "weapon_property_list", "property_list_button", "choice_list", "list_display", "vehicle_unlock_button", "ui_equipments")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,7 +51,6 @@ choice_list = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContaine
 list_display = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/Display")
 vehicle_unlock_button = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/UnlockButton")
 ui_equipments = NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments")
-disabled_controls = [NodePath("HBoxContainer/VBoxContainer/HBoxContainer/ScrollContainer/ChoiceList"), NodePath("HBoxContainer/PanelContainer/VBoxContainer/PanelContainer3/HBoxContainer"), NodePath("HBoxContainer/VBoxContainer/HBoxContainer2")]
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -517,10 +516,6 @@ layout_mode = 2
 [node name="VSeparator3" type="VSeparator" parent="HBoxContainer"]
 layout_mode = 2
 
-[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect/Button" to="." method="switch_to_Accessories" binds= [0]]
-[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect2/Button2" to="." method="switch_to_Accessories" binds= [1]]
-[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect3/Button3" to="." method="switch_to_Accessories" binds= [2]]
-[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect4/Button4" to="." method="switch_to_Accessories" binds= [3]]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Left" to="." method="left_button_pressed"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/UnlockButton" to="." method="unlock_vehicle"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Right" to="." method="right_button_pressed"]

@@ -14,14 +14,11 @@ const FIRE_RATE_MIN = 1
 @export var splash_damage_ratio: float = 0.5
 @export var bleed_layers: int = 0
 @export var bleed_damage_per_layer: float = 1.0
-@export var fire_rate_per_minute: float = 900.0
-@export var base_damage: float = 10.0
-@export var base_damage_modifier_ratio: float = 0.2
+@export var fire_rate_per_minute: float = 300.0
+@export var base_damage: float = 4.0
 @export var bullet_speed: float = 1000.0
 
 var fire_rate_bonus: float = 0.0
-var damage_modifier_bonus: float = 0.0
-var upgrade_damage_addition: float = 0.0
 
 func _ready():
 	_update_timer_interval()
@@ -94,8 +91,7 @@ func _emit_bullet(player_position: Vector2, direction: Vector2):
 	bullet_instance.set_hits_remaining(bullet_penetration + 1)
 
 func _compute_bullet_damage() -> float:
-	var damage_from_upgrades = upgrade_damage_addition * (base_damage_modifier_ratio + damage_modifier_bonus)
-	return base_damage + damage_from_upgrades
+	return base_damage
 
 func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	match upgrade_id:
@@ -111,8 +107,6 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 			bullet_critical_chance += 0.03
 		"mg_precision_3":
 			bullet_critical_chance += 0.04
-		"mg_damage_modifier":
-			damage_modifier_bonus += 0.05
 		"mg_damage_1":
 			base_damage += 1
 		"mg_damage_2":

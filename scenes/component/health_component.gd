@@ -5,7 +5,7 @@ signal died
 signal health_changed
 signal health_decreased
 
-@export var max_health: float = 10
+@export var max_health: float = 50
 var current_health
 
 

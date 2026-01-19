@@ -182,13 +182,10 @@ func unload_part():
 #test only
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_cancel"):
-		print( "基础伤害: " + str( GameManager.get_player_base_damage() ) )
-		print( "基础伤害修改比例: " + str( GameManager.get_player_base_damage_modifier_ratio() ) )
-		print( "穿甲攻击倍率: " + str(GameManager.get_player_base_damage() ))
-		print( "软攻倍率: " + str(GameManager.get_player_base_damage_modifier_ratio() ))
-		print( "穿深: " + str(GameManager.get_player_penetration_attack_multiplier_percent() ))
-		print( "装甲厚度: " + str(GameManager.get_player_soft_attack_multiplier_percent() ))
-		print( "覆甲率: " + str(GameManager.get_player_penetration_depth_mm() ))
+		print( "基础伤害: " + str(GameManager.get_player_base_damage() ))
+		print( "硬攻倍率: " + str(GameManager.get_player_hard_attack_multiplier_percent() ))
+		print( "软攻倍率: " + str(GameManager.get_player_soft_attack_multiplier_percent() ))
+		print( "硬攻深度: " + str(GameManager.get_player_hard_attack_depth_mm() ))
 		print( "装甲厚度: " + str(GameManager.get_player_armor_thickness() ))
 		print( "覆甲率: " + str(GameManager.get_player_armor_coverage() ))
 		print( "击穿伤害减免: " + str(GameManager.get_player_armor_damage_reduction_percent() ))

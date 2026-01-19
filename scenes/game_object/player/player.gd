@@ -68,10 +68,9 @@ func check_deal_damage():
 	for body in enemys_in_contact:
 		if body.is_in_group("enemy"):
 			damage += GlobalFomulaManager.calculate_damage(body.base_damage,
-			 											 body.base_damage_modifier_ratio,
-														 body.penetrationAttackMultiplierPercent,
+														 body.hardAttackMultiplierPercent,
 														 body.soft_attack_multiplier_percent,
-														 body.penetration_depth_mm,
+														 body.hard_attack_depth_mm,
 														 GameManager.get_player_armor_thickness(),
 														 GameManager.get_player_armor_coverage(),
 														 GameManager.get_player_armor_damage_reduction_percent())
@@ -80,10 +79,9 @@ func check_deal_damage():
 			# print("armor thickness:", body.armor_thickness)
 			# print("armor coverage:", body.armorCoverage)
 			# print("base damage:", body.base_damage)
-			# print("base damage modifier ratio:", body.base_damage_modifier_ratio)
 			# print("soft attack multiplier percent:", body.soft_attack_multiplier_percent)
-			# print("penetration attack multiplier percent:", body.penetrationAttackMultiplierPercent)
-			# print("penetration depth mm:", body.penetration_depth_mm)
+			# print("hard attack multiplier percent:", body.hardAttackMultiplierPercent)
+			# print("hard attack depth mm:", body.hard_attack_depth_mm)
 
 	print("enemy damage to player:", damage)
 	health_component.damage(damage)
@@ -130,10 +128,9 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 
 	print("-------------------")	
 	print("基础伤害: " + str(GameManager.get_player_base_damage()))
-	print("基础伤害修改比例: " + str(GameManager.get_player_base_damage_modifier_ratio()))
-	print("穿甲攻击倍率: " + str(GameManager.get_player_penetration_attack_multiplier_percent()))
+	print("硬攻倍率: " + str(GameManager.get_player_hard_attack_multiplier_percent()))
 	print("软攻倍率: " + str(GameManager.get_player_soft_attack_multiplier_percent()))
-	print("穿深: " + str(GameManager.get_player_penetration_attack_multiplier_percent()))
+	print("硬攻深度: " + str(GameManager.get_player_hard_attack_depth_mm()))
 	print("装甲厚度: " + str(GameManager.get_player_armor_thickness()))
 	print("覆甲率: " + str(GameManager.get_player_armor_coverage()))
 	print("击穿伤害减免: " + str(GameManager.get_player_armor_damage_reduction_percent()))

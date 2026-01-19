@@ -53,8 +53,8 @@ Remarks	备注	备注	备注
 BaseDamage	基础伤害	基础伤害	基础伤害
 ArmorThickness	装甲厚度	装甲厚度	装甲厚度
 BaseDamageModifierRatio	伤害修改比例	伤害修改比例	伤害修改比例
-PenetrationAttackMultiplierPercent	硬攻倍率	硬攻倍率	硬攻倍率
-PenetrationDepthMm	穿深	穿深	穿深
+HardAttackMultiplierPercent	硬攻倍率	硬攻倍率	硬攻倍率
+HardAttackDepthMm	硬攻深度	硬攻深度	硬攻深度
 FireRatePerMinute	攻速	攻速	攻速
 BulletVelocity	弹速	弹速	弹速
 CriticalDamageMultiplier	暴击倍率	暴击倍率	暴击倍率

@@ -112,7 +112,7 @@ func apply_damage_to_hurtbox(hurtbox: HurtboxComponent, amount: float, damage_ty
 func _compute_damage_against(enemy: Node2D) -> float:
 	var armor_thickness: int = 0
 	var armor_coverage: float = 0.0
-	var penetration_reduction: float = 0.0
+	var hard_attack_damage_reduction: float = 0.0
 
 	if enemy.get("armor_thickness") != null:
 		armor_thickness = int(enemy.get("armor_thickness"))
@@ -124,16 +124,15 @@ func _compute_damage_against(enemy: Node2D) -> float:
 	elif enemy.get("armor_coverage") != null:
 		armor_coverage = float(enemy.get("armor_coverage"))
 
-	if enemy.get("penetrationDamageReductionPercent") != null:
-		penetration_reduction = float(enemy.get("penetrationDamageReductionPercent"))
+	if enemy.get("hardAttackDamageReductionPercent") != null:
+		hard_attack_damage_reduction = float(enemy.get("hardAttackDamageReductionPercent"))
 
 	return GlobalFomulaManager.calculate_damage(
 		_base_damage,
-		GameManager.get_player_base_damage_modifier_ratio(),
-		GameManager.get_player_penetration_attack_multiplier_percent(),
+		GameManager.get_player_hard_attack_multiplier_percent(),
 		GameManager.get_player_soft_attack_multiplier_percent(),
-		GameManager.get_player_penetration_depth_mm(),
+		GameManager.get_player_hard_attack_depth_mm(),
 		armor_thickness,
 		armor_coverage,
-		penetration_reduction
+		hard_attack_damage_reduction
 	)
