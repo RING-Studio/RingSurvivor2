@@ -14,10 +14,10 @@ const FIRE_RATE_MIN = 1
 @export var splash_damage_ratio: float = 0.5
 @export var bleed_layers: int = 0
 @export var bleed_damage_per_layer: float = 1.0
-@export var fire_rate_per_minute: float = 180.0
+@export var fire_rate_per_minute: float = 900.0
 @export var base_damage: float = 10.0
 @export var base_damage_modifier_ratio: float = 0.2
-@export var bullet_speed: float = 900.0
+@export var bullet_speed: float = 1000.0
 
 var fire_rate_bonus: float = 0.0
 var damage_modifier_bonus: float = 0.0

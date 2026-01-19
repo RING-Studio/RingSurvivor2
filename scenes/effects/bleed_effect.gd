@@ -40,7 +40,7 @@ func _show_bleed_text(value: float, position: Vector2):
 	var floating_text = _floating_text_scene.instantiate() as Node2D
 	get_tree().get_first_node_in_group("foreground_layer").add_child(floating_text)
 	floating_text.global_position = position + (Vector2.UP * 16)
-	floating_text.start("%0.0f" % value, DamageTextHelper.get_color("bleed"))
+	floating_text.call_deferred("start", "%0.0f" % value, DamageTextHelper.get_color("bleed"))
 
 	if layers <= 0:
 		queue_free()

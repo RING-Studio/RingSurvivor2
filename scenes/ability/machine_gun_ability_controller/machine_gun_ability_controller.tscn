@@ -8,5 +8,4 @@ script = ExtResource("1_controller")
 machine_gun_ability = ExtResource("2_bullet")
 
 [node name="Timer" type="Timer" parent="."]
-wait_time = 0.333
 autostart = true

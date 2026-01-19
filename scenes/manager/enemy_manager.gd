@@ -58,7 +58,6 @@ func on_timer_timeout():
 		
 		var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 		entities_layer.add_child(enemy)
-		await get_tree().create_timer(0.1).timeout
 		enemy.global_position = get_spawn_position()
 
 
