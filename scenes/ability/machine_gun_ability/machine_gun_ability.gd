@@ -63,7 +63,9 @@ func _on_hitbox_area_entered(area: Area2D):
 	var damage_type := "weapon"
 	var is_critical := false
 
-	if randf() < critical_chance:
+	# 计算最终暴击率（机炮暴击率 + 全局暴击率）
+	var final_crit_chance = critical_chance + GameManager.get_global_crit_rate()
+	if randf() < final_crit_chance:
 		is_critical = true
 		damage *= critical_damage_multiplier
 		damage_type = "critical"

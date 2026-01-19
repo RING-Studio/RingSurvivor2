@@ -17,6 +17,10 @@ var enemys_in_contact = []
 var number_colliding_bodies = 0
 var base_speed = 0
 
+# 通用强化效果
+var global_health_bonus: int = 0
+var global_crit_rate_bonus: float = 0.0
+
 
 func _ready():
 	arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
@@ -33,12 +37,20 @@ func _ready():
 	update_health_display()
 	
 func init_player_data():
-	var health = GameManager.get_player_max_health()
-	health_component.max_health = health
-	health_component.current_health = health
+	_apply_health_bonus()
 
 	# 根据配装添加Ability
 	setup_equipped_abilities()
+
+func _apply_health_bonus():
+	"""应用耐久加成"""
+	var base_health = GameManager.get_player_max_health()
+	health_component.max_health = base_health + global_health_bonus
+	health_component.current_health = min(health_component.current_health, health_component.max_health)
+
+func get_global_crit_rate_bonus() -> float:
+	"""获取全局暴击率加成（供外部调用）"""
+	return global_crit_rate_bonus
 
 func _process(delta):
 	var rotation_input = Input.get_action_strength("right") - Input.get_action_strength("left")
@@ -120,12 +132,10 @@ func on_health_changed():
 	update_health_display()
 	
 func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
-	# if ability_upgrade is Ability:
-	# 	var ability = ability_upgrade as Ability
-	# 	abilities.add_child(ability.ability_controller_scene.instantiate())
-	# elif ability_upgrade.id == "player_speed":
-	# 	velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * .1)
-
+	# 处理通用强化
+	if upgrade_id.begins_with("global_"):
+		_handle_global_upgrade(upgrade_id)
+	
 	print("-------------------")	
 	print("基础伤害: " + str(GameManager.get_player_base_damage()))
 	print("硬攻倍率: " + str(GameManager.get_player_hard_attack_multiplier_percent()))
@@ -134,7 +144,29 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	print("装甲厚度: " + str(GameManager.get_player_armor_thickness()))
 	print("覆甲率: " + str(GameManager.get_player_armor_coverage()))
 	print("击穿伤害减免: " + str(GameManager.get_player_armor_damage_reduction_percent()))
+	print("全局暴击率: " + str(global_crit_rate_bonus * 100) + "%")
+	print("耐久加成: " + str(global_health_bonus))
 	print("-------------------")
+
+func _handle_global_upgrade(upgrade_id: String):
+	"""处理通用强化"""
+	match upgrade_id:
+		"global_health_1":
+			global_health_bonus += 2
+		"global_health_2":
+			global_health_bonus += 3
+		"global_health_3":
+			global_health_bonus += 5
+		"global_health_4":
+			global_health_bonus += 8
+		"global_crit_rate_1":
+			global_crit_rate_bonus += 0.01
+		"global_crit_rate_2":
+			global_crit_rate_bonus += 0.02
+	
+	# 如果是耐久强化，立即应用
+	if upgrade_id.begins_with("global_health"):
+		_apply_health_bonus()
 
 func setup_equipped_abilities():
 	"""根据当前车辆配装设置Ability"""

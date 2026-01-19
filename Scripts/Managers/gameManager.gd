@@ -265,4 +265,11 @@ func get_player_max_health():
 	
 	return health
 
+#全局暴击率
+func get_global_crit_rate() -> float:
+	var player = get_tree().get_first_node_in_group("player")
+	if player and player.has_method("get_global_crit_rate_bonus"):
+		return player.get_global_crit_rate_bonus()
+	return 0.0
+
 #end region
