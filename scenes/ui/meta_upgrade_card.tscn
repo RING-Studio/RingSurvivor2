@@ -1,17 +1,17 @@
 [gd_scene load_steps=18 format=3 uid="uid://7bfum25cft7c"]
 
-[ext_resource type="Script" path="res://scenes/ui/meta_upgrade_card.gd" id="1_tjxho"]
+[ext_resource type="Script" uid="uid://d3dt4e40c1yus" path="res://scenes/ui/meta_upgrade_card.gd" id="1_tjxho"]
 [ext_resource type="PackedScene" uid="uid://2f2c8xqvyuwd" path="res://scenes/component/random_stream_player_component.tscn" id="2_npgvm"]
-[ext_resource type="AudioStream" uid="uid://c2c6j2nqkan58" path="res://assets/audio/switch1.ogg" id="3_acgt3"]
-[ext_resource type="AudioStream" uid="uid://bjxpqvf42v2cr" path="res://assets/audio/switch2.ogg" id="4_yiwrn"]
-[ext_resource type="AudioStream" uid="uid://bngw6y0jomgyo" path="res://assets/audio/switch3.ogg" id="5_hdwxm"]
-[ext_resource type="AudioStream" uid="uid://bd8553awliywb" path="res://assets/audio/switch4.ogg" id="6_cimdv"]
-[ext_resource type="AudioStream" uid="uid://o2ux77jaghra" path="res://assets/audio/switch5.ogg" id="7_cefcy"]
-[ext_resource type="AudioStream" uid="uid://cpittpv5j7pok" path="res://assets/audio/switch6.ogg" id="8_ywqfl"]
-[ext_resource type="AudioStream" uid="uid://b1a5eekmhv1jc" path="res://assets/audio/switch7.ogg" id="9_m0nqo"]
-[ext_resource type="AudioStream" uid="uid://b2fryfojk6rx2" path="res://assets/audio/switch8.ogg" id="10_rw464"]
-[ext_resource type="AudioStream" uid="uid://8ad6vtudaf4r" path="res://assets/audio/switch9.ogg" id="11_hdbwa"]
-[ext_resource type="AudioStream" uid="uid://blg5jw46ulqtu" path="res://assets/audio/switch10.ogg" id="12_nk8v1"]
+[ext_resource type="AudioStream" uid="uid://c2c6j2nqkan58" path="res://Assets/audio/switch1.ogg" id="3_acgt3"]
+[ext_resource type="AudioStream" uid="uid://bjxpqvf42v2cr" path="res://Assets/audio/switch2.ogg" id="4_yiwrn"]
+[ext_resource type="AudioStream" uid="uid://bngw6y0jomgyo" path="res://Assets/audio/switch3.ogg" id="5_hdwxm"]
+[ext_resource type="AudioStream" uid="uid://bd8553awliywb" path="res://Assets/audio/switch4.ogg" id="6_cimdv"]
+[ext_resource type="AudioStream" uid="uid://o2ux77jaghra" path="res://Assets/audio/switch5.ogg" id="7_cefcy"]
+[ext_resource type="AudioStream" uid="uid://cpittpv5j7pok" path="res://Assets/audio/switch6.ogg" id="8_ywqfl"]
+[ext_resource type="AudioStream" uid="uid://b1a5eekmhv1jc" path="res://Assets/audio/switch7.ogg" id="9_m0nqo"]
+[ext_resource type="AudioStream" uid="uid://b2fryfojk6rx2" path="res://Assets/audio/switch8.ogg" id="10_rw464"]
+[ext_resource type="AudioStream" uid="uid://8ad6vtudaf4r" path="res://Assets/audio/switch9.ogg" id="11_hdbwa"]
+[ext_resource type="AudioStream" uid="uid://blg5jw46ulqtu" path="res://Assets/audio/switch10.ogg" id="12_nk8v1"]
 [ext_resource type="Texture2D" uid="uid://cyckoobw2k7bg" path="res://scenes/game_object/experience_vial/experience_vial.png" id="13_0n718"]
 
 [sub_resource type="Animation" id="Animation_8kjts"]
@@ -98,8 +98,8 @@ tracks/2/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_dph4q"]
 _data = {
-"RESET": SubResource("Animation_8kjts"),
-"selected": SubResource("Animation_sn5g2")
+&"RESET": SubResource("Animation_8kjts"),
+&"selected": SubResource("Animation_sn5g2")
 }
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gjap5"]
@@ -120,11 +120,12 @@ pivot_offset = Vector2(75, 75)
 script = ExtResource("1_tjxho")
 
 [node name="ClickPlayerComponent" parent="." instance=ExtResource("2_npgvm")]
+bus = &"Master"
 streams = Array[AudioStream]([ExtResource("3_acgt3"), ExtResource("4_yiwrn"), ExtResource("5_hdwxm"), ExtResource("6_cimdv"), ExtResource("7_cefcy"), ExtResource("8_ywqfl"), ExtResource("9_m0nqo"), ExtResource("10_rw464"), ExtResource("11_hdbwa"), ExtResource("12_nk8v1")])
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_dph4q")
+&"": SubResource("AnimationLibrary_dph4q")
 }
 
 [node name="MarginContainer" type="MarginContainer" parent="."]

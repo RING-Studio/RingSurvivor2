@@ -6,4 +6,3 @@
 [node name="UpgradeManager" type="Node"]
 script = ExtResource("1_nr4ck")
 upgrade_screen_scene = ExtResource("3_p42li")
-upgrade_skills = Array[int]([0, 29, 4, 2])

@@ -37,6 +37,8 @@ func _ready():
 	update_health_display()
 	
 func init_player_data():
+	# 初始化时，根据已有升级重新计算属性
+	_recalculate_all_attributes(GameManager.current_upgrades)
 	_apply_health_bonus()
 
 	# 根据配装添加Ability
@@ -132,9 +134,8 @@ func on_health_changed():
 	update_health_display()
 	
 func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
-	# 处理通用强化
-	if upgrade_id.begins_with("global_"):
-		_handle_global_upgrade(upgrade_id)
+	# 不再累加，而是重新计算所有属性
+	_recalculate_all_attributes(current_upgrades)
 	
 	print("-------------------")	
 	print("基础伤害: " + str(GameManager.get_player_base_damage()))
@@ -148,25 +149,35 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	print("耐久加成: " + str(global_health_bonus))
 	print("-------------------")
 
-func _handle_global_upgrade(upgrade_id: String):
-	"""处理通用强化"""
-	match upgrade_id:
-		"global_health_1":
-			global_health_bonus += 2
-		"global_health_2":
-			global_health_bonus += 3
-		"global_health_3":
-			global_health_bonus += 5
-		"global_health_4":
-			global_health_bonus += 8
-		"global_crit_rate_1":
-			global_crit_rate_bonus += 0.01
-		"global_crit_rate_2":
-			global_crit_rate_bonus += 0.02
+func _reset_to_base_values():
+	"""重置所有属性到基础值"""
+	global_health_bonus = 0
+	global_crit_rate_bonus = 0.0
+
+func _recalculate_all_attributes(current_upgrades: Dictionary):
+	"""根据当前所有升级重新计算属性"""
+	# 先重置到基础值
+	_reset_to_base_values()
 	
-	# 如果是耐久强化，立即应用
-	if upgrade_id.begins_with("global_health"):
-		_apply_health_bonus()
+	# 遍历所有通用升级，累加效果
+	for upgrade_id in current_upgrades.keys():
+		if not upgrade_id.begins_with("global_"):
+			continue
+		
+		var level = current_upgrades[upgrade_id].get("level", 0)
+		if level <= 0:
+			continue
+		
+		var effect_value = UpgradeEffectManager.get_effect(upgrade_id, level)
+		
+		match upgrade_id:
+			"global_health_1", "global_health_2", "global_health_3", "global_health_4":
+				global_health_bonus += int(effect_value)
+			"global_crit_rate_1", "global_crit_rate_2":
+				global_crit_rate_bonus += effect_value
+	
+	# 应用耐久加成
+	_apply_health_bonus()
 
 func setup_equipped_abilities():
 	"""根据当前车辆配装设置Ability"""

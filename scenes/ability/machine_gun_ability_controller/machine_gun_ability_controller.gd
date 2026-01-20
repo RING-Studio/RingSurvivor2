@@ -24,6 +24,9 @@ func _ready():
 	_update_timer_interval()
 	$Timer.timeout.connect(on_timer_timeout)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
+	
+	# 初始化时，根据已有升级重新计算属性
+	_recalculate_all_attributes(GameManager.current_upgrades)
 
 func _update_timer_interval():
 	var effective_rate = max(fire_rate_per_minute * (1 + fire_rate_bonus), FIRE_RATE_MIN)
@@ -94,32 +97,51 @@ func _compute_bullet_damage() -> float:
 	return base_damage
 
 func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
-	match upgrade_id:
-		"mg_fire_rate_1":
-			fire_rate_bonus += 0.10
-		"mg_fire_rate_2":
-			fire_rate_bonus += 0.15
-		"mg_fire_rate_3":
-			fire_rate_bonus += 0.20
-		"mg_precision_1":
-			bullet_critical_chance += 0.02
-		"mg_precision_2":
-			bullet_critical_chance += 0.03
-		"mg_precision_3":
-			bullet_critical_chance += 0.04
-		"mg_damage_1":
-			base_damage += 1
-		"mg_damage_2":
-			base_damage += 2
-		"mg_crit_damage":
-			bullet_critical_damage_multiplier += 0.10
-		"mg_penetration":
-			bullet_penetration += 1
-		"mg_spread":
-			spread_count += 1
-		"mg_splash":
-			splash_count += 1
-		"mg_bleed":
-			bleed_layers += 1
+	# 不再累加，而是重新计算所有属性
+	_recalculate_all_attributes(current_upgrades)
 
+func _reset_to_base_values():
+	"""重置所有属性到基础值"""
+	fire_rate_bonus = 0.0
+	bullet_critical_chance = 0.0
+	bullet_critical_damage_multiplier = 2.0  # 基础值
+	base_damage = 4.0  # 基础值
+	bullet_penetration = 0
+	spread_count = 1  # 基础值
+	bleed_layers = 0
+
+func _recalculate_all_attributes(current_upgrades: Dictionary):
+	"""根据当前所有升级重新计算属性"""
+	# 先重置到基础值
+	_reset_to_base_values()
+	
+	# 遍历所有机炮相关升级，累加效果
+	for upgrade_id in current_upgrades.keys():
+		if not upgrade_id.begins_with("mg_"):
+			continue
+		
+		var level = current_upgrades[upgrade_id].get("level", 0)
+		if level <= 0:
+			continue
+		
+		var effect_value = UpgradeEffectManager.get_effect(upgrade_id, level)
+		
+		match upgrade_id:
+			"mg_fire_rate_1", "mg_fire_rate_2", "mg_fire_rate_3":
+				fire_rate_bonus += effect_value
+			"mg_precision_1", "mg_precision_2", "mg_precision_3":
+				bullet_critical_chance += effect_value
+			"mg_crit_damage":
+				bullet_critical_damage_multiplier += effect_value
+			"mg_damage_1", "mg_damage_2":
+				base_damage += effect_value
+			"mg_penetration":
+				bullet_penetration += int(effect_value)
+			"mg_spread":
+				spread_count += int(effect_value)
+			"mg_bleed":
+				bleed_layers += int(effect_value)
+			# mg_rapid_fire_1/2/3 是特殊效果，在这里不处理
+			# 可以在其他地方检查 level > 0 来判断是否激活
+	
 	_update_timer_interval()

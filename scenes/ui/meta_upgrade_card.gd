@@ -51,5 +51,3 @@ func on_purchase_pressed():
 	MetaProgression.save()
 	get_tree().call_group("meta_upgrade_card", "update_progress")
 	$AnimationPlayer.play("selected")
-
-
