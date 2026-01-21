@@ -209,14 +209,13 @@ _data = {
 &"hover": SubResource("Animation_1ngbi")
 }
 
-[node name="AbilityUpgradeCard" type="PanelContainer" node_paths=PackedStringArray("level_label") groups=["upgrade_card"]]
+[node name="AbilityUpgradeCard" type="PanelContainer" groups=["upgrade_card"]]
 custom_minimum_size = Vector2(400, 500)
 offset_right = 241.0
 offset_bottom = 337.0
 pivot_offset = Vector2(75, 75)
 theme_override_styles/panel = SubResource("StyleBoxFlat_xicjk")
 script = ExtResource("1_r0yi3")
-level_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/LevelLabel")
 
 [node name="HoverPlayerComponent" parent="." instance=ExtResource("2_jfubo")]
 volume_db = -8.0
@@ -289,21 +288,18 @@ text = "Test name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+[node name="LevelLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(1, 0.381338, 0.313292, 1)
-theme_override_font_sizes/font_size = 31
 text = "LV1 → LV2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="DescriptionLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 5.0
 theme_type_variation = &"BlueOutlineLabel"
-theme_override_font_sizes/font_size = 34
 text = "Write some description here as you write a long description"
 autowrap_mode = 2

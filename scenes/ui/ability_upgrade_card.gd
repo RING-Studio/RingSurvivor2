@@ -3,10 +3,10 @@ extends PanelContainer
 signal selected(upgrade_id: String)
 
 @onready var name_label: Label = $%NameLabel
-@onready var description_label: Label = $%DescriptionLabel
+@onready var description_label: RichTextLabel = $%DescriptionLabel
+@onready var level_label: RichTextLabel = $MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/LevelLabel
 @onready var neworup_label: Label = $%NEWorUP
 @onready var icon_texture_rect: TextureRect = $%Icon
-@export var level_label: Label
 
 var disabled = false
 var upgrade_data: Dictionary
