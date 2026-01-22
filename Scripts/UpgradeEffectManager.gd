@@ -4,148 +4,183 @@ class_name UpgradeEffectManager
 # 升级效果配置
 # 格式：{ upgrade_id: { type: "linear"/"custom", ... } }
 static var upgrade_configs: Dictionary = {
-	# ========== 机炮专属强化 ==========
+	# ========== 通用强化 ==========
 	
-	# 机炮射速强化Ⅰ：每级 +10%，最大10级
-	"mg_fire_rate_1": {
-		"type": "linear",
-		"per_level_value": 0.10,  # 每级增加10%
-		"max_level": 10
-	},
-	
-	# 机炮射速强化Ⅱ：每级 +15%，最大8级
-	"mg_fire_rate_2": {
-		"type": "linear",
-		"per_level_value": 0.15,
-		"max_level": 8
-	},
-	
-	# 机炮射速强化Ⅲ：每级 +20%，最大5级
-	"mg_fire_rate_3": {
-		"type": "linear",
-		"per_level_value": 0.20,
-		"max_level": 5
-	},
-	
-	# 机炮精准强化Ⅰ：每级 +2%，无限等级
-	"mg_precision_1": {
-		"type": "linear",
-		"per_level_value": 0.02
-	},
-	
-	# 机炮精准强化Ⅱ：每级 +3%，无限等级
-	"mg_precision_2": {
+	# 暴击强化：每级 +3%，无限等级
+	"crit_rate": {
 		"type": "linear",
 		"per_level_value": 0.03
 	},
 	
-	# 机炮精准强化Ⅲ：每级 +4%，无限等级
-	"mg_precision_3": {
+	# 暴伤强化：每级 +6%，无限等级
+	"crit_damage": {
 		"type": "linear",
-		"per_level_value": 0.04
+		"per_level_value": 0.06
 	},
 	
-	# 机炮暴击强化：每级 +10%，无限等级
-	"mg_crit_damage": {
+	# 伤害强化：每级 +5%，无限等级
+	"damage_bonus": {
 		"type": "linear",
-		"per_level_value": 0.10
+		"per_level_value": 0.05
 	},
 	
-	# 机炮伤害强化Ⅰ：每级 +1，无限等级
-	"mg_damage_1": {
+	# 耐久强化：每级 +5，无限等级
+	"health": {
 		"type": "linear",
-		"per_level_value": 1.0
+		"per_level_value": 5.0
 	},
 	
-	# 机炮伤害强化Ⅱ：每级 +2，无限等级
-	"mg_damage_2": {
+	# ========== 主武器通用强化 ==========
+	
+	# 速射：每级 +5%，无限等级
+	"rapid_fire": {
 		"type": "linear",
-		"per_level_value": 2.0
+		"per_level_value": 0.05
 	},
 	
-	# 机炮穿透强化：每级 +1，最大5级
-	"mg_penetration": {
-		"type": "linear",
-		"per_level_value": 1.0,
-		"max_level": 5
-	},
-	
-	# 机炮弹道扩散：每级 +1，最大5级
-	"mg_spread": {
+	# 连射：每级效果在 WeaponUpgradeHandler 中处理
+	"chain_fire": {
 		"type": "linear",
 		"per_level_value": 1.0,
 		"max_level": 5
 	},
 	
-	# 机炮溅血：每级 +1层，最大3级
-	"mg_bleed": {
+	# 散弹：每级效果在 WeaponUpgradeHandler 中处理
+	"scatter_shot": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	
+	# 爆射：每级效果在 WeaponUpgradeHandler 中处理
+	"burst_fire": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 10
+	},
+	
+	# 扫射：每级 +50%射速，最大2级
+	"sweep_fire": {
+		"type": "linear",
+		"per_level_value": 0.50,
+		"max_level": 2
+	},
+	
+	# 乱射：+100%射速，唯一
+	"chaos_fire": {
+		"type": "custom",
+		"level_effects": {
+			1: 1.0
+		}
+	},
+	
+	# 破竹：每级效果在 WeaponUpgradeHandler 中处理
+	"breakthrough": {
+		"type": "linear",
+		"per_level_value": 0.25,
+		"max_level": 3
+	},
+	
+	# 火力压制：每级效果在 WeaponUpgradeHandler 中处理
+	"fire_suppression": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 2
+	},
+	
+	# 穿透：每级效果在 WeaponUpgradeHandler 中处理
+	"penetration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	
+	# 风车：每级效果在 WeaponUpgradeHandler 中处理
+	"windmill": {
 		"type": "linear",
 		"per_level_value": 1.0,
 		"max_level": 3
 	},
 	
-	# 机炮激射Ⅰ：唯一，效果为1（表示已激活）
-	"mg_rapid_fire_1": {
-		"type": "custom",
-		"level_effects": {
-			1: 1.0  # 激活后效果值为1
-		}
-	},
-	
-	# 机炮激射Ⅱ：唯一，效果为1
-	"mg_rapid_fire_2": {
-		"type": "custom",
-		"level_effects": {
-			1: 1.0
-		}
-	},
-	
-	# 机炮激射Ⅲ：唯一，效果为1
-	"mg_rapid_fire_3": {
-		"type": "custom",
-		"level_effects": {
-			1: 1.0
-		}
-	},
-	
-	# ========== 通用强化 ==========
-	
-	# 耐久强化Ⅰ：每级 +2，无限等级
-	"global_health_1": {
+	# 弹射：每级效果在 WeaponUpgradeHandler 中处理
+	"ricochet": {
 		"type": "linear",
-		"per_level_value": 2.0
+		"per_level_value": 0.10,
+		"max_level": 4
 	},
 	
-	# 耐久强化Ⅱ：每级 +3，无限等级
-	"global_health_2": {
+	# 扩散：每级效果在 WeaponUpgradeHandler 中处理
+	"spread_shot": {
 		"type": "linear",
-		"per_level_value": 3.0
+		"per_level_value": 1.0,
+		"max_level": 3
 	},
 	
-	# 耐久强化Ⅲ：每级 +5，无限等级
-	"global_health_3": {
+	# 分裂：每级效果在 WeaponUpgradeHandler 中处理
+	"split_shot": {
 		"type": "linear",
-		"per_level_value": 5.0
+		"per_level_value": 1.0,
+		"max_level": 2
 	},
 	
-	# 耐久强化Ⅳ：每级 +8，无限等级
-	"global_health_4": {
+	# 屏息：每级效果在 WeaponUpgradeHandler 中处理
+	"breath_hold": {
 		"type": "linear",
-		"per_level_value": 8.0
+		"per_level_value": 0.10,
+		"max_level": 10
 	},
 	
-	# 精准强化Ⅰ：每级 +1%，最大5级
-	"global_crit_rate_1": {
+	# 专注：每级效果在 WeaponUpgradeHandler 中处理
+	"focus": {
 		"type": "linear",
 		"per_level_value": 0.01,
 		"max_level": 5
 	},
 	
-	# 精准强化Ⅱ：每级 +2%，最大5级
-	"global_crit_rate_2": {
+	# 收割：每级恢复1点耐久，最大5级
+	"harvest": {
 		"type": "linear",
-		"per_level_value": 0.02,
+		"per_level_value": 1.0,
 		"max_level": 5
+	},
+	
+	# 致命一击：每级效果在 WeaponUpgradeHandler 中处理
+	"lethal_strike": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+	
+	# 暴击转换：唯一
+	"crit_conversion": {
+		"type": "custom",
+		"level_effects": {
+			1: 1.0
+		}
+	},
+	
+	# ========== 机炮专属新强化 ==========
+	
+	# 机炮·过载：每级效果在 WeaponUpgradeHandler 中处理
+	"mg_overload": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	
+	# 机炮·重弹：每级 -10%射速，+1基础伤害，最大5级
+	"mg_heavy_round": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	
+	# 机炮·穿甲弹：基础伤害+3，穿透固定为1，唯一
+	"mg_ap_round": {
+		"type": "custom",
+		"level_effects": {
+			1: 1.0
+		}
 	}
 }
 

@@ -32,6 +32,11 @@ func _ready():
 	health_component.health_decreased.connect(on_health_decreased)
 	health_component.health_changed.connect(on_health_changed)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
+	
+	# 创建 WeaponUpgradeHandler
+	var upgrade_handler = WeaponUpgradeHandler.new()
+	add_child(upgrade_handler)
+	
 	await get_tree().process_frame
 	init_player_data()
 	update_health_display()
@@ -161,7 +166,11 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 	
 	# 遍历所有通用升级，累加效果
 	for upgrade_id in current_upgrades.keys():
-		if not upgrade_id.begins_with("global_"):
+		# 处理旧的 global_ 开头的强化和新的通用强化
+		var is_global_upgrade = upgrade_id.begins_with("global_")
+		var is_new_global_upgrade = upgrade_id in ["health", "crit_rate", "crit_damage", "damage_bonus"]
+		
+		if not is_global_upgrade and not is_new_global_upgrade:
 			continue
 		
 		var level = current_upgrades[upgrade_id].get("level", 0)
@@ -171,9 +180,9 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 		var effect_value = UpgradeEffectManager.get_effect(upgrade_id, level)
 		
 		match upgrade_id:
-			"global_health_1", "global_health_2", "global_health_3", "global_health_4":
+			"global_health_1", "global_health_2", "global_health_3", "global_health_4", "health":
 				global_health_bonus += int(effect_value)
-			"global_crit_rate_1", "global_crit_rate_2":
+			"global_crit_rate_1", "global_crit_rate_2", "crit_rate":
 				global_crit_rate_bonus += effect_value
 	
 	# 应用耐久加成

@@ -291,6 +291,8 @@ vertical_alignment = 1
 [node name="LevelLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 32
+bbcode_enabled = true
 text = "LV1 → LV2"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -301,5 +303,7 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 5.0
 theme_type_variation = &"BlueOutlineLabel"
+theme_override_font_sizes/normal_font_size = 32
+bbcode_enabled = true
 text = "Write some description here as you write a long description"
 autowrap_mode = 2

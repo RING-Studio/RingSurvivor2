@@ -3,181 +3,191 @@ extends Node
 @export var entries: Array[Dictionary] = [
 	# 通用强化
 	{
-		"id": "global_health_1",
-		"name": "耐久强化Ⅰ",
-		"description": "耐久 +2",
-		"quality": "white",
-		"max_level": -1
-	},
-	{
-		"id": "global_crit_rate_1",
-		"name": "精准强化Ⅰ",
-		"description": "通用暴击率 +1%",
-		"quality": "white",
-		"max_level": 5
-	},
-	{
-		"id": "global_health_2",
-		"name": "耐久强化Ⅱ",
-		"description": "耐久 +3",
+		"id": "crit_rate",
+		"name": "暴击强化",
+		"description": "暴击率 +{crit_rate_value}%",
 		"quality": "blue",
 		"max_level": -1
 	},
 	{
-		"id": "global_crit_rate_2",
-		"name": "精准强化Ⅱ",
-		"description": "通用暴击率 +2%",
-		"quality": "purple",
+		"id": "crit_damage",
+		"name": "暴伤强化",
+		"description": "暴击伤害 +{crit_damage_value}%",
+		"quality": "white",
+		"max_level": -1
+	},
+	{
+		"id": "damage_bonus",
+		"name": "伤害强化",
+		"description": "伤害 +{damage_bonus_value}%",
+		"quality": "white",
+		"max_level": -1
+	},
+	{
+		"id": "health",
+		"name": "耐久强化",
+		"description": "耐久 +{health_value}",
+		"quality": "white",
+		"max_level": -1
+	},
+	# 主武器通用强化
+	{
+		"id": "rapid_fire",
+		"name": "速射",
+		"description": "射速 +{rapid_fire_value}%",
+		"quality": "white",
+		"max_level": -1
+	},
+	{
+		"id": "chain_fire",
+		"name": "连射",
+		"description": "射速 -{chain_fire_penalty_value}%。主武器射击时，+3%射速，最多叠加{chain_fire_max_stacks_value}层，每1秒减少1层",
+		"quality": "blue",
 		"max_level": 5
 	},
 	{
-		"id": "global_health_3",
-		"name": "耐久强化Ⅲ",
-		"description": "耐久 +5",
+		"id": "scatter_shot",
+		"name": "散弹",
+		"description": "主武器每射击{scatter_shot_interval_value}次，向随机方向进行{scatter_shot_count_value}次额外射击",
+		"quality": "blue",
+		"max_level": 5
+	},
+	{
+		"id": "burst_fire",
+		"name": "爆射",
+		"description": "主武器暴击时，+4%射速，最多叠加{burst_fire_max_stacks_value}层，每1秒减少1层",
 		"quality": "purple",
-		"max_level": -1
-	},
-	{
-		"id": "global_health_4",
-		"name": "耐久强化Ⅳ",
-		"description": "耐久 +8",
-		"quality": "red",
-		"max_level": -1
-	},
-	# 机炮专属强化
-	{
-		"id": "mg_fire_rate_1",
-		"name": "机炮射速强化Ⅰ",
-		"description": "机炮射速 +10%",
-		"quality": "white",
 		"max_level": 10
 	},
 	{
-		"id": "mg_precision_1",
-		"name": "机炮精准强化Ⅰ",
-		"description": "机炮暴击率 +2%",
-		"quality": "white",
-		"max_level": -1
-	},
-	{
-		"id": "mg_fire_rate_2",
-		"name": "机炮射速强化Ⅱ",
-		"description": "机炮射速 +15%",
+		"id": "sweep_fire",
+		"name": "扫射",
+		"description": "+{sweep_fire_bonus_value}%射速。主武器射击方向变更：顺时针旋转（每帧旋转固定角度）",
 		"quality": "blue",
-		"max_level": 8
+		"max_level": 2
 	},
 	{
-		"id": "mg_precision_2",
-		"name": "机炮精准强化Ⅱ",
-		"description": "机炮暴击率 +3%",
+		"id": "chaos_fire",
+		"name": "乱射",
+		"description": "+100%射速。主武器射击方向变更：随机方向（每次射击完全随机）",
 		"quality": "blue",
-		"max_level": -1
-	},
-	{
-		"id": "mg_crit_damage",
-		"name": "机炮暴击强化",
-		"description": "机炮暴击伤害 +10%",
-		"quality": "blue",
-		"max_level": -1
-	},
-	{
-		"id": "mg_damage_1",
-		"name": "机炮伤害强化Ⅰ",
-		"description": "机炮基础伤害 +1",
-		"quality": "purple",
-		"max_level": -1
-	},
-	{
-		"id": "mg_precision_3",
-		"name": "机炮精准强化Ⅲ",
-		"description": "机炮暴击率 +4%",
-		"quality": "purple",
-		"max_level": -1
-	},
-	{
-		"id": "mg_fire_rate_3",
-		"name": "机炮射速强化Ⅲ",
-		"description": "机炮射速 +20%",
-		"quality": "purple",
-		"max_level": 5
-	},
-	{
-		"id": "mg_penetration",
-		"name": "机炮穿透强化",
-		"description": "机炮穿透次数 +1",
-		"quality": "purple",
-		"max_level": 5
-	},
-	{
-		"id": "mg_rapid_fire_1",
-		"name": "机炮激射Ⅰ",
-		"description": "造成暴击时，下一次射击暴击伤害翻倍（不可叠加）",
-		"quality": "purple",
 		"max_level": 1
 	},
 	{
-		"id": "mg_rapid_fire_2",
-		"name": "机炮激射Ⅱ",
-		"description": "造成暴击时，下一次射击+1穿透",
+		"id": "breakthrough",
+		"name": "破竹",
+		"description": "场上存在的怪物数量越少，获得越多射速加成，最多+{breakthrough_max_bonus_value}%（怪物数量N，则+{breakthrough_max_bonus_value}%/N射速）",
 		"quality": "purple",
-		"max_level": 1
+		"max_level": 3
 	},
 	{
-		"id": "mg_damage_2",
-		"name": "机炮伤害强化Ⅱ",
-		"description": "机炮基础伤害 +2",
+		"id": "fire_suppression",
+		"name": "火力压制",
+		"description": "自身配件数量越多，获得越多射速加成（配件数量N，则+{fire_suppression_per_part_value}*N%射速）",
 		"quality": "red",
-		"max_level": -1
+		"max_level": 2
 	},
 	{
-		"id": "mg_spread",
-		"name": "机炮弹道扩散",
-		"description": "机炮弹道 +1",
-		"quality": "red",
+		"id": "penetration",
+		"name": "穿透",
+		"description": "伤害 -{penetration_damage_penalty_value}%，主武器穿透+{penetration_penetration_value}",
+		"quality": "blue",
 		"max_level": 5
 	},
 	{
-		"id": "mg_rapid_fire_3",
-		"name": "机炮激射Ⅲ",
-		"description": "造成暴击时，下一次射击+1弹道",
-		"quality": "red",
-		"max_level": 1
+		"id": "windmill",
+		"name": "风车",
+		"description": "射速 -50%。伤害 -{windmill_damage_penalty_value}%。主武器弹道+{windmill_spread_value}。主武器射击方向变更：顺时针旋转",
+		"quality": "blue",
+		"max_level": 3
 	},
 	{
-		"id": "mg_bleed",
-		"name": "机炮溅血",
-		"description": "暴击时施加 1 层流血",
+		"id": "ricochet",
+		"name": "弹射",
+		"description": "主武器子弹命中后，有{ricochet_chance_value}%概率向最近敌人弹射。弹射在穿透前判定，成功则不消耗穿透次数",
+		"quality": "purple",
+		"max_level": 4
+	},
+	{
+		"id": "spread_shot",
+		"name": "扩散",
+		"description": "主武器弹道+{spread_shot_spread_value}，每发子弹造成{spread_shot_damage_ratio_value}%伤害",
 		"quality": "red",
 		"max_level": 3
+	},
+	{
+		"id": "split_shot",
+		"name": "分裂",
+		"description": "暴击时，子弹分裂成{split_shot_count_value}发，每发造成50%伤害。仅在弹射失败时触发，不消耗穿透次数。分裂子弹无法再分裂",
+		"quality": "red",
+		"max_level": 2
+	},
+	{
+		"id": "breath_hold",
+		"name": "屏息",
+		"description": "主武器未进行射击时，以+{breath_hold_rate_value}%/秒的速率给予暴击伤害加成。主武器射击后清空所有加成",
+		"quality": "purple",
+		"max_level": 10
+	},
+	{
+		"id": "focus",
+		"name": "专注",
+		"description": "主武器连续命中同一敌人时，每发+{focus_crit_rate_value}%暴击率，最多叠加5层。未命中该敌人时重新计算",
+		"quality": "purple",
+		"max_level": 5
+	},
+	{
+		"id": "harvest",
+		"name": "收割",
+		"description": "暴击击杀敌人时，恢复{harvest_heal_value}点耐久",
+		"quality": "purple",
+		"max_level": 5
+	},
+	{
+		"id": "lethal_strike",
+		"name": "致命一击",
+		"description": "主武器每射击{lethal_strike_interval_value}次，下一次射击暴击率+100%，且暴击伤害翻倍",
+		"quality": "red",
+		"max_level": 4
+	},
+	{
+		"id": "crit_conversion",
+		"name": "暴击转换",
+		"description": "暴击时，暴击率加成会作用于暴击伤害加成",
+		"quality": "red",
+		"max_level": 1
+	},
+	# 机炮专属强化
+	{
+		"id": "mg_overload",
+		"name": "机炮·过载",
+		"description": "射速 +50%，主武器射击时，-{mg_overload_penalty_value}%射速，最多叠加{mg_overload_max_stacks_value}层，每1秒减少{mg_overload_decay_value}层",
+		"quality": "blue",
+		"max_level": 3
+	},
+	{
+		"id": "mg_heavy_round",
+		"name": "机炮·重弹",
+		"description": "射速 -{mg_heavy_round_penalty_value}%，主武器基础伤害+{mg_heavy_round_damage_value}",
+		"quality": "purple",
+		"max_level": 5
+	},
+	{
+		"id": "mg_ap_round",
+		"name": "机炮·穿甲弹",
+		"description": "主武器基础伤害+3，穿透固定为1",
+		"quality": "red",
+		"max_level": 1
 	}
 ]
 
 # 升级图标映射：在编辑器中为每个升级配置对应的图标
 @export var upgrade_icons: Dictionary = {
 	# 通用强化
-	"global_health_1": preload("res://Assets/GPT/ChatGPT shield.png"),
-	"global_health_2": preload("res://Assets/GPT/ChatGPT shield.png"),
-	"global_health_3": preload("res://Assets/GPT/ChatGPT shield.png"),
-	"global_health_4": preload("res://Assets/GPT/ChatGPT shield.png"),
-	"global_crit_rate_1": preload("res://Assets/GPT/ChatGPT crit.png"),
-	"global_crit_rate_2": preload("res://Assets/GPT/ChatGPT crit.png"),
-	
-	# 机炮专属强化
-	"mg_fire_rate_1": null,
-	"mg_precision_1": null,
-	"mg_fire_rate_2": null,
-	"mg_precision_2": null,
-	"mg_crit_damage": null,
-	"mg_damage_1": null,
-	"mg_precision_3": null,
-	"mg_fire_rate_3": null,
-	"mg_penetration": null,
-	"mg_rapid_fire_1": null,
-	"mg_rapid_fire_2": null,
-	"mg_damage_2": null,
-	"mg_spread": preload("res://Assets/GPT/ChatGPT split.png"),
-	"mg_rapid_fire_3": null,
-	"mg_bleed": null,
+	"health": preload("res://Assets/GPT/ChatGPT shield.png"),
+	"crit_rate": preload("res://Assets/GPT/ChatGPT crit.png"),
+	"crit_damage": preload("res://Assets/GPT/ChatGPT crit.png"),
+	"damage_bonus": null,
 }
 
 func get_entry(upgrade_id):

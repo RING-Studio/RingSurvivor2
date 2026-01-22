@@ -29,7 +29,17 @@ func _ready():
 	_recalculate_all_attributes(GameManager.current_upgrades)
 
 func _update_timer_interval():
-	var effective_rate = max(fire_rate_per_minute * (1 + fire_rate_bonus), FIRE_RATE_MIN)
+	var base_rate = fire_rate_per_minute
+	var modifier = 0.0
+	
+	# 使用 WeaponUpgradeHandler 获取射速修正
+	if WeaponUpgradeHandler.instance:
+		modifier = WeaponUpgradeHandler.instance.get_fire_rate_modifier()
+	
+	# 加上原有的机炮专属射速加成
+	modifier += fire_rate_bonus
+	
+	var effective_rate = max(base_rate * (1.0 + modifier), FIRE_RATE_MIN)
 	$Timer.wait_time = 60.0 / effective_rate
 
 func on_timer_timeout():
@@ -46,32 +56,58 @@ func on_timer_timeout():
 	var player_position = player.global_position
 	var fire_direction = _resolve_fire_direction(player_position, enemies)
 
-	var shot_count = max(spread_count, 1)
+	# 通知 WeaponUpgradeHandler 武器发射
+	var extra_shot_count = 0
+	if WeaponUpgradeHandler.instance:
+		extra_shot_count = WeaponUpgradeHandler.instance.on_weapon_fire()
+
+	# 应用全局弹道加成
+	var effective_spread_count = spread_count
+	# 使用 WeaponUpgradeHandler 获取弹道修正
+	if WeaponUpgradeHandler.instance:
+		effective_spread_count = WeaponUpgradeHandler.instance.get_spread_modifier(effective_spread_count)
+	
+	var shot_count = max(effective_spread_count, 1)
 	for i in range(shot_count):
 		var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(3)
 		var bullet_direction = fire_direction.rotated(angle_offset)
 		_emit_bullet(player_position, bullet_direction)
+	
+	# 散弹额外射击
+	for i in range(extra_shot_count):
+		var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
+		_emit_bullet(player_position, random_direction)
 
 func _resolve_fire_direction(player_position: Vector2, enemies: Array) -> Vector2:
+	# 先计算基础方向
+	var base_direction: Vector2
 	if enemies.size() == 0:
-		return Vector2.RIGHT.rotated(randf_range(0, TAU))
+		base_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
+	else:
+		var nearest_enemy: Node2D = null
+		var nearest_distance_squared: float = INF
+		
+		for enemy in enemies:
+			var delta = enemy.global_position - player_position
+			var distance_squared = delta.length_squared()
+			if distance_squared < nearest_distance_squared:
+				nearest_distance_squared = distance_squared
+				nearest_enemy = enemy
+		
+		if nearest_enemy != null:
+			var delta = nearest_enemy.global_position - player_position
+			if delta.length_squared() >= 0.0001:
+				base_direction = delta.normalized()
+			else:
+				base_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
+		else:
+			base_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
 	
-	var nearest_enemy: Node2D = null
-	var nearest_distance_squared: float = INF
+	# 使用 WeaponUpgradeHandler 获取方向修正（处理扫射、乱射、风车）
+	if WeaponUpgradeHandler.instance:
+		return WeaponUpgradeHandler.instance.get_fire_direction_modifier(base_direction, player_position)
 	
-	for enemy in enemies:
-		var delta = enemy.global_position - player_position
-		var distance_squared = delta.length_squared()
-		if distance_squared < nearest_distance_squared:
-			nearest_distance_squared = distance_squared
-			nearest_enemy = enemy
-	
-	if nearest_enemy != null:
-		var delta = nearest_enemy.global_position - player_position
-		if delta.length_squared() >= 0.0001:
-			return delta.normalized()
-	
-	return Vector2.RIGHT.rotated(randf_range(0, TAU))
+	return base_direction
 
 func _emit_bullet(player_position: Vector2, direction: Vector2):
 	var bullet_instance = machine_gun_ability.instantiate() as MachineGunAbility
@@ -88,13 +124,25 @@ func _emit_bullet(player_position: Vector2, direction: Vector2):
 	bullet_instance.splash_damage_ratio = splash_damage_ratio
 	bullet_instance.bleed_layers = bleed_layers
 	bullet_instance.bleed_damage_per_layer = bleed_damage_per_layer
+	# 检查扩散效果
+	var spread_level = GameManager.current_upgrades.get("spread_shot", {}).get("level", 0)
+	if spread_level > 0:
+		bullet_instance.has_spread_effect = true
+		bullet_instance.spread_damage_ratio = [0.50, 0.40, 0.30][min(spread_level - 1, 2)]
+	# 设置controller引用，用于通知暴击
+	if bullet_instance.has_method("set_controller"):
+		bullet_instance.set_controller(self)
 	# 现在才 add_child，此时 _ready() 会使用正确的 penetration_capacity
 	get_tree().get_first_node_in_group("foreground_layer").add_child(bullet_instance)
 	bullet_instance.set_base_damage(_compute_bullet_damage())
 	bullet_instance.set_hits_remaining(bullet_penetration + 1)
 
 func _compute_bullet_damage() -> float:
-	return base_damage
+	var damage = base_damage
+	# 使用 WeaponUpgradeHandler 获取伤害修正（在计算护甲之前）
+	if WeaponUpgradeHandler.instance:
+		damage = WeaponUpgradeHandler.instance.get_damage_modifier(damage)
+	return damage
 
 func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	# 不再累加，而是重新计算所有属性
@@ -141,7 +189,25 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 				spread_count += int(effect_value)
 			"mg_bleed":
 				bleed_layers += int(effect_value)
+			"mg_heavy_round":
+				# 射速 -10lv%，基础伤害+1lv
+				fire_rate_bonus -= 0.10 * float(level)
+				base_damage += float(level)
+			"mg_ap_round":
+				# 基础伤害+3，穿透固定为1
+				base_damage += 3.0
+				bullet_penetration = 1  # 固定为1
 			# mg_rapid_fire_1/2/3 是特殊效果，在这里不处理
-			# 可以在其他地方检查 level > 0 来判断是否激活
+			# mg_overload 在 WeaponUpgradeHandler 中处理
+	
+	# 使用 WeaponUpgradeHandler 获取穿透和弹道修正
+	if WeaponUpgradeHandler.instance:
+		bullet_penetration = WeaponUpgradeHandler.instance.get_penetration_modifier(bullet_penetration)
+		spread_count = WeaponUpgradeHandler.instance.get_spread_modifier(spread_count)
 	
 	_update_timer_interval()
+
+func on_critical_hit():
+	"""当机炮造成暴击时调用此方法（保留用于未来扩展）"""
+	# 激射效果已移除，此方法保留用于未来可能的扩展
+	pass
