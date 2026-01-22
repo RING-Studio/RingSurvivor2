@@ -1,9 +1,10 @@
-[gd_scene load_steps=18 format=3 uid="uid://c2kp0nivg1lr6"]
+[gd_scene load_steps=19 format=3 uid="uid://c2kp0nivg1lr6"]
 
-[ext_resource type="Script" uid="uid://b8hfw82818ec4" path="res://scenes/Levels/Level1/level1.gd" id="1_wfac4"]
+[ext_resource type="Script" uid="uid://b8hfw82818ec4" path="res://scenes/Levels/Level1/Level1.gd" id="1_wfac4"]
+[ext_resource type="PackedScene" uid="uid://7axbopas4824" path="res://scenes/ui/end_screen.tscn" id="2_fpbsk"]
 [ext_resource type="PackedScene" uid="uid://gddxr6myrw3c" path="res://scenes/ui/arena_time_ui.tscn" id="2_t2fh3"]
 [ext_resource type="PackedScene" uid="uid://musqopj5jgj3" path="res://scenes/manager/arena_time_manager.tscn" id="3_fpbsk"]
-[ext_resource type="PackedScene" uid="uid://bjkegus0fssw1" path="res://scenes/manager/enemy_manager.tscn" id="4_sh0p4"]
+[ext_resource type="PackedScene" uid="uid://bwkwtd466tucu" path="res://scenes/Levels/Level1/level1_enemy_manager.tscn" id="4_sh0p4"]
 [ext_resource type="PackedScene" uid="uid://lnbdf4stuwxn" path="res://scenes/manager/experience_manager.tscn" id="5_pyi2m"]
 [ext_resource type="PackedScene" uid="uid://bt5jv4ycv6g0c" path="res://scenes/manager/upgrade_manager.tscn" id="6_i1ckd"]
 [ext_resource type="PackedScene" uid="uid://bnl28d230kkir" path="res://scenes/game_object/game_camera/game_camera.tscn" id="7_ikmxo"]
@@ -34,6 +35,7 @@ size = Vector2(466, 271)
 
 [node name="Level1" type="Node"]
 script = ExtResource("1_wfac4")
+end_screen_scene = ExtResource("2_fpbsk")
 
 [node name="ArenaTimeUI" parent="." node_paths=PackedStringArray("arena_time_manager") instance=ExtResource("2_t2fh3")]
 arena_time_manager = NodePath("../ArenaTimeManager")

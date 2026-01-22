@@ -52,9 +52,6 @@ func on_timer_timeout():
 	if player == null:
 		return
 	
-	# 获取当前难度（用于计算属性）
-	var current_difficulty = arena_time_manager.arena_difficulty
-	
 	for i in number_to_spawn:
 		var enemy_scene = enemy_table.pick_item()
 		var enemy = enemy_scene.instantiate() as Node2D
@@ -63,8 +60,8 @@ func on_timer_timeout():
 		entities_layer.add_child(enemy)
 		enemy.global_position = get_spawn_position()
 		
-		# 调用初始化接口，传入属性参数
-		initialize_enemy_properties(enemy, current_difficulty)
+		var difficulty = arena_time_manager.arena_difficulty
+		initialize_enemy_properties(enemy, difficulty)
 
 
 func on_arena_difficulty_increased(arena_difficulty: int):
@@ -83,24 +80,17 @@ func on_arena_difficulty_increased(arena_difficulty: int):
 
 
 func initialize_enemy_properties(enemy: Node2D, difficulty: int):
-	"""
-	初始化敌人属性
-	可以在这里根据难度、敌人类型等计算属性值
-	"""
+	"""初始化敌人属性，使用 difficulty 参数"""
 	var properties = {}
+	var multiplier = 1.0 + (difficulty * 0.1)  # 基础倍率随难度增加
 	
-	# 根据敌人类型和难度计算生命值
+	# 根据敌人类型计算基础属性
 	if enemy is BasicEnemy:
 		var base_health = 50.0
-		var health_multiplier = 1.0 + (difficulty * 0.1)  # 每级难度增加10%
-		properties["max_health"] = base_health * health_multiplier
+		properties["max_health"] = base_health * multiplier
 	elif enemy is WizardEnemy:
 		var base_health = 30.0
-		var health_multiplier = 1.0 + (difficulty * 0.1)  # 每级难度增加10%
-		properties["max_health"] = base_health * health_multiplier
-	
-	# 可选：根据难度调整其他属性
-	# properties["base_damage"] = 1.0 + (difficulty * 0.1)
+		properties["max_health"] = base_health * multiplier
 	
 	# 调用敌人的初始化方法
 	if enemy.has_method("initialize_enemy"):

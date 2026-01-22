@@ -84,7 +84,6 @@ func _on_hitbox_area_entered(area: Area2D):
 		final_crit_chance = WeaponUpgradeHandler.instance.get_crit_rate_modifier(base_crit_rate, target)
 	
 	# 致命一击：如果激活，暴击伤害翻倍
-	var lethal_strike_active = false
 	if WeaponUpgradeHandler.instance:
 		lethal_strike_active = WeaponUpgradeHandler.instance.is_lethal_strike_active()
 	
@@ -268,5 +267,5 @@ func _trigger_split():
 		split_bullet.ricochet_attempted = false  # 分裂子弹可以弹射
 		if _controller != null:
 			split_bullet.set_controller(_controller)
-		get_tree().get_first_node_in_group("foreground_layer").add_child(split_bullet)
+		get_tree().get_first_node_in_group("foreground_layer").call_deferred("add_child", split_bullet)
 		split_bullet.set_base_damage(_base_damage * 0.5)

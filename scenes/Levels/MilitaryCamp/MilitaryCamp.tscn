@@ -19,7 +19,7 @@ size = Vector2(334, 314)
 [node name="MilitaryCamp" type="Node2D" node_paths=PackedStringArray("player")]
 script = ExtResource("1_usjsl")
 player = NodePath("Player")
-next_scene = &"res://scenes/main/MainScene.tscn"
+next_scene = &"res://scenes/Levels/Level1/Level1.tscn"
 npc_scene = &"res://scenes/Levels/Avg.tscn"
 car_editor_scene = &"res://scenes/Levels/CarEditor.tscn"
 tech_scene = &"res://scenes/Levels/TechScene.tscn"
