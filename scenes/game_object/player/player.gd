@@ -54,6 +54,8 @@ func _apply_health_bonus():
 	var base_health = GameManager.get_player_max_health()
 	health_component.max_health = base_health + global_health_bonus
 	health_component.current_health = min(health_component.current_health, health_component.max_health)
+	# 立即更新血条显示
+	update_health_display()
 
 func get_global_crit_rate_bonus() -> float:
 	"""获取全局暴击率加成（供外部调用）"""

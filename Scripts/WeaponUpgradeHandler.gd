@@ -290,18 +290,19 @@ func on_weapon_critical(target: Node2D):
 	if burst_level > 0:
 		var max_stacks = 4 * burst_level
 		burst_fire_stacks = min(burst_fire_stacks + 1, max_stacks)
+
+func on_enemy_killed_by_critical(target: Node2D):
+	"""敌人被暴击击杀时调用（在伤害应用后调用）"""
+	var current_upgrades = GameManager.current_upgrades
 	
 	# 收割
 	var harvest_level = current_upgrades.get("harvest", {}).get("level", 0)
 	if harvest_level > 0:
-		# 检查敌人是否死亡
-		var enemy_health = target.get_node_or_null("HealthComponent")
-		if enemy_health and enemy_health.current_health <= 0:
-			var player = get_tree().get_first_node_in_group("player")
-			if player:
-				var player_health = player.get_node_or_null("HealthComponent")
-				if player_health:
-					player_health.heal(harvest_level)
+		var player = get_tree().get_first_node_in_group("player")
+		if player:
+			var player_health = player.get_node_or_null("HealthComponent")
+			if player_health:
+				player_health.heal(harvest_level)
 
 func _process(delta):
 	"""每帧更新"""

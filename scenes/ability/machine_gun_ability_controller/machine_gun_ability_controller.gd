@@ -54,29 +54,61 @@ func on_timer_timeout():
 		return
 
 	var player_position = player.global_position
-	var fire_direction = _resolve_fire_direction(player_position, enemies)
-
+	
 	# 通知 WeaponUpgradeHandler 武器发射
 	var extra_shot_count = 0
 	if WeaponUpgradeHandler.instance:
 		extra_shot_count = WeaponUpgradeHandler.instance.on_weapon_fire()
 
-	# 应用全局弹道加成
+	# 正常射击：计算基础方向（指向最近敌人/顺时针旋转/随机方向）
+	var fire_direction = _resolve_fire_direction(player_position, enemies)
+	_fire_shot(player_position, fire_direction)
+	
+	# 散弹额外射击：每次额外射击使用随机方向
+	for i in range(extra_shot_count):
+		var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
+		_fire_shot(player_position, random_direction)
+
+func _fire_shot(player_position: Vector2, base_direction: Vector2):
+	"""
+	执行一次射击（处理多弹道逻辑）
+	base_direction: 基础射击方向（由外部决定：指向敌人/顺时针旋转/随机方向）
+	"""
+	# 获取有效弹道数
 	var effective_spread_count = spread_count
-	# 使用 WeaponUpgradeHandler 获取弹道修正
 	if WeaponUpgradeHandler.instance:
 		effective_spread_count = WeaponUpgradeHandler.instance.get_spread_modifier(effective_spread_count)
 	
 	var shot_count = max(effective_spread_count, 1)
-	for i in range(shot_count):
-		var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(3)
-		var bullet_direction = fire_direction.rotated(angle_offset)
-		_emit_bullet(player_position, bullet_direction)
 	
-	# 散弹额外射击
-	for i in range(extra_shot_count):
-		var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
-		_emit_bullet(player_position, random_direction)
+	# 检查当前射击方向类型
+	var current_upgrades = GameManager.current_upgrades
+	var sweep_level = current_upgrades.get("sweep_fire", {}).get("level", 0)
+	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
+	var chaos_level = current_upgrades.get("chaos_fire", {}).get("level", 0)
+	
+	var has_clockwise_fire = sweep_level > 0 or windmill_level > 0
+	var has_random_fire = chaos_level > 0
+	
+	# 根据射击方向类型和多弹道数量决定发射方式
+	if has_clockwise_fire and shot_count > 1:
+		# 顺时针方向射击 + 多弹道：均匀角度射击
+		var angle_step = TAU / float(shot_count)
+		for i in range(shot_count):
+			var angle_offset = float(i) * angle_step
+			var bullet_direction = base_direction.rotated(angle_offset)
+			_emit_bullet(player_position, bullet_direction)
+	elif has_random_fire and shot_count > 1:
+		# 随机方向射击 + 多弹道：每个弹道随机方向
+		for i in range(shot_count):
+			var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
+			_emit_bullet(player_position, random_direction)
+	else:
+		# 正常射击：向基础方向，带小角度扩散
+		for i in range(shot_count):
+			var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(3)
+			var bullet_direction = base_direction.rotated(angle_offset)
+			_emit_bullet(player_position, bullet_direction)
 
 func _resolve_fire_direction(player_position: Vector2, enemies: Array) -> Vector2:
 	# 先计算基础方向

@@ -43,6 +43,9 @@ func apply_upgrade(upgrade_id: String):
 		var quality = entry.get("quality", "white")
 		quality_pools[quality].remove_item(upgrade_id)
 
+	# 处理射击方向变更的互斥逻辑
+	_handle_fire_direction_exclusivity(upgrade_id)
+
 	GameEvents.emit_ability_upgrade_added(upgrade_id, GameManager.current_upgrades)
 
 func _get_quality_probabilities(current_level: int) -> Dictionary:
@@ -166,6 +169,35 @@ func pick_upgrades() -> Array[Dictionary]:
 	
 	return chosen_upgrades
 
+
+func _handle_fire_direction_exclusivity(selected_upgrade_id: String):
+	"""处理射击方向变更强化的互斥逻辑"""
+	# 顺时针类：扫射(sweep_fire)和风车(windmill)
+	var clockwise_upgrades = ["sweep_fire", "windmill"]
+	# 随机类：乱射(chaos_fire)
+	var random_upgrades = ["chaos_fire"]
+	
+	# 检查选择了哪种类型
+	var selected_is_clockwise = selected_upgrade_id in clockwise_upgrades
+	var selected_is_random = selected_upgrade_id in random_upgrades
+	
+	if selected_is_clockwise:
+		# 选择了顺时针类，移除随机类
+		for random_id in random_upgrades:
+			_remove_upgrade_from_pools(random_id)
+	elif selected_is_random:
+		# 选择了随机类，移除顺时针类
+		for clockwise_id in clockwise_upgrades:
+			_remove_upgrade_from_pools(clockwise_id)
+
+func _remove_upgrade_from_pools(upgrade_id: String):
+	"""从所有品质池中移除指定的强化"""
+	var entry = upgrade_catalog.get(upgrade_id)
+	if entry == null:
+		return
+	
+	var quality = entry.get("quality", "white")
+	quality_pools[quality].remove_item(upgrade_id)
 
 func on_upgrade_selected(upgrade: String):
 	apply_upgrade(upgrade)

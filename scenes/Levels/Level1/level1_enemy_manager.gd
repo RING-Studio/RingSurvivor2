@@ -246,7 +246,7 @@ func spawn_boss():
 	var boss = wizard_enemy_scene.instantiate() as WizardEnemy
 	
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
-	entities_layer.add_child(boss)
+	entities_layer.call_deferred("add_child", boss)
 	boss.global_position = map_center
 	
 	# 计算属性倍率（包含区域污染度倍率）
