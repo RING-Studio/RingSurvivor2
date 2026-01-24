@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://chneota78wylc"]
+[gd_scene load_steps=9 format=3 uid="uid://chneota78wylc"]
 
 [ext_resource type="Script" uid="uid://dul1d15cp6b1u" path="res://scenes/ui/upgrade_screen.gd" id="1_4fchq"]
 [ext_resource type="PackedScene" uid="uid://dip1pawdo0hbl" path="res://scenes/ui/ability_upgrade_card.tscn" id="1_rwh7c"]
+[ext_resource type="PackedScene" uid="uid://cxd6qs6r0vm46" path="res://scenes/ui/roll_button.tscn" id="3_bd1lb"]
 
 [sub_resource type="Animation" id="Animation_momv2"]
 length = 0.001
@@ -88,9 +89,36 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CardContainer" type="HBoxContainer" parent="MarginContainer"]
-unique_name_in_owner = true
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 16
+
+[node name="CardContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="AbilityUpgradeCard" parent="MarginContainer/VBoxContainer/CardContainer" instance=ExtResource("1_rwh7c")]
+layout_mode = 2
+
+[node name="AbilityUpgradeCard2" parent="MarginContainer/VBoxContainer/CardContainer" instance=ExtResource("1_rwh7c")]
+layout_mode = 2
+
+[node name="AbilityUpgradeCard3" parent="MarginContainer/VBoxContainer/CardContainer" instance=ExtResource("1_rwh7c")]
+layout_mode = 2
+
+[node name="RollContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="RollButton" parent="MarginContainer/VBoxContainer/RollContainer" instance=ExtResource("3_bd1lb")]
+unique_name_in_owner = true
+layout_mode = 2

@@ -46,6 +46,9 @@ func apply_upgrade(upgrade_id: String):
 	# 处理射击方向变更的互斥逻辑
 	_handle_fire_direction_exclusivity(upgrade_id)
 
+	# 每次升级增加1个roll点
+	GameManager.roll_points += 1
+
 	GameEvents.emit_ability_upgrade_added(upgrade_id, GameManager.current_upgrades)
 
 func _get_quality_probabilities(current_level: int) -> Dictionary:
@@ -207,4 +210,5 @@ func on_level_up(current_level: int):
 	add_child(upgrade_screen_instance)
 	var chosen_upgrades = pick_upgrades()
 	upgrade_screen_instance.set_ability_upgrades(chosen_upgrades)
+	upgrade_screen_instance.set_upgrade_manager(self)
 	upgrade_screen_instance.upgrade_selected.connect(on_upgrade_selected)

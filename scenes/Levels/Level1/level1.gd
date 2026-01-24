@@ -148,11 +148,58 @@ func check_current_region():
 	# 不在任何区域中
 	enemy_manager.set_current_region(enemy_manager.RegionType.NONE)
 
+# debug
+var debug_input_buffer: String = ""
+var debug_sequence: String = "DEBUG"  # 特殊字符序列，可以修改
 
 func _unhandled_input(event):
 	if event.is_action_pressed("pause"):
 		add_child(pause_menu_scene.instantiate())
 		get_tree().root.set_input_as_handled()
+	
+	# Debug模式检测
+	if event is InputEventKey and event.pressed:
+		var keycode = event.keycode
+		# 检测字符输入
+		if keycode >= KEY_A and keycode <= KEY_Z:
+			var char = char(keycode - KEY_A + 65)
+			debug_input_buffer += char
+			# 保持缓冲区大小
+			if debug_input_buffer.length() > debug_sequence.length():
+				debug_input_buffer = debug_input_buffer.substr(debug_input_buffer.length() - debug_sequence.length())
+			# 检查是否匹配debug序列
+			if debug_input_buffer == debug_sequence:
+				GameManager.debug_mode = not GameManager.debug_mode
+				print("Debug模式: ", "开启" if GameManager.debug_mode else "关闭")
+				debug_input_buffer = ""
+				get_tree().root.set_input_as_handled()
+				return
+		elif keycode >= KEY_0 and keycode <= KEY_9:
+			var char = char(keycode - KEY_0 + 48)
+			debug_input_buffer += char
+			if debug_input_buffer.length() > debug_sequence.length():
+				debug_input_buffer = debug_input_buffer.substr(debug_input_buffer.length() - debug_sequence.length())
+			if debug_input_buffer == debug_sequence:
+				GameManager.debug_mode = not GameManager.debug_mode
+				print("Debug模式: ", "开启" if GameManager.debug_mode else "关闭")
+				debug_input_buffer = ""
+				get_tree().root.set_input_as_handled()
+				return
+		else:
+			# 非字母数字键重置缓冲区
+			debug_input_buffer = ""
+	
+	# Debug模式：按=键获取经验
+	if GameManager.debug_mode and event is InputEventKey and event.pressed:
+		if event.keycode == KEY_EQUAL or (event.keycode == KEY_PLUS and not event.shift_pressed):
+			# 查找经验管理器
+			var experience_manager = get_node_or_null("ExperienceManager")
+			if experience_manager == null:
+				experience_manager = get_tree().get_first_node_in_group("experience_manager")
+			if experience_manager:
+				experience_manager.increment_experience(1.0)
+				print("Debug: 获得1点经验")
+				get_tree().root.set_input_as_handled()
 
 
 func on_player_died():

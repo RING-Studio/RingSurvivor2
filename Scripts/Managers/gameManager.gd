@@ -42,6 +42,12 @@ var unlocked_parts := {
 #升级数据
 var current_upgrades = {}
 
+# Roll点系统（用于刷新升级）
+var roll_points: int = 0
+
+# Debug模式
+var debug_mode: bool = false
+
 #科技数据(TODO:科技升级的数值可能有bug)
 var tech_upgrades: Dictionary
 
