@@ -138,6 +138,16 @@ func initialize_enemy_properties(enemy: Node2D, is_random: bool = true):
 	else:
 		enemy.add_to_group(GROUP_FIXED_ENEMY)
 	
+	# TODO: 设置精英/BOSS标签（根据scale判断）
+	# 使用 get() 检查属性是否存在（不存在返回 null）
+	if enemy.get("is_elite") != null and enemy.get("is_boss") != null:
+		# BOSS判断：scale >= 4.0 或 is_in_group("fixed_enemy")且scale较大
+		if enemy.scale.x >= 4.0 or (enemy.is_in_group(GROUP_FIXED_ENEMY) and enemy.scale.x >= 3.0):
+			enemy.is_boss = true
+		# 精英判断：scale >= 2.0 且 < 4.0
+		elif enemy.scale.x >= 2.0 and enemy.scale.x < 4.0:
+			enemy.is_elite = true
+	
 	# 如果是随机生成的敌人，追踪其死亡
 	if is_random:
 		track_enemy_spawned(enemy)
@@ -269,6 +279,9 @@ func spawn_boss():
 	
 	# 设置体型 scale 翻四倍
 	boss.scale = Vector2(4.0, 4.0)
+	
+	# 设置BOSS标记（用于地雷·AT等判定）
+	boss.is_boss = true
 	
 	# 追踪 BOSS 死亡（用于清理）
 	if boss.has_node("HealthComponent"):

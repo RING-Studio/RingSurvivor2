@@ -12,6 +12,8 @@ class_name BasicEnemy
 @export var soft_attack_multiplier_percent  = 1.0 #软攻倍率 = 1.0
 @export var hardAttackMultiplierPercent = 1 #硬攻倍率/%
 @export var hard_attack_depth_mm = 0 #硬攻深度 = 0
+@export var is_elite: bool = false  # 是否为精英敌人
+@export var is_boss: bool = false  # 是否为BOSS
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)

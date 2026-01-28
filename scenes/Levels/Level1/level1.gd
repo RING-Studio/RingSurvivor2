@@ -9,6 +9,17 @@ func _ready():
 	$%Player.health_component.died.connect(on_player_died)
 	Transitions.transition(Transitions.transition_type.Diamond, true)
 	setup_region_detection()
+	
+	# 初始化升级池（根据当前装备状态）
+	var upgrade_manager = get_node_or_null("UpgradeManager")
+	if upgrade_manager:
+		# 添加主武器专属强化到池中
+		var vehicle_config = GameManager.get_vehicle_config(GameManager.current_vehicle)
+		var main_weapon_id = vehicle_config.get("主武器类型", null)
+		if main_weapon_id != null:
+			upgrade_manager._add_exclusive_upgrades_for_weapon(main_weapon_id)
+		# 开始新对局
+		upgrade_manager.start_session()
 
 
 func setup_region_detection():

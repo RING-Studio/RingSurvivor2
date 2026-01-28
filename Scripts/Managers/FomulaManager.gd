@@ -1,5 +1,8 @@
 extends Node
 
+# 游戏比例尺：1米 = 16像素
+const METERS_TO_PIXELS: float = 16.0
+
 #def damage(基础伤害: float, 硬攻倍率: float, 软攻倍率: float, 硬攻深度: int, 敌方装甲厚度: int, 敌方覆甲率: float, 敌方硬攻伤害减免: float) -> int:
 func calculate_damage( base_damage: float, hard_multiplier: float, soft_multiplier: float, hard_attack_depth_mm: int, enemy_armor_thickness: int, enemy_armor_coverage: float, enemy_hard_attack_damage_reduction: float) -> int:
 

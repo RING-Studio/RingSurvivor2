@@ -3,6 +3,6 @@
 [ext_resource type="Script" uid="uid://b5e6e7wacmfyn" path="res://scenes/manager/upgrade_manager.gd" id="1_nr4ck"]
 [ext_resource type="PackedScene" uid="uid://chneota78wylc" path="res://scenes/ui/upgrade_screen.tscn" id="3_p42li"]
 
-[node name="UpgradeManager" type="Node"]
+[node name="UpgradeManager" type="Node" groups=["upgrade_manager"]]
 script = ExtResource("1_nr4ck")
 upgrade_screen_scene = ExtResource("3_p42li")

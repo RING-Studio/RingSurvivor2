@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://b010r7ggyd2qf"]
+
+[ext_resource type="Script" uid="uid://bsq6pa845dk31" path="res://scenes/ability/mine_ability/mine_ability.gd" id="1_mine"]
+[ext_resource type="Texture2D" uid="uid://cuybn460ie8ou" path="res://Assets/GPT/ChatGPT Mine.png" id="2_mine_texture"]
+[ext_resource type="PackedScene" uid="uid://bukkiv0tbb2ka" path="res://scenes/component/hitbox_component.tscn" id="3_d6dvc"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_explosion"]
+radius = 48.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4nw0o"]
+radius = 6.0
+
+[node name="Mine" type="Node2D"]
+script = ExtResource("1_mine")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_mine_texture")
+
+[node name="ExplosionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExplosionArea"]
+shape = SubResource("CircleShape2D_explosion")
+
+[node name="HitboxComponent" parent="." instance=ExtResource("3_d6dvc")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("CircleShape2D_4nw0o")

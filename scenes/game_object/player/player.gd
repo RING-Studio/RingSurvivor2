@@ -144,6 +144,33 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	# 不再累加，而是重新计算所有属性
 	_recalculate_all_attributes(current_upgrades)
 	
+	# 检查是否是配件，如果是则动态添加Controller
+	var upgrade_manager = get_tree().get_first_node_in_group("upgrade_manager")
+	if upgrade_manager and upgrade_manager.has_method("get_session_equipped_accessories"):
+		var equipped_accessories = upgrade_manager.get_session_equipped_accessories()
+		
+		# 检查是否刚获得了新配件
+		var entry = AbilityUpgradeData.get_entry(upgrade_id)
+		if entry and entry.get("upgrade_type", "") == "accessory":
+			# 检查是否已经实例化了该配件的Controller
+			var controller_exists = false
+			for child in abilities.get_children():
+				match upgrade_id:
+					"mine":
+						if child is MineAbilityController:
+							controller_exists = true
+							break
+					# 其他配件...
+			
+			# 如果不存在，则实例化
+			if not controller_exists and upgrade_id in equipped_accessories:
+				match upgrade_id:
+					"mine":
+						var mine_controller = preload("res://scenes/ability/mine_ability_controller/mine_ability_controller.tscn").instantiate()
+						abilities.add_child(mine_controller)
+						print("已装备地雷")
+					# 其他配件...
+	
 	print("-------------------")	
 	print("基础伤害: " + str(GameManager.get_player_base_damage()))
 	print("硬攻倍率: " + str(GameManager.get_player_hard_attack_multiplier_percent()))
@@ -198,19 +225,30 @@ func setup_equipped_abilities():
 
 	# 获取主武器类型
 	var main_weapon_id = vehicle_config.get("主武器类型")
-	if main_weapon_id == null:
-		return
-
-	# 根据武器ID添加对应的Ability Controller
-	match main_weapon_id:
-		1:  # 机炮
-			var machine_gun_controller = preload("res://scenes/ability/machine_gun_ability_controller/machine_gun_ability_controller.tscn").instantiate()
-			abilities.add_child(machine_gun_controller)
-			print("已装备机炮")
-		# 这里可以添加其他武器的case
-		# 2:  # 榴弹炮
-		# 3:  # 坦克炮
-		# 4:  # 导弹
+	if main_weapon_id != null:
+		# 根据武器ID添加对应的Ability Controller
+		match main_weapon_id:
+			1:  # 机炮
+				var machine_gun_controller = preload("res://scenes/ability/machine_gun_ability_controller/machine_gun_ability_controller.tscn").instantiate()
+				abilities.add_child(machine_gun_controller)
+				print("已装备机炮")
+			# 这里可以添加其他武器的case
+			# 2:  # 榴弹炮
+			# 3:  # 坦克炮
+			# 4:  # 导弹
+	
+	# 配件（从局内已装备列表）
+	var upgrade_manager = get_tree().get_first_node_in_group("upgrade_manager")
+	if upgrade_manager and upgrade_manager.has_method("get_session_equipped_accessories"):
+		var equipped_accessories = upgrade_manager.get_session_equipped_accessories()
+		
+		for accessory_id in equipped_accessories:
+			match accessory_id:
+				"mine":
+					var mine_controller = preload("res://scenes/ability/mine_ability_controller/mine_ability_controller.tscn").instantiate()
+					abilities.add_child(mine_controller)
+					print("已装备地雷")
+				# 其他配件...
 
 func on_arena_difficulty_increased(difficulty: int):
 	var health_regeneration_quantity = MetaProgression.get_upgrade_count("health_regeneration")

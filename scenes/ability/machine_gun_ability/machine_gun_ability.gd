@@ -74,7 +74,7 @@ func _on_hitbox_area_entered(area: Area2D):
 		WeaponUpgradeHandler.instance.on_weapon_hit(target)
 
 	var damage := _compute_damage_against(target)
-	var damage_type := "weapon"
+	var damage_source := "weapon"
 	var is_critical := false
 
 	# 计算最终暴击率（使用 WeaponUpgradeHandler）
@@ -100,7 +100,6 @@ func _on_hitbox_area_entered(area: Area2D):
 		if lethal_strike_active:
 			effective_crit_multiplier *= 2.0
 		damage *= effective_crit_multiplier
-		damage_type = "critical"
 		
 		# 通知controller触发激射效果
 		if _controller != null:
@@ -111,7 +110,7 @@ func _on_hitbox_area_entered(area: Area2D):
 			WeaponUpgradeHandler.instance.on_weapon_critical(target)
 
 	# 主目标扣血 + 伤害数字
-	apply_damage_to_hurtbox(hurtbox, damage, damage_type)
+	apply_damage_to_hurtbox(hurtbox, damage, damage_source, is_critical)
 	
 	# 收割：检查暴击击杀（在伤害应用后）
 	if is_critical:
@@ -170,7 +169,7 @@ func _trigger_splash(target: Node2D, source_damage: float):
 			if enemy:
 				var hb = enemy.get_node_or_null("HurtboxComponent")
 				if hb:
-					apply_damage_to_hurtbox(hb, splash_damage, "weapon")
+					apply_damage_to_hurtbox(hb, splash_damage, "weapon", false)
 
 func _trigger_bleed(target: Node2D):
 	var effect = BleedEffectScene.instantiate()
@@ -181,8 +180,8 @@ func _trigger_bleed(target: Node2D):
 	effect.damage_per_layer = calculated_bleed_damage
 	target.add_child(effect)
 
-func apply_damage_to_hurtbox(hurtbox: HurtboxComponent, amount: float, damage_type: String):
-	hurtbox.apply_damage(amount, damage_type)
+func apply_damage_to_hurtbox(hurtbox: HurtboxComponent, amount: float, damage_source: String, is_critical: bool):
+	hurtbox.apply_damage(amount, damage_source, is_critical)
 
 func _compute_damage_against(enemy: Node2D) -> float:
 	var base_damage = _base_damage

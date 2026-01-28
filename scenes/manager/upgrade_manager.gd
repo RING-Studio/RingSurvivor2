@@ -3,53 +3,181 @@ extends Node
 @export var experience_manager: Node
 @export var upgrade_screen_scene: PackedScene
 
-# 按品质分池存储升级
-var quality_pools: Dictionary = {
+# 升级池数据库：存储所有升级条目（包括专属强化）
+var upgrade_database: Dictionary = {}
+var database_initialized: bool = false
+
+# 局内升级池：当前对局中实际可抽取的升级
+var active_pools: Dictionary = {
 	"white": WeightedTable.new(),
 	"blue": WeightedTable.new(),
 	"purple": WeightedTable.new(),
 	"red": WeightedTable.new()
 }
 
-var upgrade_catalog: Dictionary = {}
+# 已装备的配件列表（局内）
+var session_equipped_accessories: Array[String] = []
 
 func _ready():
-	# 按品质分类初始化升级池
-	for entry in AbilityUpgradeData.entries:
-		var upgrade_id = entry["id"]
-		var quality = entry.get("quality", "white")
-		upgrade_catalog[upgrade_id] = entry.duplicate()
-		# 同品质内等概率抽取，权重统一为1
-		quality_pools[quality].add_item(upgrade_id, 1)
-		if not GameManager.current_upgrades.has(upgrade_id):
-			GameManager.current_upgrades[upgrade_id] = {"level": 0}
-
+	# 初始化数据库（全局，只初始化一次）
+	initialize_database()
 	GameEvents.level_up.connect(on_level_up)
 
+func initialize_database():
+	"""初始化升级数据库（所有升级条目，包括专属强化）"""
+	if database_initialized:
+		return
+	
+	for entry in AbilityUpgradeData.entries:
+		var upgrade_id = entry["id"]
+		upgrade_database[upgrade_id] = entry.duplicate()
+		if not GameManager.current_upgrades.has(upgrade_id):
+			GameManager.current_upgrades[upgrade_id] = {"level": 0}
+	
+	database_initialized = true
+
+func initialize_active_pools():
+	"""初始化局内升级池（根据当前装备状态）"""
+	# 清空现有池子
+	for quality in active_pools:
+		active_pools[quality] = WeightedTable.new()
+	
+	# 获取当前主武器（从vehicle_config或session状态）
+	var vehicle_config = GameManager.get_vehicle_config(GameManager.current_vehicle)
+	var main_weapon_id = vehicle_config.get("主武器类型", null)
+	
+	# 获取已装备的配件（局内+局外）
+	var equipped_accessories = session_equipped_accessories.duplicate()
+	# 如果支持局外携带，也需要从vehicle_config读取
+	var vehicle_accessories = vehicle_config.get("配件", [])
+	# 将局外配件ID转换为字符串ID（如果需要）
+	# TODO: 如果局外配件使用数字ID，需要转换为字符串ID
+	
+	# 遍历数据库，决定哪些加入局内池
+	for upgrade_id in upgrade_database:
+		var entry = upgrade_database[upgrade_id]
+		var exclusive_for = entry.get("exclusive_for", "")
+		
+		# 检查专属条件
+		var should_add = true
+		if exclusive_for == "mg":
+			should_add = (main_weapon_id == 1)  # 机炮ID=1
+		elif exclusive_for == "mine":
+			should_add = ("mine" in equipped_accessories)
+		
+		if should_add:
+			var quality = entry.get("quality", "white")
+			var current_level = GameManager.current_upgrades.get(upgrade_id, {}).get("level", 0)
+			var max_level = entry.get("max_level", -1)
+			
+			# 未满级才加入
+			if max_level == -1 or current_level < max_level:
+				active_pools[quality].add_item(upgrade_id, 1)
+
+func start_session():
+	"""开始新对局时调用"""
+	session_equipped_accessories.clear()
+	initialize_active_pools()
+
+func get_session_equipped_accessories() -> Array[String]:
+	"""获取局内已装备的配件列表"""
+	return session_equipped_accessories
+
 func apply_upgrade(upgrade_id: String):
+	if not database_initialized:
+		initialize_database()
+	
 	if not GameManager.current_upgrades.has(upgrade_id):
 		GameManager.current_upgrades[upgrade_id] = {"level": 0}
 
-	GameManager.current_upgrades[upgrade_id]["level"] += 1
-
-	var entry = upgrade_catalog.get(upgrade_id)
+	var entry = upgrade_database.get(upgrade_id)
 	if entry == null:
-		push_warning("无法找到强化数据: %s" % upgrade_id)
+		push_warning("无法找到升级数据: %s" % upgrade_id)
 		return
-
+	
+	var upgrade_type = entry.get("upgrade_type", "enhancement")
+	
+	# 处理配件
+	if upgrade_type == "accessory":
+		if upgrade_id not in session_equipped_accessories:
+			# 首次获得配件
+			session_equipped_accessories.append(upgrade_id)
+			GameManager.current_upgrades[upgrade_id]["level"] = 1
+			
+			# 添加该配件的专属强化到池中
+			_add_exclusive_upgrades_for_accessory(upgrade_id)
+		else:
+			# 已拥有，升级
+			GameManager.current_upgrades[upgrade_id]["level"] += 1
+	else:
+		# 处理强化
+		GameManager.current_upgrades[upgrade_id]["level"] += 1
+	
+	# 检查是否满级，从局内池移除
 	var max_level = entry.get("max_level", 0)
-	# max_level 为 -1 时表示无限升级，不移除
 	if max_level != -1 and GameManager.current_upgrades[upgrade_id]["level"] >= max_level:
 		var quality = entry.get("quality", "white")
-		quality_pools[quality].remove_item(upgrade_id)
-
-	# 处理射击方向变更的互斥逻辑
+		active_pools[quality].remove_item(upgrade_id)
+	
+	# 处理互斥逻辑
 	_handle_fire_direction_exclusivity(upgrade_id)
-
+	
 	# 每次升级增加1个roll点
 	GameManager.roll_points += 1
-
+	
 	GameEvents.emit_ability_upgrade_added(upgrade_id, GameManager.current_upgrades)
+
+func _add_exclusive_upgrades_for_accessory(accessory_id: String):
+	"""当玩家选择配件后，将其专属强化加入局内池"""
+	if not database_initialized:
+		initialize_database()
+	
+	for upgrade_id in upgrade_database:
+		var entry = upgrade_database[upgrade_id]
+		if entry.get("exclusive_for", "") == accessory_id:
+			var quality = entry.get("quality", "white")
+			var current_level = GameManager.current_upgrades.get(upgrade_id, {}).get("level", 0)
+			var max_level = entry.get("max_level", -1)
+			
+			# 检查是否已在池中（避免重复添加）
+			var already_in_pool = false
+			for item in active_pools[quality].items:
+				if item["item"] == upgrade_id:
+					already_in_pool = true
+					break
+			
+			if not already_in_pool and (max_level == -1 or current_level < max_level):
+				active_pools[quality].add_item(upgrade_id, 1)
+
+func _add_exclusive_upgrades_for_weapon(weapon_id: int):
+	"""当玩家装备主武器后，将其专属强化加入局内池"""
+	if not database_initialized:
+		initialize_database()
+	
+	var exclusive_prefix = ""
+	match weapon_id:
+		1:  # 机炮
+			exclusive_prefix = "mg"
+		# 其他武器...
+	
+	if exclusive_prefix == "":
+		return
+	
+	for upgrade_id in upgrade_database:
+		var entry = upgrade_database[upgrade_id]
+		if entry.get("exclusive_for", "") == exclusive_prefix:
+			var quality = entry.get("quality", "white")
+			var current_level = GameManager.current_upgrades.get(upgrade_id, {}).get("level", 0)
+			var max_level = entry.get("max_level", -1)
+			
+			var already_in_pool = false
+			for item in active_pools[quality].items:
+				if item["item"] == upgrade_id:
+					already_in_pool = true
+					break
+			
+			if not already_in_pool and (max_level == -1 or current_level < max_level):
+				active_pools[quality].add_item(upgrade_id, 1)
 
 func _get_quality_probabilities(current_level: int) -> Dictionary:
 	"""
@@ -76,7 +204,7 @@ func _get_available_qualities() -> Array[String]:
 	"""获取有可用升级的品质列表"""
 	var available: Array[String] = []
 	for quality in ["white", "blue", "purple", "red"]:
-		if quality_pools[quality].items.size() > 0:
+		if active_pools[quality].items.size() > 0:
 			available.append(quality)
 	return available
 
@@ -119,7 +247,7 @@ func _pick_quality_with_retry(current_level: int, exclude: Array[String], max_re
 		var quality = _pick_quality(probabilities, available_qualities)
 		
 		# 检查该品质池中是否有不在exclude中的升级
-		var pool = quality_pools[quality]
+		var pool = active_pools[quality]
 		var has_available = false
 		for item in pool.items:
 			if item["item"] not in exclude:
@@ -137,7 +265,7 @@ func _pick_quality_with_retry(current_level: int, exclude: Array[String], max_re
 	# 如果所有重试都失败，返回第一个有可用升级的品质（忽略概率）
 	available_qualities = _get_available_qualities()
 	for quality in available_qualities:
-		var pool = quality_pools[quality]
+		var pool = active_pools[quality]
 		for item in pool.items:
 			if item["item"] not in exclude:
 				return quality
@@ -146,6 +274,7 @@ func _pick_quality_with_retry(current_level: int, exclude: Array[String], max_re
 	return ""
 
 func pick_upgrades() -> Array[Dictionary]:
+	"""从局内升级池中抽取（不再过滤）"""
 	var chosen_upgrades: Array[Dictionary] = []
 	var exclude: Array[String] = []
 	
@@ -160,13 +289,13 @@ func pick_upgrades() -> Array[Dictionary]:
 		if quality == "":
 			break
 		
-		# 从对应品质池中抽取
-		var chosen_id = quality_pools[quality].pick_item(exclude)
+		# 从局内池中抽取
+		var chosen_id = active_pools[quality].pick_item(exclude)
 		if chosen_id == null:
 			break
 		
 		exclude.append(chosen_id)
-		var entry = upgrade_catalog.get(chosen_id)
+		var entry = upgrade_database.get(chosen_id)
 		if entry != null:
 			chosen_upgrades.append(entry)
 	
@@ -195,12 +324,12 @@ func _handle_fire_direction_exclusivity(selected_upgrade_id: String):
 
 func _remove_upgrade_from_pools(upgrade_id: String):
 	"""从所有品质池中移除指定的强化"""
-	var entry = upgrade_catalog.get(upgrade_id)
+	var entry = upgrade_database.get(upgrade_id)
 	if entry == null:
 		return
 	
 	var quality = entry.get("quality", "white")
-	quality_pools[quality].remove_item(upgrade_id)
+	active_pools[quality].remove_item(upgrade_id)
 
 func on_upgrade_selected(upgrade: String):
 	apply_upgrade(upgrade)

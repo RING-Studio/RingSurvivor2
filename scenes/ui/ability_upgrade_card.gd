@@ -139,7 +139,8 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 		"windmill_damage_penalty_value", "spread_shot_damage_ratio_value", "mg_overload_penalty_value", "ricochet_chance_value",
 		"chain_fire_penalty_value", "chain_fire_max_stacks_value", "burst_fire_max_stacks_value", "sweep_fire_bonus_value",
 		"breakthrough_max_bonus_value", "fire_suppression_per_part_value", "penetration_damage_penalty_value",
-		"breath_hold_rate_value", "focus_crit_rate_value", "mg_heavy_round_penalty_value"
+		"breath_hold_rate_value", "focus_crit_rate_value", "mg_heavy_round_penalty_value",
+		"mine_cooldown_value", "cooling_device_value", "mine_anti_tank_value"
 	]
 	
 	# 特殊占位符处理（根据等级计算特定值）
@@ -260,10 +261,45 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			# 基础伤害+1lv
 			var damage = 1 * next_level
 			special_placeholder_values["mg_heavy_round_damage_value"] = damage
+		
+		"mine":
+			# 基础伤害=5lv
+			var base_damage = 5 * next_level
+			special_placeholder_values["基础伤害=5lv"] = base_damage
+			# 部署上限：10+5lv
+			var max_deployed = 10 + 5 * next_level
+			special_placeholder_values["mine_max_deployed_value"] = max_deployed
+			# 冷却时间（基础3秒，受强化影响）
+			# 这里显示基础冷却时间，实际冷却时间受mine_cooldown和cooling_device影响
+			var base_cooldown = 3.0
+			special_placeholder_values["冷却时间"] = base_cooldown
+			# 爆炸范围（基础48像素=3米，受mine_range影响）
+			var base_radius = 48.0
+			special_placeholder_values["爆炸范围"] = base_radius
+		
+		"mine_range":
+			# 地雷爆炸范围+1.5lv米
+			var range_bonus = 1.5 * next_level
+			special_placeholder_values["mine_range_value"] = range_bonus
+		
+		"mine_cooldown":
+			# 地雷冷却时间-15lv%
+			var cooldown_reduction = 15 * next_level
+			special_placeholder_values["mine_cooldown_value"] = cooldown_reduction
+		
+		"mine_anti_tank":
+			# 地雷基础伤害+200lv%
+			var damage_bonus = 200 * next_level
+			special_placeholder_values["mine_anti_tank_value"] = damage_bonus
+		
+		"cooling_device":
+			# 所有配件冷却时间缩短15lv%
+			var cooldown_reduction = 15 * next_level
+			special_placeholder_values["cooling_device_value"] = cooldown_reduction
 	
-	# 查找所有占位符（格式：{xxx_value}）
+	# 查找所有占位符（格式：{xxx_value} 或 {中文占位符}）
 	var regex = RegEx.new()
-	regex.compile("\\{([^}]+_value)\\}")
+	regex.compile("\\{([^}]+)\\}")
 	var matches = regex.search_all(result)
 	
 	for match in matches:
@@ -272,40 +308,61 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 		
 		var display_value: String
 		
-		# 先检查是否是特殊占位符
+		# 先检查是否是特殊占位符（包括中文占位符）
 		if special_placeholder_values.has(placeholder_name):
-			display_value = str(special_placeholder_values[placeholder_name])
+			var value = special_placeholder_values[placeholder_name]
+			# 对于 mine_range_value，显示一位小数
+			if placeholder_name == "mine_range_value":
+				display_value = "%.1f" % value
+			else:
+				display_value = str(value)
+		elif placeholder_name == "冷却时间":
+			# 地雷基础冷却时间
+			display_value = "3.0"
+		elif placeholder_name == "爆炸范围":
+			# 地雷基础爆炸范围（显示为米，需要转换）
+			var base_radius_m = 48.0 / GlobalFomulaManager.METERS_TO_PIXELS  # 像素转米（1米=16像素）
+			display_value = "%.1f" % base_radius_m
+		elif placeholder_name == "基础伤害=5lv":
+			# 地雷基础伤害
+			var base_damage = 5 * next_level
+			display_value = str(base_damage)
 		else:
-			# 确定使用的 upgrade_id
-			var mapped_upgrade_id: String
-			if placeholder_to_upgrade_id.has(placeholder_name):
-				# 使用映射表中的ID
-				mapped_upgrade_id = placeholder_to_upgrade_id[placeholder_name]
+			# 标准格式：{xxx_value}
+			if placeholder_name.ends_with("_value"):
+				# 确定使用的 upgrade_id
+				var mapped_upgrade_id: String
+				if placeholder_to_upgrade_id.has(placeholder_name):
+					# 使用映射表中的ID
+					mapped_upgrade_id = placeholder_to_upgrade_id[placeholder_name]
+				else:
+					# 不在映射表中，默认使用当前 upgrade_id
+					mapped_upgrade_id = upgrade_id
+				
+				# 从 UpgradeEffectManager 获取效果值
+				var effect_value = UpgradeEffectManager.get_effect(mapped_upgrade_id, next_level)
+				
+				# 判断是否需要显示为百分比
+				var is_percentage = placeholder_name in percentage_placeholders
+				if not is_percentage:
+					# 检查 upgrade_id 是否通常显示为百分比
+					if mapped_upgrade_id in ["crit_rate", "crit_damage", "damage_bonus", "rapid_fire", 
+											  "mg_crit_damage", "mg_precision_1", "mg_precision_2", "mg_precision_3",
+											  "global_crit_rate_1", "global_crit_rate_2",
+											  "mg_fire_rate_1", "mg_fire_rate_2", "mg_fire_rate_3",
+											  "mg_rapid_fire_1", "mg_rapid_fire_2"]:
+						is_percentage = true
+				
+				if is_percentage:
+					# 百分比：乘以100并显示为整数
+					var percentage = int(effect_value * 100)
+					display_value = str(percentage)
+				else:
+					# 整数：直接显示
+					display_value = str(int(effect_value))
 			else:
-				# 不在映射表中，默认使用当前 upgrade_id
-				mapped_upgrade_id = upgrade_id
-			
-			# 从 UpgradeEffectManager 获取效果值
-			var effect_value = UpgradeEffectManager.get_effect(mapped_upgrade_id, next_level)
-			
-			# 判断是否需要显示为百分比
-			var is_percentage = placeholder_name in percentage_placeholders
-			if not is_percentage:
-				# 检查 upgrade_id 是否通常显示为百分比
-				if mapped_upgrade_id in ["crit_rate", "crit_damage", "damage_bonus", "rapid_fire", 
-										  "mg_crit_damage", "mg_precision_1", "mg_precision_2", "mg_precision_3",
-										  "global_crit_rate_1", "global_crit_rate_2",
-										  "mg_fire_rate_1", "mg_fire_rate_2", "mg_fire_rate_3",
-										  "mg_rapid_fire_1", "mg_rapid_fire_2"]:
-					is_percentage = true
-			
-			if is_percentage:
-				# 百分比：乘以100并显示为整数
-				var percentage = int(effect_value * 100)
-				display_value = str(percentage)
-			else:
-				# 整数：直接显示
-				display_value = str(int(effect_value))
+				# 未知占位符，跳过
+				continue
 		
 		# 用绿色富文本替换占位符
 		var colored_value = "[color=#00ff00]%s[/color]" % display_value

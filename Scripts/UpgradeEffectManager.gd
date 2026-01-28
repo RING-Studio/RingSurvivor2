@@ -175,12 +175,49 @@ static var upgrade_configs: Dictionary = {
 		"max_level": 5
 	},
 	
-	# 机炮·穿甲弹：基础伤害+3，穿透固定为1，唯一
-	"mg_ap_round": {
+	# 机炮·高爆弹：基础伤害+3，穿透固定为1，唯一
+	"mg_he_round": {
 		"type": "custom",
 		"level_effects": {
 			1: 1.0
 		}
+	},
+	
+	# ========== 配件相关 ==========
+	
+	# 地雷：每级效果在 MineAbilityController 中处理
+	"mine": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+	
+	# 地雷·范围：每级 +1.5米
+	"mine_range": {
+		"type": "linear",
+		"per_level_value": 1.5,
+		"max_level": 4
+	},
+	
+	# 地雷·冷却：每级 -15%
+	"mine_cooldown": {
+		"type": "linear",
+		"per_level_value": 0.15,
+		"max_level": 5
+	},
+	
+	# 地雷·AT：每级 +200%伤害
+	"mine_anti_tank": {
+		"type": "linear",
+		"per_level_value": 2.0,
+		"max_level": 5
+	},
+	
+	# 冷却装置：每级 -15%
+	"cooling_device": {
+		"type": "linear",
+		"per_level_value": 0.15,
+		"max_level": 3
 	}
 }
 

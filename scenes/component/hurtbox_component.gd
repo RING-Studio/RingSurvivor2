@@ -11,7 +11,12 @@ func _ready():
 	# 不再自动连接 area_entered，由外部自己处理伤害
 	pass
 
-func apply_damage(amount: float, damage_type: String = "weapon"):
+func apply_damage(amount: float, damage_source: String = "weapon", is_critical: bool = false):
+	"""
+	应用伤害
+	damage_source: "weapon" | "accessory" | "bleed"
+	is_critical: 是否暴击
+	"""
 	var floating_text = floating_text_scene.instantiate() as Node2D
 	get_tree().get_first_node_in_group("foreground_layer").add_child(floating_text)
 	floating_text.global_position = global_position + (Vector2.UP * 16)
@@ -22,9 +27,11 @@ func apply_damage(amount: float, damage_type: String = "weapon"):
 	var format_string = "%0.1f"
 	if round(amount) == amount:
 		format_string = "%0.0f"
-	var color = DamageTextHelper.get_color(damage_type)
+	
+	# 根据伤害来源和是否暴击确定颜色
+	var color = DamageTextHelper.get_color(damage_source, is_critical)
 	floating_text.call_deferred("start", format_string % amount, color)
 	
-	# 只有 weapon 类型伤害才触发 hit 信号（用于播放音效）
-	if damage_type == "weapon":
+	# TODO: 只有 weapon 类型伤害才触发 hit 信号（用于播放音效）
+	if damage_source == "weapon":
 		hit.emit()

@@ -225,7 +225,7 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 				# 射速 -10lv%，基础伤害+1lv
 				fire_rate_bonus -= 0.10 * float(level)
 				base_damage += float(level)
-			"mg_ap_round":
+			"mg_he_round":
 				# 基础伤害+3，穿透固定为1
 				base_damage += 3.0
 				bullet_penetration = 1  # 固定为1
