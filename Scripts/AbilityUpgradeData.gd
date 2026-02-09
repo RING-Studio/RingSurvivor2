@@ -9,7 +9,8 @@ extends Node
 		"quality": "blue",
 		"max_level": -1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "crit_damage",
@@ -18,7 +19,8 @@ extends Node
 		"quality": "white",
 		"max_level": -1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "damage_bonus",
@@ -27,7 +29,8 @@ extends Node
 		"quality": "white",
 		"max_level": -1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "health",
@@ -36,7 +39,8 @@ extends Node
 		"quality": "white",
 		"max_level": -1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	# 主武器通用强化
 	{
@@ -46,7 +50,8 @@ extends Node
 		"quality": "white",
 		"max_level": -1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "chain_fire",
@@ -55,7 +60,8 @@ extends Node
 		"quality": "blue",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "scatter_shot",
@@ -64,7 +70,8 @@ extends Node
 		"quality": "blue",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "burst_fire",
@@ -73,25 +80,28 @@ extends Node
 		"quality": "purple",
 		"max_level": 10,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "sweep_fire",
 		"name": "扫射",
-		"description": "+{sweep_fire_bonus_value}%射速。主武器射击方向变更：顺时针旋转（每帧旋转固定角度）",
+		"description": "主武器射击方向变更-扫射*：主武器射击方向旋转追踪最近敌人\n射速 +{sweep_fire_bonus_value}%",
 		"quality": "blue",
 		"max_level": 2,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": "fire_direction"
 	},
 	{
 		"id": "chaos_fire",
 		"name": "乱射",
-		"description": "+100%射速。主武器射击方向变更：随机方向（每次射击完全随机）",
+		"description": "主武器射击方向变更-乱射*：主武器射击方向随机（每次射击完全随机方向）\n射速 +100%",
 		"quality": "blue",
 		"max_level": 1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": "fire_direction"
 	},
 	{
 		"id": "breakthrough",
@@ -100,7 +110,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 3,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "fire_suppression",
@@ -109,7 +120,8 @@ extends Node
 		"quality": "red",
 		"max_level": 2,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "penetration",
@@ -118,16 +130,39 @@ extends Node
 		"quality": "blue",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "windmill",
 		"name": "风车",
-		"description": "射速 -50%。伤害 -{windmill_damage_penalty_value}%。主武器弹道+{windmill_spread_value}。主武器射击方向变更：顺时针旋转",
+		"description": "主武器射击方向变更-风车*：主武器射击方向随时间顺时针旋转，各弹道均匀分布\n射速 -50%\n伤害 -20%\n主武器弹道+2",
+		"quality": "blue",
+		"max_level": 1,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": "fire_direction"
+	},
+	# 风车衍生强化
+	{
+		"id": "windmill_spread",
+		"name": "风车·弹道",
+		"description": "伤害 -{windmill_spread_damage_penalty_value}%\n主武器弹道+{windmill_spread_value}",
 		"quality": "blue",
 		"max_level": 3,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "windmill",
+		"prefix": ""
+	},
+	{
+		"id": "windmill_speed",
+		"name": "风车·转速",
+		"description": "射速 +{windmill_speed_fire_rate_value}%\n风车旋转速度 +{windmill_speed_rotation_value}%",
+		"quality": "blue",
+		"max_level": 3,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "windmill",
+		"prefix": ""
 	},
 	{
 		"id": "ricochet",
@@ -136,7 +171,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 4,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "spread_shot",
@@ -145,7 +181,8 @@ extends Node
 		"quality": "red",
 		"max_level": 3,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "split_shot",
@@ -154,7 +191,8 @@ extends Node
 		"quality": "red",
 		"max_level": 2,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "breath_hold",
@@ -163,7 +201,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 10,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "focus",
@@ -172,7 +211,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "harvest",
@@ -181,7 +221,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "lethal_strike",
@@ -190,7 +231,8 @@ extends Node
 		"quality": "red",
 		"max_level": 4,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "crit_conversion",
@@ -199,7 +241,8 @@ extends Node
 		"quality": "red",
 		"max_level": 1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	# 机炮专属强化
 	{
@@ -209,7 +252,8 @@ extends Node
 		"quality": "blue",
 		"max_level": 3,
 		"upgrade_type": "enhancement",
-		"exclusive_for": "mg"
+		"exclusive_for": "mg",
+		"prefix": ""
 	},
 	{
 		"id": "mg_heavy_round",
@@ -218,7 +262,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": "mg"
+		"exclusive_for": "mg",
+		"prefix": ""
 	},
 	{
 		"id": "mg_he_round",
@@ -227,7 +272,8 @@ extends Node
 		"quality": "red",
 		"max_level": 1,
 		"upgrade_type": "enhancement",
-		"exclusive_for": "mg"
+		"exclusive_for": "mg",
+		"prefix": ""
 	},
 	# 配件
 	{
@@ -237,7 +283,8 @@ extends Node
 		"quality": "blue",
 		"max_level": 4,
 		"upgrade_type": "accessory",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	{
 		"id": "cooling_device",
@@ -246,7 +293,8 @@ extends Node
 		"quality": "red",
 		"max_level": 3,
 		"upgrade_type": "accessory",
-		"exclusive_for": ""
+		"exclusive_for": "",
+		"prefix": ""
 	},
 	# 地雷专属强化
 	{
@@ -256,7 +304,8 @@ extends Node
 		"quality": "white",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": "mine"
+		"exclusive_for": "mine",
+		"prefix": ""
 	},
 	{
 		"id": "mine_cooldown",
@@ -265,7 +314,8 @@ extends Node
 		"quality": "white",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": "mine"
+		"exclusive_for": "mine",
+		"prefix": ""
 	},
 	{
 		"id": "mine_anti_tank",
@@ -274,7 +324,8 @@ extends Node
 		"quality": "purple",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
-		"exclusive_for": "mine"
+		"exclusive_for": "mine",
+		"prefix": ""
 	}
 ]
 
@@ -284,6 +335,7 @@ extends Node
 	"health": preload("res://Assets/GPT/ChatGPT shield.png"),
 	"crit_rate": preload("res://Assets/GPT/ChatGPT crit.png"),
 	"crit_damage": preload("res://Assets/GPT/ChatGPT crit.png"),
+    "mine": preload("res://Assets/GPT/ChatGPT mine.png"),
 	"damage_bonus": null,
 }
 

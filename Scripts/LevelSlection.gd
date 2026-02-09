@@ -26,5 +26,5 @@ func _goto_level(level_name: StringName):
 		print("Error: Level name is empty.")
 		return
 
-	var level_path = "res://Levels/" + level_name + ".tscn"
+	var level_path = "res://scenes/Levels/" + level_name + ".tscn"
 	get_tree().change_scene_to_file(level_path)

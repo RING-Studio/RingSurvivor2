@@ -16,6 +16,8 @@ var focus_stacks: int = 0
 var breath_hold_timer: float = 0.0
 var last_shot_time: float = 0.0
 var sweep_fire_angle: float = 0.0
+var sweep_fire_update_timer: float = 0.0
+var sweep_fire_angular_velocity: float = 0.0  # 度/秒，带符号
 var windmill_angle: float = 0.0
 
 # 计时器
@@ -83,7 +85,11 @@ func get_fire_rate_modifier() -> float:
 	# 风车（减益）
 	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
 	if windmill_level > 0:
-		modifier -= 0.5
+		modifier -= 0.5  # 风车主体固定 -50%
+		# 风车·转速：射速 +10% 每级
+		var windmill_speed_level = current_upgrades.get("windmill_speed", {}).get("level", 0)
+		if windmill_speed_level > 0:
+			modifier += 0.10 * windmill_speed_level
 	
 	# 机炮·过载
 	var overload_level = current_upgrades.get("mg_overload", {}).get("level", 0)
@@ -135,7 +141,11 @@ func get_damage_modifier(base_damage: float) -> float:
 	# 风车（减益）
 	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
 	if windmill_level > 0:
-		var reduction = [0.20, 0.30, 0.40][min(windmill_level - 1, 2)]
+		var reduction = 0.20  # 风车主体固定 -20%
+		# 风车·弹道：伤害额外 -10% 每级
+		var windmill_spread_level = current_upgrades.get("windmill_spread", {}).get("level", 0)
+		if windmill_spread_level > 0:
+			reduction += 0.10 * windmill_spread_level
 		damage *= (1.0 - reduction)
 	
 	return damage
@@ -214,7 +224,11 @@ func get_spread_modifier(base_spread: int) -> int:
 	# 风车
 	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
 	if windmill_level > 0:
-		modifier += [2, 3, 4][min(windmill_level - 1, 2)]
+		modifier += 2  # 风车主体固定 +2
+		# 风车·弹道：主武器弹道 +1/2/3
+		var windmill_spread_level = current_upgrades.get("windmill_spread", {}).get("level", 0)
+		if windmill_spread_level > 0:
+			modifier += [1, 2, 3][min(windmill_spread_level - 1, 2)]
 	
 	# 扩散
 	var spread_level = current_upgrades.get("spread_shot", {}).get("level", 0)
@@ -317,19 +331,56 @@ func _process(delta):
 		else:
 			breath_hold_timer = 0.0
 	
-	# 扫射角度旋转
+	# 扫射：每 0.16 秒检测最近敌人，计算旋转方向和角速度
 	var sweep_level = current_upgrades.get("sweep_fire", {}).get("level", 0)
 	if sweep_level > 0:
-		sweep_fire_angle += deg_to_rad(2.0) * delta
-		if sweep_fire_angle >= TAU:
-			sweep_fire_angle -= TAU
+		sweep_fire_update_timer -= delta
+		if sweep_fire_update_timer <= 0:
+			sweep_fire_update_timer = 0.16
+			_update_sweep_fire_rotation()
+		
+		sweep_fire_angle += deg_to_rad(sweep_fire_angular_velocity) * delta
+		# 保持角度在 [0, TAU) 范围内
+		sweep_fire_angle = wrapf(sweep_fire_angle, 0.0, TAU)
 	
 	# 风车角度旋转
 	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
 	if windmill_level > 0:
-		windmill_angle += deg_to_rad(2.0) * delta
+		# 基础旋转速度 90 度/秒，风车·转速每级 +30%
+		var windmill_speed_level = current_upgrades.get("windmill_speed", {}).get("level", 0)
+		var windmill_rotation_speed = 90.0 * (1.0 + 0.30 * windmill_speed_level)
+		windmill_angle += deg_to_rad(windmill_rotation_speed) * delta
 		if windmill_angle >= TAU:
 			windmill_angle -= TAU
+
+func _update_sweep_fire_rotation():
+	"""扫射：每 0.16 秒根据最近敌人更新角速度和旋转方向（target 寻找复用正常射击逻辑）"""
+	var tree = get_tree()
+	var player = tree.get_first_node_in_group("player") as Node2D
+	if player == null:
+		sweep_fire_angular_velocity = 60.0
+		return
+	
+	var to_enemy = MachineGunAbilityController.get_direction_to_nearest_enemy(player.global_position, tree)
+	if to_enemy == Vector2.ZERO:
+		# 无敌人时，以基础速度缓慢旋转
+		sweep_fire_angular_velocity = 60.0
+		return
+	
+	# 计算朝向敌人的目标角度
+	var target_angle = to_enemy.angle()
+	
+	# 计算最短路径的角度差（-PI 到 PI）
+	var angle_diff = wrapf(target_angle - sweep_fire_angle, -PI, PI)
+	
+	# 角速度 = 60°/s + 1/2 × |angle_diff(rad)| /s（夹角弧度转度后乘 0.5）
+	var speed = 60.0 + 0.5 * rad_to_deg(abs(angle_diff))
+	
+	# 旋转方向：朝向敌人
+	if angle_diff >= 0:
+		sweep_fire_angular_velocity = speed
+	else:
+		sweep_fire_angular_velocity = -speed
 
 func _setup_timers():
 	"""设置计时器"""

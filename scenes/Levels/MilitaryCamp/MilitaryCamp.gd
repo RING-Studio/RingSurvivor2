@@ -29,13 +29,12 @@ func ensure_main_weapon():
 	var vehicle_config = GameManager.get_vehicle_config(GameManager.current_vehicle)
 	if vehicle_config == null:
 		# 如果没有车辆配置，创建默认配置
-		GameManager.equip_part(GameManager.current_vehicle, "主武器类型", 1)  # 机炮ID=1
+		GameManager.equip_part(GameManager.current_vehicle, "主武器类型", "machine_gun")
 		return
 
 	var main_weapon = vehicle_config.get("主武器类型")
 	if main_weapon == null:
-		# 如果主武器为空，设置为机炮
-		GameManager.equip_part(GameManager.current_vehicle, "主武器类型", 1)  # 机炮ID=1
+		GameManager.equip_part(GameManager.current_vehicle, "主武器类型", "machine_gun")
 		print("主武器为空，已自动设置为机炮")
 
 func npc():

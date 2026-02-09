@@ -516,6 +516,10 @@ layout_mode = 2
 [node name="VSeparator3" type="VSeparator" parent="HBoxContainer"]
 layout_mode = 2
 
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect/Button" to="." method="switch_to_Accessories"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect2/Button2" to="." method="switch_to_Accessories"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect3/Button3" to="." method="switch_to_Accessories"]
+[connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer/VBoxContainer/Equipments/TextureRect4/Button4" to="." method="switch_to_Accessories"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Left" to="." method="left_button_pressed"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/VehicleShowcase/UnlockButton" to="." method="unlock_vehicle"]
 [connection signal="button_up" from="HBoxContainer/PanelContainer/VBoxContainer/PanelContainer2/HBoxContainer/Right" to="." method="right_button_pressed"]

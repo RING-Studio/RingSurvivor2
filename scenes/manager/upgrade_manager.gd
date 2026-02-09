@@ -46,12 +46,14 @@ func initialize_active_pools():
 	var vehicle_config = GameManager.get_vehicle_config(GameManager.current_vehicle)
 	var main_weapon_id = vehicle_config.get("主武器类型", null)
 	
-	# 获取已装备的配件（局内+局外）
-	var equipped_accessories = session_equipped_accessories.duplicate()
-	# 如果支持局外携带，也需要从vehicle_config读取
-	var vehicle_accessories = vehicle_config.get("配件", [])
-	# 将局外配件ID转换为字符串ID（如果需要）
-	# TODO: 如果局外配件使用数字ID，需要转换为字符串ID
+	# 已装备的配件 = 带入的（从 vehicle_config 读）+ 局内选的（session）
+	var brought_in: Array = vehicle_config.get("配件", [])
+	var equipped_accessories: Array = []
+	for a in brought_in:
+		if a is String:
+			equipped_accessories.append(a)
+	for a in session_equipped_accessories:
+		equipped_accessories.append(a)
 	
 	# 遍历数据库，决定哪些加入局内池
 	for upgrade_id in upgrade_database:
@@ -60,10 +62,16 @@ func initialize_active_pools():
 		
 		# 检查专属条件
 		var should_add = true
-		if exclusive_for == "mg":
-			should_add = (main_weapon_id == 1)  # 机炮ID=1
-		elif exclusive_for == "mine":
-			should_add = ("mine" in equipped_accessories)
+		if exclusive_for != "":
+			if exclusive_for == "mg":
+				# 主武器专属：检查是否装备了对应主武器
+				should_add = (main_weapon_id == "machine_gun")
+			else:
+				# 通用前置检查：检查前置升级/配件是否已拥有（level > 0）
+				var parent_level = GameManager.current_upgrades.get(exclusive_for, {}).get("level", 0)
+				if parent_level <= 0:
+					# 也检查是否在已装备配件中
+					should_add = (exclusive_for in equipped_accessories)
 		
 		if should_add:
 			var quality = entry.get("quality", "white")
@@ -74,9 +82,26 @@ func initialize_active_pools():
 			if max_level == -1 or current_level < max_level:
 				active_pools[quality].add_item(upgrade_id, 1)
 
+func equip_brought_in_accessories():
+	"""读取当前车辆配装中的「带入配件」，写入 current_upgrades 并加入专属池。不写入 session。"""
+	var vehicle_config = GameManager.get_vehicle_config(GameManager.current_vehicle)
+	if vehicle_config == null:
+		return
+	var brought_in: Array = vehicle_config.get("配件", [])
+	for accessory_id in brought_in:
+		if accessory_id is not String:
+			push_error("配件 id 必须为 String，实际类型: %s" % typeof(accessory_id))
+			continue
+		var level: int = GameManager.get_brought_in_accessory_level(GameManager.current_vehicle, accessory_id)
+		GameManager.current_upgrades[accessory_id] = {"level": level}
+		_add_exclusive_upgrades_for(accessory_id)
+
 func start_session():
-	"""开始新对局时调用"""
+	"""开始新对局时调用：清空 session，用独立函数装备带入配件，再初始化池。"""
+	if not database_initialized:
+		initialize_database()
 	session_equipped_accessories.clear()
+	equip_brought_in_accessories()
 	initialize_active_pools()
 
 func get_session_equipped_accessories() -> Array[String]:
@@ -103,9 +128,6 @@ func apply_upgrade(upgrade_id: String):
 			# 首次获得配件
 			session_equipped_accessories.append(upgrade_id)
 			GameManager.current_upgrades[upgrade_id]["level"] = 1
-			
-			# 添加该配件的专属强化到池中
-			_add_exclusive_upgrades_for_accessory(upgrade_id)
 		else:
 			# 已拥有，升级
 			GameManager.current_upgrades[upgrade_id]["level"] += 1
@@ -113,28 +135,32 @@ func apply_upgrade(upgrade_id: String):
 		# 处理强化
 		GameManager.current_upgrades[upgrade_id]["level"] += 1
 	
+	# 添加该升级的衍生强化到池中（通用：配件、强化均适用）
+	_add_exclusive_upgrades_for(upgrade_id)
+	
 	# 检查是否满级，从局内池移除
 	var max_level = entry.get("max_level", 0)
 	if max_level != -1 and GameManager.current_upgrades[upgrade_id]["level"] >= max_level:
 		var quality = entry.get("quality", "white")
 		active_pools[quality].remove_item(upgrade_id)
 	
-	# 处理互斥逻辑
-	_handle_fire_direction_exclusivity(upgrade_id)
+	# 处理定向词条互斥逻辑
+	_handle_prefix_exclusivity(upgrade_id)
 	
 	# 每次升级增加1个roll点
 	GameManager.roll_points += 1
 	
 	GameEvents.emit_ability_upgrade_added(upgrade_id, GameManager.current_upgrades)
 
-func _add_exclusive_upgrades_for_accessory(accessory_id: String):
-	"""当玩家选择配件后，将其专属强化加入局内池"""
+func _add_exclusive_upgrades_for(parent_id: String):
+	"""当玩家选择某升级后，将以它为前置（exclusive_for）的衍生强化加入局内池。
+	适用于配件、强化等任何类型的升级。"""
 	if not database_initialized:
 		initialize_database()
 	
 	for upgrade_id in upgrade_database:
 		var entry = upgrade_database[upgrade_id]
-		if entry.get("exclusive_for", "") == accessory_id:
+		if entry.get("exclusive_for", "") == parent_id:
 			var quality = entry.get("quality", "white")
 			var current_level = GameManager.current_upgrades.get(upgrade_id, {}).get("level", 0)
 			var max_level = entry.get("max_level", -1)
@@ -149,35 +175,22 @@ func _add_exclusive_upgrades_for_accessory(accessory_id: String):
 			if not already_in_pool and (max_level == -1 or current_level < max_level):
 				active_pools[quality].add_item(upgrade_id, 1)
 
-func _add_exclusive_upgrades_for_weapon(weapon_id: int):
-	"""当玩家装备主武器后，将其专属强化加入局内池"""
+func _add_exclusive_upgrades_for_weapon(weapon_id: Variant):
+	"""当玩家装备主武器后，将其专属强化加入局内池。weapon_id 为英文 id 字符串，如 machine_gun。"""
 	if not database_initialized:
 		initialize_database()
 	
 	var exclusive_prefix = ""
-	match weapon_id:
-		1:  # 机炮
-			exclusive_prefix = "mg"
-		# 其他武器...
+	if weapon_id is String:
+		match weapon_id:
+			"machine_gun":
+				exclusive_prefix = "mg"
+			# "howitzer", "tank_gun", "missile" 等可在此扩展
 	
 	if exclusive_prefix == "":
 		return
 	
-	for upgrade_id in upgrade_database:
-		var entry = upgrade_database[upgrade_id]
-		if entry.get("exclusive_for", "") == exclusive_prefix:
-			var quality = entry.get("quality", "white")
-			var current_level = GameManager.current_upgrades.get(upgrade_id, {}).get("level", 0)
-			var max_level = entry.get("max_level", -1)
-			
-			var already_in_pool = false
-			for item in active_pools[quality].items:
-				if item["item"] == upgrade_id:
-					already_in_pool = true
-					break
-			
-			if not already_in_pool and (max_level == -1 or current_level < max_level):
-				active_pools[quality].add_item(upgrade_id, 1)
+	_add_exclusive_upgrades_for(exclusive_prefix)
 
 func _get_quality_probabilities(current_level: int) -> Dictionary:
 	"""
@@ -302,25 +315,24 @@ func pick_upgrades() -> Array[Dictionary]:
 	return chosen_upgrades
 
 
-func _handle_fire_direction_exclusivity(selected_upgrade_id: String):
-	"""处理射击方向变更强化的互斥逻辑"""
-	# 顺时针类：扫射(sweep_fire)和风车(windmill)
-	var clockwise_upgrades = ["sweep_fire", "windmill"]
-	# 随机类：乱射(chaos_fire)
-	var random_upgrades = ["chaos_fire"]
+func _handle_prefix_exclusivity(selected_upgrade_id: String):
+	"""处理定向词条的互斥逻辑：选择带 prefix 的升级后，移除同 prefix 的其他升级"""
+	var selected_entry = upgrade_database.get(selected_upgrade_id)
+	if selected_entry == null:
+		return
 	
-	# 检查选择了哪种类型
-	var selected_is_clockwise = selected_upgrade_id in clockwise_upgrades
-	var selected_is_random = selected_upgrade_id in random_upgrades
+	var selected_prefix = selected_entry.get("prefix", "")
+	if selected_prefix == "":
+		return
 	
-	if selected_is_clockwise:
-		# 选择了顺时针类，移除随机类
-		for random_id in random_upgrades:
-			_remove_upgrade_from_pools(random_id)
-	elif selected_is_random:
-		# 选择了随机类，移除顺时针类
-		for clockwise_id in clockwise_upgrades:
-			_remove_upgrade_from_pools(clockwise_id)
+	# 遍历数据库，移除同 prefix 但不同 id 的升级
+	for upgrade_id in upgrade_database:
+		if upgrade_id == selected_upgrade_id:
+			continue
+		var entry = upgrade_database[upgrade_id]
+		var other_prefix = entry.get("prefix", "")
+		if other_prefix == selected_prefix:
+			_remove_upgrade_from_pools(upgrade_id)
 
 func _remove_upgrade_from_pools(upgrade_id: String):
 	"""从所有品质池中移除指定的强化"""

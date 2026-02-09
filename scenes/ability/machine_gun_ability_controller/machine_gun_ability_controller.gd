@@ -83,32 +83,54 @@ func _fire_shot(player_position: Vector2, base_direction: Vector2):
 	
 	# 检查当前射击方向类型
 	var current_upgrades = GameManager.current_upgrades
-	var sweep_level = current_upgrades.get("sweep_fire", {}).get("level", 0)
 	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
 	var chaos_level = current_upgrades.get("chaos_fire", {}).get("level", 0)
 	
-	var has_clockwise_fire = sweep_level > 0 or windmill_level > 0
-	var has_random_fire = chaos_level > 0
-	
 	# 根据射击方向类型和多弹道数量决定发射方式
-	if has_clockwise_fire and shot_count > 1:
-		# 顺时针方向射击 + 多弹道：均匀角度射击
+	if windmill_level > 0 and shot_count > 1:
+		# 风车 + 多弹道：各弹道均匀分布在 360°
 		var angle_step = TAU / float(shot_count)
 		for i in range(shot_count):
 			var angle_offset = float(i) * angle_step
 			var bullet_direction = base_direction.rotated(angle_offset)
 			_emit_bullet(player_position, bullet_direction)
-	elif has_random_fire and shot_count > 1:
-		# 随机方向射击 + 多弹道：每个弹道随机方向
+	elif chaos_level > 0 and shot_count > 1:
+		# 乱射 + 多弹道：每个弹道随机方向
 		for i in range(shot_count):
 			var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
 			_emit_bullet(player_position, random_direction)
 	else:
-		# 正常射击：向基础方向，带小角度扩散
+		# 正常射击 / 扫射 + 多弹道：向基础方向，带小角度扩散
+		# （扫射的方向旋转已由 base_direction 体现，弹道仍按正常散射角分布）
 		for i in range(shot_count):
 			var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(3)
 			var bullet_direction = base_direction.rotated(angle_offset)
 			_emit_bullet(player_position, bullet_direction)
+
+static func get_direction_to_nearest_enemy(player_position: Vector2, tree: SceneTree) -> Vector2:
+	"""获取朝向最近敌人的方向，与正常射击 target 寻找逻辑一致。无敌人时返回 Vector2.ZERO。"""
+	var player = tree.get_first_node_in_group("player") as Node2D
+	if player == null:
+		return Vector2.ZERO
+	var enemies = tree.get_nodes_in_group("enemy").filter(func(enemy: Node2D):
+		return enemy.global_position.distance_squared_to(player.global_position) < pow(MAX_RANGE, 2)
+	)
+	if enemies.size() == 0:
+		return Vector2.ZERO
+	var nearest_enemy: Node2D = null
+	var nearest_distance_squared: float = INF
+	for enemy in enemies:
+		var delta = enemy.global_position - player_position
+		var distance_squared = delta.length_squared()
+		if distance_squared < nearest_distance_squared:
+			nearest_distance_squared = distance_squared
+			nearest_enemy = enemy
+	if nearest_enemy == null:
+		return Vector2.ZERO
+	var to_enemy = nearest_enemy.global_position - player_position
+	if to_enemy.length_squared() < 0.0001:
+		return Vector2.ZERO
+	return to_enemy.normalized()
 
 func _resolve_fire_direction(player_position: Vector2, enemies: Array) -> Vector2:
 	# 先计算基础方向
@@ -181,11 +203,11 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	_recalculate_all_attributes(current_upgrades)
 
 func _reset_to_base_values():
-	"""重置所有属性到基础值"""
+	"""重置所有属性到基础值。基础伤害来自 GameManager（车型+装甲+主武器）。"""
 	fire_rate_bonus = 0.0
 	bullet_critical_chance = 0.0
 	bullet_critical_damage_multiplier = 2.0  # 基础值
-	base_damage = 4.0  # 基础值
+	base_damage = GameManager.get_player_base_damage()  # 与配装一致
 	bullet_penetration = 0
 	spread_count = 1  # 基础值
 	bleed_layers = 0

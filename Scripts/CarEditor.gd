@@ -31,10 +31,10 @@ func _ready() -> void:
 
 	switch_to_main_weapon(true)
 
-func switch_to_Accessories(id:int):
+func switch_to_Accessories(_id: int = 0):
 	selected_slot = "配件"
 	refresh_choice_list(selected_slot)
-	_on_part_selected(0)
+	# 第一个配件已在 refresh_choice_list 内通过 _on_part_selected(first_accessory_id) 选中
 
 func switch_to_main_weapon(enter_scene: bool = false):
 	selected_slot = "主武器类型"
@@ -50,8 +50,36 @@ func refresh_choice_list(slot:String) -> void:
 	for child in choice_list.get_children():
 		choice_list.remove_child(child)
 
+	# 配件槽：从 AbilityUpgradeData 的 accessory 构建，id 为 upgrade_id（String）
+	if slot == "配件":
+		var first_accessory_id: String = ""
+		for entry in AbilityUpgradeData.entries:
+			if entry.get("upgrade_type", "") != "accessory":
+				continue
+			var part_name = entry.get("name", "")
+			var part_id: String = entry.get("id", "")
+			if first_accessory_id.is_empty():
+				first_accessory_id = part_id
+			var button = property_list_button.duplicate()
+			button.text = part_name
+			button.button_up.connect(_bind_part_selected(part_id))
+			choice_list.add_child(button)
+			button.show()
+			var unlocked = GameManager.is_parts_unlocked(slot, part_id)
+			button.use_parent_material = !unlocked
+			if GameManager.is_vehicle_unlocked(selected_vehicle):
+				if unlocked:
+					if GameManager.is_equipped(selected_vehicle, slot, part_id):
+						button.modulate = Color(0.5, 1, 0, 1)
+					else:
+						button.modulate = Color(0.5, 1, 1, 1)
+			else:
+				button.use_parent_material = true
+		if not first_accessory_id.is_empty():
+			_on_part_selected(first_accessory_id)
+		return
+
 	var table = JsonManager.get_category(slot)
-	
 	for field in table:
 		var part_name = field["Name"]
 		var id = field["Id"]
@@ -77,6 +105,9 @@ func refresh_choice_list(slot:String) -> void:
 		else:
 			button.use_parent_material = true
 
+func _bind_part_selected(part_id: Variant) -> Callable:
+	return func() -> void: _on_part_selected(part_id)
+
 
 func _on_part_selected( id, update_property_list: bool = true ) -> void:
 	var part_property = list_display.update_info( id, selected_slot, selected_vehicle)
@@ -88,13 +119,24 @@ func _on_part_selected( id, update_property_list: bool = true ) -> void:
 	selected_part_id = id
 
 func refresh_card_data(id:int) -> void:
-	# 车辆名称
-	car_name.text = JsonManager.get_card_name_by_id(id)
-
-	vehicle_data = JsonManager.get_category("车辆类型")
-	
-	property_list.replace_property(vehicle_data.get(id))
-
+	# 车辆类型用英文 id：从当前槽位配置读，无则用默认
+	var config = GameManager.get_vehicle_config(id)
+	var vehicle_type_id: String = "improved_sedan"
+	if config != null and config.get("车辆类型") is String:
+		vehicle_type_id = config.get("车辆类型")
+	else:
+		var defaults = ["improved_sedan", "wheeled_vehicle", "armored_car", "tank"]
+		if id >= 0 and id < defaults.size():
+			vehicle_type_id = defaults[id]
+	car_name.text = JsonManager.get_card_name_by_id(vehicle_type_id)
+	var vehicle_type_data = JsonManager.get_category_by_id("车辆类型", vehicle_type_id)
+	property_list.replace_property(vehicle_type_data)
+	# 车辆立绘
+	var image_path = "res://Assets/UIAssets/Tanks/{0}.png".format([vehicle_type_data.get("Name", "")])
+	if ResourceLoader.exists(image_path):
+		vehicle_display.texture = load(image_path)
+	else:
+		vehicle_display.texture = load("res://Assets/UIAssets/Unavailable.png")
 	ui_equipments.update_equipment(id)
 
 func change_level1():
@@ -112,12 +154,6 @@ func _update_vehicle_selection():
 	vehicle_name.text = str(selected_vehicle)
 	refresh_card_data(selected_vehicle)
 
-	var image_path = "res://Assets/UIAssets/Tanks/{0}.png".format([ vehicle_data[selected_vehicle]["Name"] ])
-	if ResourceLoader.exists(image_path):
-		vehicle_display.texture = load(image_path)
-	else:
-		vehicle_display.texture = load("res://Assets/UIAssets/Unavailable.png")
-
 	if GameManager.is_vehicle_unlocked(selected_vehicle):
 		vehicle_unlock_button.hide()
 		enable_controls(true)
@@ -133,7 +169,7 @@ func _goto_level(level_name: StringName):
 		print("Error: Level name is empty.")
 		return
 
-	var level_path = "res://Levels/" + level_name + ".tscn"
+	var level_path = "res://scenes/Levels/" + level_name + ".tscn"
 	get_tree().change_scene_to_file(level_path)
 
 func _back_to_menu():
@@ -160,12 +196,10 @@ func unlock_vehicle():
 		_update_vehicle_selection()
 
 func unlock_part():
-	var id:int = selected_part_id
-	if not GameManager.is_parts_unlocked(selected_slot, id):
+	if not GameManager.is_parts_unlocked(selected_slot, selected_part_id):
 		if not GameManager.unlocked_parts.has(selected_slot):
 			GameManager.unlocked_parts[selected_slot] = []
-		GameManager.unlocked_parts[selected_slot].append(id)
-
+		GameManager.unlocked_parts[selected_slot].append(selected_part_id)
 		_update_vehicle_selection()
 
 		

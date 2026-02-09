@@ -5,7 +5,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nyqwy"]
 
-[node name="ConfirmPanel" type="Control" node_paths=PackedStringArray("title_label", "ok", "canel")]
+[node name="ConfirmPanel" type="Control" node_paths=PackedStringArray("title_label", "ok", "cancel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,7 +15,7 @@ grow_vertical = 2
 script = ExtResource("1_l41ok")
 title_label = NodePath("TextureRect/Label")
 ok = NodePath("TextureRect/OK")
-canel = NodePath("TextureRect/Cancel")
+cancel = NodePath("TextureRect/Cancel")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_nyqwy")

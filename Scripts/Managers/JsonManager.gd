@@ -102,7 +102,7 @@ func get_category(category_name: String) -> Array:
 		return []
 	return _data.get(category_name, []) if typeof(_data.get(category_name, [])) == TYPE_ARRAY else []
 
-func get_card_name_by_id(card_id: int) -> String:
-	var card_data = get_category("车辆类型")
-	var data = card_data.get(card_id)
-	return data.get("Name", "未知车辆")
+func get_card_name_by_id(vehicle_type_id: String) -> String:
+	"""根据车辆类型英文 id 取显示名称。"""
+	var data = get_category_by_id("车辆类型", vehicle_type_id)
+	return data.get("Name", "未知车辆") if data else "未知车辆"

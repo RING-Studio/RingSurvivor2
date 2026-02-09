@@ -3,7 +3,7 @@ class_name ConfirmPanel
 
 @export var title_label: Label
 @export var ok: Button
-@export var canel: Button
+@export var cancel: Button
 
 func _ready() -> void:
 	visibility_changed.connect(on_visibility_changed)
@@ -14,7 +14,7 @@ func pop_up( title:String):
 
 func remove_all_signals():
 	disconnect_all_from_signal(ok, "button_up")
-	disconnect_all_from_signal(canel, "button_up")
+	disconnect_all_from_signal(cancel, "button_up")
 
 
 func disconnect_all_from_signal(node: Node, signal_name: String):

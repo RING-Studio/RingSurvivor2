@@ -43,7 +43,7 @@ func refresh():
 				return
 
 			confirm_panel.pop_up("是否加载存档？")
-			confirm_panel.canel.button_up.connect(func():
+			confirm_panel.cancel.button_up.connect(func():
 				confirm_panel.hide()
 			)
 

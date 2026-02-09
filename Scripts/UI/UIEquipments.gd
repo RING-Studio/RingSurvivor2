@@ -9,18 +9,18 @@ func update_equipment(vehicle_id: int) -> void:
 	hide_all_textures()
 
 	var vehicle_data = GameManager.get_vehicle_config(vehicle_id)
-	
 	if vehicle_data == null:
 		return
 
-	var i = 0;
+	var i = 0
 	var ids = vehicle_data.get("配件")
 	if ids != null:
-		for id in ids:
-			var field = JsonManager.get_category_by_id("配件", id)
-			textures[i].texture = get_equipment_texture(field.get("Name"))
-			textures[i].self_modulate.a = 1
-			i += 1
+		for part_id in ids:
+			if part_id is String:
+				var display_name = _get_accessory_display_name(part_id)
+				textures[i].texture = get_equipment_texture(display_name)
+				textures[i].self_modulate.a = 1
+				i += 1
 
 	var id = vehicle_data.get("主武器类型")
 	var equipment = JsonManager.get_category_by_id("主武器类型", id)
@@ -40,8 +40,15 @@ func update_equipment(vehicle_id: int) -> void:
 	else:
 		armor.texture_normal = null
 
-	print(GameManager.vehicles_config)
-	
+func _get_accessory_display_name(upgrade_id: String) -> String:
+	"""配件显示名称：从 AbilityUpgradeData 读取。"""
+	if upgrade_id.is_empty():
+		return "未知"
+	var entry = AbilityUpgradeData.get_entry(upgrade_id)
+	if entry != null:
+		return str(entry.get("name", upgrade_id))
+	return upgrade_id
+
 func get_equipment_texture(_name: String):
 	var image_path = "res://Assets/UIAssets/Accessories/{0}.jpg".format([_name])
 	if ResourceLoader.exists(image_path):
