@@ -50,10 +50,19 @@ func init_player_data():
 	setup_equipped_abilities()
 
 func _apply_health_bonus():
-	"""应用耐久加成"""
+	"""应用耐久加成：耐久上限+N 时，同时增加 max_health 和 current_health（不算回复）"""
 	var base_health = GameManager.get_player_max_health()
-	health_component.max_health = base_health + global_health_bonus
-	health_component.current_health = min(health_component.current_health, health_component.max_health)
+	var old_max = health_component.max_health
+	var new_max = base_health + global_health_bonus
+	var increase = new_max - old_max
+	
+	health_component.max_health = new_max
+	if increase > 0:
+		# 上限增加时，同步增加当前耐久（不算回复，不触发回复相关效果）
+		health_component.current_health += increase
+	else:
+		# 上限减少时，限制当前耐久不超过上限
+		health_component.current_health = min(health_component.current_health, new_max)
 	# 立即更新血条显示
 	update_health_display()
 

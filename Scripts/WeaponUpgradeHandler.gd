@@ -337,7 +337,7 @@ func _process(delta):
 		sweep_fire_update_timer -= delta
 		if sweep_fire_update_timer <= 0:
 			sweep_fire_update_timer = 0.16
-			_update_sweep_fire_rotation()
+			_update_sweep_fire_angular_velocity()
 		
 		sweep_fire_angle += deg_to_rad(sweep_fire_angular_velocity) * delta
 		# 保持角度在 [0, TAU) 范围内
@@ -353,30 +353,50 @@ func _process(delta):
 		if windmill_angle >= TAU:
 			windmill_angle -= TAU
 
-func _update_sweep_fire_rotation():
-	"""扫射：每 0.16 秒根据最近敌人更新角速度和旋转方向（target 寻找复用正常射击逻辑）"""
-	var tree = get_tree()
-	var player = tree.get_first_node_in_group("player") as Node2D
+# 与机炮控制器一致：扫射目标检测使用相同射程
+const SWEEP_TARGET_MAX_RANGE: float = 200.0
+
+func _update_sweep_fire_angular_velocity():
+	"""扫射：每 0.16 秒更新角速度和旋转方向。目标寻找与正常射击一致（同射程、最近敌人）。"""
+	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		sweep_fire_angular_velocity = 60.0
 		return
 	
-	var to_enemy = MachineGunAbilityController.get_direction_to_nearest_enemy(player.global_position, tree)
-	if to_enemy == Vector2.ZERO:
-		# 无敌人时，以基础速度缓慢旋转
+	# 与正常射击相同：同射程内敌人，找最近
+	var all_enemies = get_tree().get_nodes_in_group("enemy")
+	var enemies: Array = []
+	for enemy in all_enemies:
+		if not is_instance_valid(enemy):
+			continue
+		if enemy.global_position.distance_squared_to(player.global_position) < pow(SWEEP_TARGET_MAX_RANGE, 2):
+			enemies.append(enemy)
+	
+	if enemies.size() == 0:
+		# 无敌人时，以基础速度缓慢旋转（此时机炮也不会开火）
 		sweep_fire_angular_velocity = 60.0
 		return
 	
-	# 计算朝向敌人的目标角度
-	var target_angle = to_enemy.angle()
+	# 最近敌人（与 _resolve_fire_direction 逻辑一致）
+	var nearest_enemy: Node2D = null
+	var nearest_dist_sq: float = INF
+	for enemy in enemies:
+		var dist_sq = enemy.global_position.distance_squared_to(player.global_position)
+		if dist_sq < nearest_dist_sq:
+			nearest_dist_sq = dist_sq
+			nearest_enemy = enemy
 	
-	# 计算最短路径的角度差（-PI 到 PI）
+	if nearest_enemy == null:
+		sweep_fire_angular_velocity = 60.0
+		return
+	
+	# 目标角度、最短路径角度差
+	var to_enemy = nearest_enemy.global_position - player.global_position
+	var target_angle = to_enemy.angle()
 	var angle_diff = wrapf(target_angle - sweep_fire_angle, -PI, PI)
 	
-	# 角速度 = 60°/s + 1/2 × |angle_diff(rad)| /s（夹角弧度转度后乘 0.5）
-	var speed = 60.0 + 0.5 * rad_to_deg(abs(angle_diff))
-	
-	# 旋转方向：朝向敌人
+	# 角速度(deg/s) = 60 + 0.5 × |夹角(rad)|
+	var speed = 60.0 + 0.5 * abs(angle_diff)
 	if angle_diff >= 0:
 		sweep_fire_angular_velocity = speed
 	else:

@@ -4,6 +4,12 @@ class_name MachineGunAbilityController
 const MAX_RANGE = 200
 const FIRE_RATE_MIN = 1
 
+enum SpreadPattern {
+	FOCUSED,  # 集中散射：按散射角在基础方向两侧分布
+	UNIFORM,  # 均匀分布：360° 均匀分布（风车）
+	RANDOM    # 随机分布：每发独立随机方向（乱射）
+}
+
 @export var machine_gun_ability: PackedScene
 @export var bullet_lifetime: float = 3.0  # 子弹生存时间（秒）
 @export var bullet_penetration: int = 0
@@ -18,6 +24,8 @@ const FIRE_RATE_MIN = 1
 @export var base_damage: float = 4.0
 @export var bullet_speed: float = 1000.0
 
+# 散射角（度）：集中散射时每发弹道相对基础方向的夹角，可被强化影响
+var spread_angle_deg: float = 3.0
 var fire_rate_bonus: float = 0.0
 
 func _ready():
@@ -50,8 +58,16 @@ func on_timer_timeout():
 	var enemies = get_tree().get_nodes_in_group("enemy").filter(func(enemy: Node2D):
 		return enemy.global_position.distance_squared_to(player.global_position) < pow(MAX_RANGE, 2)
 	)
+	# 无敌人时：仅当拥有扫射/风车/乱射（射击方向变更）时仍射击
 	if enemies.size() == 0:
-		return
+		var current_upgrades = GameManager.current_upgrades
+		var has_fire_direction_change = (
+			current_upgrades.get("sweep_fire", {}).get("level", 0) > 0 or
+			current_upgrades.get("windmill", {}).get("level", 0) > 0 or
+			current_upgrades.get("chaos_fire", {}).get("level", 0) > 0
+		)
+		if not has_fire_direction_change:
+			return
 
 	var player_position = player.global_position
 	
@@ -69,6 +85,15 @@ func on_timer_timeout():
 		var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
 		_fire_shot(player_position, random_direction)
 
+func _get_spread_pattern() -> SpreadPattern:
+	"""根据当前升级返回弹道分布模式"""
+	var current_upgrades = GameManager.current_upgrades
+	if current_upgrades.get("windmill", {}).get("level", 0) > 0:
+		return SpreadPattern.UNIFORM
+	if current_upgrades.get("chaos_fire", {}).get("level", 0) > 0:
+		return SpreadPattern.RANDOM
+	return SpreadPattern.FOCUSED
+
 func _fire_shot(player_position: Vector2, base_direction: Vector2):
 	"""
 	执行一次射击（处理多弹道逻辑）
@@ -80,57 +105,30 @@ func _fire_shot(player_position: Vector2, base_direction: Vector2):
 		effective_spread_count = WeaponUpgradeHandler.instance.get_spread_modifier(effective_spread_count)
 	
 	var shot_count = max(effective_spread_count, 1)
-	
-	# 检查当前射击方向类型
-	var current_upgrades = GameManager.current_upgrades
-	var windmill_level = current_upgrades.get("windmill", {}).get("level", 0)
-	var chaos_level = current_upgrades.get("chaos_fire", {}).get("level", 0)
-	
-	# 根据射击方向类型和多弹道数量决定发射方式
-	if windmill_level > 0 and shot_count > 1:
-		# 风车 + 多弹道：各弹道均匀分布在 360°
-		var angle_step = TAU / float(shot_count)
-		for i in range(shot_count):
-			var angle_offset = float(i) * angle_step
-			var bullet_direction = base_direction.rotated(angle_offset)
-			_emit_bullet(player_position, bullet_direction)
-	elif chaos_level > 0 and shot_count > 1:
-		# 乱射 + 多弹道：每个弹道随机方向
-		for i in range(shot_count):
-			var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
-			_emit_bullet(player_position, random_direction)
-	else:
-		# 正常射击 / 扫射 + 多弹道：向基础方向，带小角度扩散
-		# （扫射的方向旋转已由 base_direction 体现，弹道仍按正常散射角分布）
-		for i in range(shot_count):
-			var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(3)
-			var bullet_direction = base_direction.rotated(angle_offset)
-			_emit_bullet(player_position, bullet_direction)
+	var pattern = _get_spread_pattern()
+	_distribute_bullets(pattern, base_direction, shot_count, player_position)
 
-static func get_direction_to_nearest_enemy(player_position: Vector2, tree: SceneTree) -> Vector2:
-	"""获取朝向最近敌人的方向，与正常射击 target 寻找逻辑一致。无敌人时返回 Vector2.ZERO。"""
-	var player = tree.get_first_node_in_group("player") as Node2D
-	if player == null:
-		return Vector2.ZERO
-	var enemies = tree.get_nodes_in_group("enemy").filter(func(enemy: Node2D):
-		return enemy.global_position.distance_squared_to(player.global_position) < pow(MAX_RANGE, 2)
-	)
-	if enemies.size() == 0:
-		return Vector2.ZERO
-	var nearest_enemy: Node2D = null
-	var nearest_distance_squared: float = INF
-	for enemy in enemies:
-		var delta = enemy.global_position - player_position
-		var distance_squared = delta.length_squared()
-		if distance_squared < nearest_distance_squared:
-			nearest_distance_squared = distance_squared
-			nearest_enemy = enemy
-	if nearest_enemy == null:
-		return Vector2.ZERO
-	var to_enemy = nearest_enemy.global_position - player_position
-	if to_enemy.length_squared() < 0.0001:
-		return Vector2.ZERO
-	return to_enemy.normalized()
+func _distribute_bullets(pattern: SpreadPattern, base_direction: Vector2, shot_count: int, player_position: Vector2):
+	"""根据弹道分布模式发射子弹"""
+	match pattern:
+		SpreadPattern.FOCUSED:
+			# 集中散射：每发按散射角在基础方向两侧分布
+			for i in range(shot_count):
+				var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(spread_angle_deg)
+				var bullet_direction = base_direction.rotated(angle_offset)
+				_emit_bullet(player_position, bullet_direction)
+		SpreadPattern.UNIFORM:
+			# 均匀分布：360° 均匀分布（风车）
+			var angle_step = TAU / float(shot_count)
+			for i in range(shot_count):
+				var angle_offset = float(i) * angle_step
+				var bullet_direction = base_direction.rotated(angle_offset)
+				_emit_bullet(player_position, bullet_direction)
+		SpreadPattern.RANDOM:
+			# 随机分布：每发独立随机方向（乱射）
+			for i in range(shot_count):
+				var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
+				_emit_bullet(player_position, random_direction)
 
 func _resolve_fire_direction(player_position: Vector2, enemies: Array) -> Vector2:
 	# 先计算基础方向
@@ -210,6 +208,7 @@ func _reset_to_base_values():
 	base_damage = GameManager.get_player_base_damage()  # 与配装一致
 	bullet_penetration = 0
 	spread_count = 1  # 基础值
+	spread_angle_deg = 3.0  # 散射角（度），可被强化修正
 	bleed_layers = 0
 
 func _recalculate_all_attributes(current_upgrades: Dictionary):
