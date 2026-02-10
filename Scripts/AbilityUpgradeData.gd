@@ -279,7 +279,7 @@ extends Node
 	{
 		"id": "mine",
 		"name": "地雷",
-		"description": "每{冷却时间}秒放置一个地雷，接触敌人后对{爆炸范围}范围内敌人造成{基础伤害=5lv}点伤害。部署上限：{mine_max_deployed_value}",
+		"description": "放置一个地雷，接触敌人后对{爆炸范围}米范围内敌人造成{基础伤害=5lv}点伤害。\n基础装填间隔：{冷却时间}秒\n部署上限：{mine_max_deployed_value}",
 		"quality": "blue",
 		"max_level": 4,
 		"upgrade_type": "accessory",
@@ -289,7 +289,7 @@ extends Node
 	{
 		"id": "cooling_device",
 		"name": "冷却装置",
-		"description": "所有配件冷却时间缩短{cooling_device_value}%",
+		"description": "所有【冷却类】配件冷却速度 +{cooling_device_value}%",
 		"quality": "red",
 		"max_level": 3,
 		"upgrade_type": "accessory",
@@ -301,7 +301,7 @@ extends Node
 		"id": "mine_range",
 		"name": "地雷·范围",
 		"description": "地雷爆炸范围+{mine_range_value}米",
-		"quality": "white",
+		"quality": "blue",
 		"max_level": 5,
 		"upgrade_type": "enhancement",
 		"exclusive_for": "mine",
@@ -309,10 +309,20 @@ extends Node
 	},
 	{
 		"id": "mine_cooldown",
-		"name": "地雷·冷却",
-		"description": "地雷冷却时间-{mine_cooldown_value}%",
-		"quality": "white",
+		"name": "地雷·装填速度",
+		"description": "地雷装填速度 +{mine_cooldown_value}%",
+		"quality": "blue",
 		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "mine",
+		"prefix": ""
+	},
+	{
+		"id": "mine_multi_deploy",
+		"name": "地雷·布雷",
+		"description": "地雷基础伤害 -{mine_multi_damage_penalty}\n每次部署地雷数量 +{mine_multi_deploy_count}",
+		"quality": "purple",
+		"max_level": 4,
 		"upgrade_type": "enhancement",
 		"exclusive_for": "mine",
 		"prefix": ""
@@ -320,7 +330,7 @@ extends Node
 	{
 		"id": "mine_anti_tank",
 		"name": "地雷·AT",
-		"description": "地雷冷却时间+5秒，地雷基础伤害+{mine_anti_tank_value}%。地雷仅能由精英或BOSS触发",
+		"description": "地雷装填间隔 +5秒，地雷基础伤害+{mine_anti_tank_value}%。地雷仅能由精英或BOSS触发",
 		"quality": "purple",
 		"max_level": 5,
 		"upgrade_type": "enhancement",

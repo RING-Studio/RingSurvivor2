@@ -18,6 +18,14 @@ var active_pools: Dictionary = {
 # 已装备的配件列表（局内）
 var session_equipped_accessories: Array[String] = []
 
+# 冷却类配件（用于决定“冷却装置”是否应进入升级池）
+# 说明：当前版本尚未完整落地这些配件，因此 cooling_device 会被自动隐藏，避免出现“无效果升级”。
+const COOLDOWN_ACCESSORY_IDS: Array[String] = [
+	"radio_support",
+	"laser_suppress",
+	"external_missile",
+]
+
 func _ready():
 	# 初始化数据库（全局，只初始化一次）
 	initialize_database()
@@ -72,6 +80,15 @@ func initialize_active_pools():
 				if parent_level <= 0:
 					# 也检查是否在已装备配件中
 					should_add = (exclusive_for in equipped_accessories)
+		
+		# 冷却装置：仅当存在【冷却类】配件时才进入池（避免当前版本出现无效升级）
+		if should_add and upgrade_id == "cooling_device":
+			var has_cooldown_accessory := false
+			for accessory_id in equipped_accessories:
+				if accessory_id in COOLDOWN_ACCESSORY_IDS:
+					has_cooldown_accessory = true
+					break
+			should_add = has_cooldown_accessory
 		
 		if should_add:
 			var quality = entry.get("quality", "white")

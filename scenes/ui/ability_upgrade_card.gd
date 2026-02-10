@@ -165,6 +165,19 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			var spread_values = [2, 3, 4]
 			special_placeholder_values["windmill_spread_value"] = spread_values[index]
 		
+		"windmill_spread":
+			# 伤害 -10/20/30%，弹道 +1/2/3
+			var damage_penalty = 10 * next_level
+			special_placeholder_values["windmill_spread_damage_penalty_value"] = damage_penalty
+			var spread_values = [1, 2, 3]
+			var spread_index = min(next_level - 1, spread_values.size() - 1)
+			special_placeholder_values["windmill_spread_value"] = spread_values[spread_index]
+		
+		"windmill_speed":
+			# 射速 +10lv%，风车旋转速度 +30lv%
+			special_placeholder_values["windmill_speed_fire_rate_value"] = 10 * next_level
+			special_placeholder_values["windmill_speed_rotation_value"] = 30 * next_level
+		
 		"spread_shot":
 			# 弹道+1/2/3
 			var spread_values = [1, 2, 3]
@@ -269,13 +282,18 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			# 部署上限：10+5lv
 			var max_deployed = 10 + 5 * next_level
 			special_placeholder_values["mine_max_deployed_value"] = max_deployed
-			# 冷却时间（基础3秒，受强化影响）
-			# 这里显示基础冷却时间，实际冷却时间受mine_cooldown和cooling_device影响
-			var base_cooldown = 3.0
-			special_placeholder_values["冷却时间"] = base_cooldown
+			# 基础装填间隔（基础3秒）
+			var base_interval_s = 3.0
+			special_placeholder_values["冷却时间"] = base_interval_s
 			# 爆炸范围（基础48像素=3米，受mine_range影响）
 			var base_radius = 48.0
 			special_placeholder_values["爆炸范围"] = base_radius
+		
+		"mine_multi_deploy":
+			# 基础伤害 -1lv
+			special_placeholder_values["mine_multi_damage_penalty"] = 1 * next_level
+			# 每次部署地雷数量 +1lv
+			special_placeholder_values["mine_multi_deploy_count"] = 1 * next_level
 		
 		"mine_range":
 			# 地雷爆炸范围+1.5lv米
@@ -283,9 +301,9 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			special_placeholder_values["mine_range_value"] = range_bonus
 		
 		"mine_cooldown":
-			# 地雷冷却时间-15lv%
-			var cooldown_reduction = 15 * next_level
-			special_placeholder_values["mine_cooldown_value"] = cooldown_reduction
+			# 地雷装填速度 +15lv%（倍率）
+			var speed_bonus = 15 * next_level
+			special_placeholder_values["mine_cooldown_value"] = speed_bonus
 		
 		"mine_anti_tank":
 			# 地雷基础伤害+200lv%
@@ -293,7 +311,7 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			special_placeholder_values["mine_anti_tank_value"] = damage_bonus
 		
 		"cooling_device":
-			# 所有配件冷却时间缩短15lv%
+			# 所有【冷却类】配件冷却速度 +15lv%
 			var cooldown_reduction = 15 * next_level
 			special_placeholder_values["cooling_device_value"] = cooldown_reduction
 	
@@ -317,7 +335,7 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			else:
 				display_value = str(value)
 		elif placeholder_name == "冷却时间":
-			# 地雷基础冷却时间
+			# 地雷基础装填间隔（秒）
 			display_value = "3.0"
 		elif placeholder_name == "爆炸范围":
 			# 地雷基础爆炸范围（显示为米，需要转换）

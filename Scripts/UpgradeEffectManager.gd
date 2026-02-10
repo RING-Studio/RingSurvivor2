@@ -99,7 +99,7 @@ static var upgrade_configs: Dictionary = {
 	"windmill": {
 		"type": "linear",
 		"per_level_value": 1.0,
-		"max_level": 3
+		"max_level": 1
 	},
 	
 	# 弹射：每级效果在 WeaponUpgradeHandler 中处理
@@ -196,10 +196,10 @@ static var upgrade_configs: Dictionary = {
 	"mine_range": {
 		"type": "linear",
 		"per_level_value": 1.5,
-		"max_level": 4
+		"max_level": 5
 	},
 	
-	# 地雷·冷却：每级 -15%
+	# 地雷·装填速度：每级 +15%（速度加成）
 	"mine_cooldown": {
 		"type": "linear",
 		"per_level_value": 0.15,
@@ -213,7 +213,7 @@ static var upgrade_configs: Dictionary = {
 		"max_level": 5
 	},
 	
-	# 冷却装置：每级 -15%
+	# 冷却装置：每级 +15%（冷却速度加成，仅冷却类配件）
 	"cooling_device": {
 		"type": "linear",
 		"per_level_value": 0.15,
