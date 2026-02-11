@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b15y4wcheqwrn"]
+
+[ext_resource type="Script" uid="uid://cg6q41t6y636i" path="res://scenes/ability/laser_suppress_ability_controller/laser_suppress_ability_controller.gd" id="1_ctrl"]
+
+[node name="LaserSuppressAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

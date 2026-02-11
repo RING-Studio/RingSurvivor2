@@ -32,6 +32,6 @@ func apply_damage(amount: float, damage_source: String = "weapon", is_critical: 
 	var color = DamageTextHelper.get_color(damage_source, is_critical)
 	floating_text.call_deferred("start", format_string % amount, color)
 	
-	# TODO: 只有 weapon 类型伤害才触发 hit 信号（用于播放音效）
+	# hit 信号仅对武器伤害触发，用于播放受击音效等；配件/流血不触发
 	if damage_source == "weapon":
 		hit.emit()

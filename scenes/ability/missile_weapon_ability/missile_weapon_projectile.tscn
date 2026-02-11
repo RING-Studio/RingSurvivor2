@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://c7s3v2q8u1w0k"]
+
+[ext_resource type="Script" uid="uid://yaaa0w047qkn" path="res://scenes/ability/missile_weapon_ability/missile_weapon_projectile.gd" id="1_3p1mm"]
+[ext_resource type="PackedScene" uid="uid://bukkiv0tbb2ka" path="res://scenes/component/hitbox_component.tscn" id="2_hitbox"]
+[ext_resource type="Texture2D" path="res://Assets/Weapons/missile_weapon_sprite.png" id="3_sprite"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 10.0
+
+[node name="MissileWeaponProjectile" type="Node2D"]
+script = ExtResource("1_3p1mm")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.12, 0.12)
+texture = ExtResource("3_sprite")
+
+[node name="HitboxComponent" parent="." instance=ExtResource("2_hitbox")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("CircleShape2D_1")

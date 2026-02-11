@@ -81,7 +81,7 @@ bg_color = Color(0.812712, 0.499252, 0.51417, 1)
 [node name="EndScreen" type="CanvasLayer"]
 process_mode = 3
 script = ExtResource("1_xf2cy")
-continue_scene = &"res://scenes/main/MainScene.tscn"
+continue_scene = &"res://scenes/Levels/MilitaryCamp/MilitaryCamp.tscn"
 quit_scene = &"res://scenes/Levels/MainMenu.tscn"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

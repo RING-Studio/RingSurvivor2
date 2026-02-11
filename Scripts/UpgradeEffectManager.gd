@@ -183,6 +183,50 @@ static var upgrade_configs: Dictionary = {
 		}
 	},
 	
+	# ========== 其他主武器专属强化 ==========
+	
+	# 榴弹炮·装填：每级 +10%（射速加成）
+	"howitzer_reload": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	
+	# 榴弹炮·爆炸半径：每级 +0.5米
+	"howitzer_radius": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	
+	# 坦克炮·穿深：每级 +2mm
+	"tank_gun_depth": {
+		"type": "linear",
+		"per_level_value": 2.0,
+		"max_level": 5
+	},
+	
+	# 坦克炮·穿透：每级 +1
+	"tank_gun_penetration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	
+	# 导弹·齐射：每级 +1 枚
+	"missile_salvo": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	
+	# 导弹·装填：每级 +10%（射速加成）
+	"missile_reload": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	
 	# ========== 配件相关 ==========
 	
 	# 地雷：每级效果在 MineAbilityController 中处理
@@ -218,6 +262,138 @@ static var upgrade_configs: Dictionary = {
 		"type": "linear",
 		"per_level_value": 0.15,
 		"max_level": 3
+	},
+
+	# ========== 阶段三：通用生存/机动/防御 ==========
+
+	# 维护工具箱：冷却间隔由表给出，等级 1~9 对应 15/12/10/9/8/7/6/5/4 秒
+	"repair_kit": {
+		"type": "custom",
+		"level_effects": {
+			1: 15.0, 2: 12.0, 3: 10.0, 4: 9.0, 5: 8.0, 6: 7.0, 7: 6.0, 8: 5.0, 9: 4.0
+		}
+	},
+
+	# 车载空调：回复耐久时冷却速度 +5%*等级，持续3秒
+	"cabin_ac": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 5
+	},
+
+	# 散热器：耐久上限 -5*等级；冷却速度 = (初始耐久上限-当前耐久上限)*0.1*等级%（在玩家逻辑中计算）
+	"heat_sink": {
+		"type": "linear",
+		"per_level_value": 5.0,
+		"max_level": 5
+	},
+
+	# 克里斯蒂悬挂：移速 +10%*等级
+	"christie_suspension": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+
+	# 燃气轮机：移速 +15%*等级
+	"gas_turbine": {
+		"type": "linear",
+		"per_level_value": 0.15,
+		"max_level": 3
+	},
+
+	# 液气悬挂：移速惩罚减半，唯一
+	"hydro_pneumatic": {
+		"type": "custom",
+		"level_effects": { 1: 1.0 }
+	},
+
+	# 车身附加装甲：耐久 +4*等级，被击穿时伤害减免 5%*等级（pierce_reduction_per_level 供击穿减伤逻辑读取）
+	"addon_armor": {
+		"type": "linear",
+		"per_level_value": 4.0,
+		"max_level": 5,
+		"pierce_reduction_per_level": 0.05
+	},
+
+	# 泄压阀：被击穿时伤害减免 10%*等级
+	"relief_valve": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 6
+	},
+
+	# ========== 阶段四：配件系统扩展 ==========
+
+	# 烟雾弹：等级用于强度/解锁（数值在控制器中按公式处理）
+	"smoke_grenade": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	# 烟雾弹·范围：+2m/级
+	"smoke_range": {
+		"type": "linear",
+		"per_level_value": 2.0,
+		"max_level": 5
+	},
+	# 烟雾弹·持续：+1s/级
+	"smoke_duration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 无线电通讯：基础伤害=50+20lv（用于 UI/控制器取值）
+	"radio_support": {
+		"type": "custom",
+		"level_effects": { 1: 70.0, 2: 90.0, 3: 110.0 },
+		"max_level": 3
+	},
+	# 无线电·半径：+1m/级
+	"radio_radius": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 激光压制：基础伤害=4+2lv（每次命中伤害）
+	"laser_suppress": {
+		"type": "custom",
+		"level_effects": { 1: 6.0, 2: 8.0, 3: 10.0 },
+		"max_level": 3
+	},
+
+	# 外挂导弹：基础伤害=20+10lv
+	"external_missile": {
+		"type": "custom",
+		"level_effects": { 1: 30.0, 2: 40.0, 3: 50.0 },
+		"max_level": 3
+	},
+	# 外挂导弹·伤害：+25%/级
+	"missile_damage": {
+		"type": "linear",
+		"per_level_value": 0.25,
+		"max_level": 5
+	},
+
+	# 纤维内衬：唯一（逻辑在 player.gd 中处理）
+	"spall_liner": {
+		"type": "custom",
+		"level_effects": { 1: 1.0 },
+		"max_level": 1
+	},
+	# 爆炸反应装甲：唯一（逻辑在 player.gd 中处理）
+	"era_block": {
+		"type": "custom",
+		"level_effects": { 1: 1.0 },
+		"max_level": 1
+	},
+	# 红外对抗：唯一（逻辑在 player.gd 中处理）
+	"ir_counter": {
+		"type": "custom",
+		"level_effects": { 1: 1.0 },
+		"max_level": 1
 	}
 }
 

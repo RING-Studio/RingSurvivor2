@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://c4k1o0p3n2m9a"]
+
+[ext_resource type="Script" path="res://scenes/ability/tank_gun_ability_controller/tank_gun_ability_controller.gd" id="1_7g2e1"]
+[ext_resource type="PackedScene" path="res://scenes/ability/tank_gun_ability/tank_shell.tscn" id="2_0h6xv"]
+
+[node name="TankGunAbilityController" type="Node"]
+script = ExtResource("1_7g2e1")
+shell_scene = ExtResource("2_0h6xv")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true
+

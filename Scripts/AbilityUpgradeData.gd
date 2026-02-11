@@ -275,6 +275,69 @@ extends Node
 		"exclusive_for": "mg",
 		"prefix": ""
 	},
+	# 榴弹炮专属强化
+	{
+		"id": "howitzer_reload",
+		"name": "榴弹炮·装填",
+		"description": "榴弹炮射速 +{howitzer_reload_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "howitzer",
+		"prefix": ""
+	},
+	{
+		"id": "howitzer_radius",
+		"name": "榴弹炮·爆炸半径",
+		"description": "榴弹炮爆炸范围 +{howitzer_radius_value}米",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "howitzer",
+		"prefix": ""
+	},
+	# 坦克炮专属强化
+	{
+		"id": "tank_gun_depth",
+		"name": "坦克炮·穿深",
+		"description": "坦克炮硬攻深度 +{tank_gun_depth_value}mm",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "tank_gun",
+		"prefix": ""
+	},
+	{
+		"id": "tank_gun_penetration",
+		"name": "坦克炮·穿透",
+		"description": "坦克炮穿透 +{tank_gun_penetration_value}",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "tank_gun",
+		"prefix": ""
+	},
+	# 导弹主武器专属强化
+	{
+		"id": "missile_salvo",
+		"name": "导弹·齐射",
+		"description": "每次发射额外 +{missile_salvo_value} 枚导弹",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "missile",
+		"prefix": ""
+	},
+	{
+		"id": "missile_reload",
+		"name": "导弹·装填",
+		"description": "导弹射速 +{missile_reload_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "missile",
+		"prefix": ""
+	},
 	# 配件
 	{
 		"id": "mine",
@@ -336,6 +399,199 @@ extends Node
 		"upgrade_type": "enhancement",
 		"exclusive_for": "mine",
 		"prefix": ""
+	},
+	# ========== 阶段三：通用生存/机动/防御 ==========
+	{
+		"id": "repair_kit",
+		"name": "维护工具箱",
+		"description": "每{repair_kit_interval_value}秒回复 1 点耐久",
+		"quality": "white",
+		"max_level": 9,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "cabin_ac",
+		"name": "车载空调",
+		"description": "回复耐久时，冷却速度 +{cabin_ac_value}%，持续3秒。不可叠加。",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "heat_sink",
+		"name": "散热器",
+		"description": "耐久上限 -{heat_sink_penalty_value}。耐久上限越低，全局冷却速度越快（+{heat_sink_cooling_desc}）",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "christie_suspension",
+		"name": "克里斯蒂悬挂",
+		"description": "移速 +{christie_suspension_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "gas_turbine",
+		"name": "燃气轮机",
+		"description": "移速 +{gas_turbine_value}%",
+		"quality": "purple",
+		"max_level": 3,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "hydro_pneumatic",
+		"name": "液气悬挂",
+		"description": "受到的移速惩罚减半",
+		"quality": "purple",
+		"max_level": 1,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "addon_armor",
+		"name": "车身附加装甲",
+		"description": "耐久 +{addon_armor_health_value}，被击穿时受到的伤害减免 {addon_armor_reduction_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "relief_valve",
+		"name": "泄压阀",
+		"description": "被击穿时受到的伤害减免 {relief_valve_value}%",
+		"quality": "blue",
+		"max_level": 6,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	# ========== 阶段四：配件系统扩展 ==========
+	{
+		"id": "smoke_grenade",
+		"name": "烟雾弹",
+		"description": "原地释放烟雾，{smoke_radius_value}米范围内敌人移速 -{smoke_slow_value}%，持续{smoke_duration_value}秒。\n装填：10秒",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "radio_support",
+		"name": "无线电通讯",
+		"description": "呼叫炮击锁定随机区域，10秒后在该区域造成范围伤害。\n基础伤害：{radio_damage_value}\n范围：{radio_radius_value}米\n冷却：{radio_cooldown_value}秒",
+		"quality": "purple",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "laser_suppress",
+		"name": "激光压制",
+		"description": "开启后{laser_duration_value}秒内，对{laser_range_value}米范围内最近敌人每秒造成{laser_hits_per_second_value}次伤害。\n基础伤害：{laser_damage_value}\n冷却：{laser_cooldown_value}秒",
+		"quality": "red",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "external_missile",
+		"name": "外挂导弹",
+		"description": "对{missile_lock_range_value}米内最近敌人发射导弹，命中后爆炸造成范围伤害。\n基础伤害：{missile_damage_value}\n爆炸范围：{missile_radius_value}米\n冷却：{missile_cooldown_value}秒",
+		"quality": "purple",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "spall_liner",
+		"name": "纤维内衬",
+		"description": "被动：抵御一次致命击穿伤害，触发后失效",
+		"quality": "blue",
+		"max_level": 1,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "era_block",
+		"name": "爆炸反应装甲",
+		"description": "被动：抵御一次任意致命伤害，触发后失效。优先于纤维内衬触发",
+		"quality": "purple",
+		"max_level": 1,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "ir_counter",
+		"name": "红外对抗",
+		"description": "5米范围内正在瞄准玩家的最近的远程敌人穿甲率固定为0%",
+		"quality": "red",
+		"max_level": 1,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	# 配件专属强化（示例：烟雾弹/无线电/导弹）
+	{
+		"id": "smoke_range",
+		"name": "烟雾弹·范围",
+		"description": "烟雾弹影响范围 +{smoke_range_value}米",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "smoke_grenade",
+		"prefix": ""
+	},
+	{
+		"id": "smoke_duration",
+		"name": "烟雾弹·持续",
+		"description": "烟雾弹持续时间 +{smoke_duration_bonus_value}秒",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "smoke_grenade",
+		"prefix": ""
+	},
+	{
+		"id": "radio_radius",
+		"name": "无线电·半径",
+		"description": "炮击影响半径 +{radio_radius_bonus_value}米",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "radio_support",
+		"prefix": ""
+	},
+	{
+		"id": "missile_damage",
+		"name": "外挂导弹·伤害",
+		"description": "外挂导弹基础伤害 +{missile_damage_bonus_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "external_missile",
+		"prefix": ""
 	}
 ]
 
@@ -346,6 +602,17 @@ extends Node
 	"crit_rate": preload("res://Assets/GPT/ChatGPT crit.png"),
 	"crit_damage": preload("res://Assets/GPT/ChatGPT crit.png"),
     "mine": preload("res://Assets/GPT/ChatGPT mine.png"),
+	"smoke_grenade": null,
+	"radio_support": null,
+	"laser_suppress": null,
+	"external_missile": null,
+	"ir_counter": null,
+	"howitzer_reload": null,
+	"howitzer_radius": null,
+	"tank_gun_depth": null,
+	"tank_gun_penetration": null,
+	"missile_salvo": null,
+	"missile_reload": null,
 	"damage_bonus": null,
 }
 

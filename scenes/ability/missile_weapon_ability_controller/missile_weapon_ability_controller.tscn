@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://dap2y1m7s0q4h"]
+
+[ext_resource type="Script" uid="uid://cgy0kk36x75bp" path="res://scenes/ability/missile_weapon_ability_controller/missile_weapon_ability_controller.gd" id="1_k6q9c"]
+[ext_resource type="PackedScene" uid="uid://c7s3v2q8u1w0k" path="res://scenes/ability/missile_weapon_ability/missile_weapon_projectile.tscn" id="2_y0x8m"]
+
+[node name="MissileWeaponAbilityController" type="Node"]
+script = ExtResource("1_k6q9c")
+missile_scene = ExtResource("2_y0x8m")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true

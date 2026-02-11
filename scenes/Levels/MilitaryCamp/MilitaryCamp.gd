@@ -12,7 +12,9 @@ func _ready() -> void:
 	Transitions.transition( Transitions.transition_type.Diamond , true)
 	
 func depart():
-	#TODO:检查是否满足条件
+	# TODO: 任务/MAP界面完成后替换为真实出击条件
+	if not can_depart():
+		return
 
 	# 初始化新游戏数据（如果还没有存档）
 	if not GlobalSaveData.HasSave("autosave"):
@@ -23,6 +25,10 @@ func depart():
 
 	Transitions.set_next_scene(next_scene)
 	Transitions.transition( Transitions.transition_type.Diamond )
+
+func can_depart() -> bool:
+	"""出击条件占位：目前仅要求污染值非负。"""
+	return GameManager.pollution >= 0
 
 func ensure_main_weapon():
 	"""确保当前车辆有主武器，如果没有则设置为机炮"""

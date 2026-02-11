@@ -117,13 +117,19 @@ func _deal_damage_to_enemy(enemy: Node2D):
 		damage *= crit_damage_multiplier
 	
 	# 走护甲计算
+	var armor_coverage: float = 0.0
+	if enemy.get("armorCoverage") != null:
+		armor_coverage = float(enemy.get("armorCoverage"))
+	elif enemy.get("armor_coverage") != null:
+		armor_coverage = float(enemy.get("armor_coverage"))
+	
 	var final_damage = GlobalFomulaManager.calculate_damage(
 		damage,
 		GameManager.get_player_hard_attack_multiplier_percent(),
 		GameManager.get_player_soft_attack_multiplier_percent(),
 		GameManager.get_player_hard_attack_depth_mm(),
 		enemy.get("armor_thickness") if enemy.get("armor_thickness") else 0,
-		enemy.get("armor_coverage") if enemy.get("armor_coverage") else 0.0,
+		armor_coverage,
 		enemy.get("hardAttackDamageReductionPercent") if enemy.get("hardAttackDamageReductionPercent") else 0.0
 	)
 	
@@ -133,6 +139,12 @@ func _deal_damage_to_enemy(enemy: Node2D):
 		hurtbox.apply_damage(final_damage, damage_source, is_critical)
 
 func _play_explosion_effect():
-	"""播放爆炸效果（可选）"""
-	# TODO: 添加爆炸动画/粒子效果
-	pass
+	# [待手动替换] 地雷爆炸表现：当前为占位实现（扩散+淡出），准备好后请用手动制作的爆炸动画/粒子替换
+	"""播放爆炸效果：alpha=64 红色圆形占位（范围伤害表现）"""
+	var layer = get_tree().get_first_node_in_group("foreground_layer")
+	if not layer:
+		return
+	var effect = AoECircleEffect.new()
+	effect.global_position = global_position
+	effect.setup(explosion_radius, Color(1.0, 0.2, 0.2, 64.0 / 255.0), 0.22)
+	layer.add_child(effect)

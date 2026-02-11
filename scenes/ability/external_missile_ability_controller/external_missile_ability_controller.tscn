@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://dmissilecontroller0000"]
+
+[ext_resource type="Script" path="res://scenes/ability/external_missile_ability_controller/external_missile_ability_controller.gd" id="1_ctrl"]
+[ext_resource type="PackedScene" path="res://scenes/ability/external_missile_ability/missile.tscn" id="2_missile"]
+
+[node name="ExternalMissileAbilityController" type="Node"]
+script = ExtResource("1_ctrl")
+missile_scene = ExtResource("2_missile")
+

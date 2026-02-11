@@ -202,7 +202,12 @@ func _add_exclusive_upgrades_for_weapon(weapon_id: Variant):
 		match weapon_id:
 			"machine_gun":
 				exclusive_prefix = "mg"
-			# "howitzer", "tank_gun", "missile" 等可在此扩展
+			"howitzer":
+				exclusive_prefix = "howitzer"
+			"tank_gun":
+				exclusive_prefix = "tank_gun"
+			"missile":
+				exclusive_prefix = "missile"
 	
 	if exclusive_prefix == "":
 		return

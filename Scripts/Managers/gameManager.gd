@@ -12,6 +12,13 @@ var time_phase: int = 1
 # 污染值
 var pollution: int = 0
 
+# 任务结算标记（避免胜利/失败重复结算）
+var mission_resolved: bool = false
+
+# 时间与污染推进参数
+const PHASES_PER_DAY := 3
+const BASE_POLLUTION_INCREASE_PER_PHASE := 300
+
 # 任务进度/流程进度（已完成、已解锁、未解锁）
 var mission_progress :String= "已解锁"
 
@@ -66,6 +73,7 @@ func init_game():
 	current_vehicle = 0
 	current_skill = ""
 	money = 100000
+	mission_resolved = false
 
 	# 初始化车辆配置 - 默认改进公务车 + 机炮（英文 id）
 	vehicles_config = {
@@ -281,6 +289,43 @@ func get_player_max_health():
 	if health == null:
 		return 0
 	return health
+
+func start_mission():
+	"""进入关卡时调用，重置任务结算状态。"""
+	mission_resolved = false
+
+func apply_mission_result(result: String) -> bool:
+	"""结算任务（胜利/失败均计时推进，并应用污染变化）。"""
+	if mission_resolved:
+		return false
+	mission_resolved = true
+	_advance_time_phase()
+	_apply_pollution_change_for_result(result)
+	return true
+
+func advance_time_without_mission() -> void:
+	"""不进行任务时推进一个时间段（仅污染+300）。"""
+	_advance_time_phase()
+	_apply_pollution_change_for_result("skip")
+
+func _advance_time_phase() -> void:
+	"""推进时间段：每次任务结束推进一个时间段。"""
+	time_phase += 1
+	if time_phase > PHASES_PER_DAY:
+		time_phase = 1
+		day += 1
+
+func _apply_pollution_change_for_result(result: String) -> void:
+	"""污染变化规则（默认）：胜利*90%后+300；失败/不出击+300。"""
+	match result:
+		"victory":
+			pollution = int(floor(pollution * 0.9))
+			pollution += BASE_POLLUTION_INCREASE_PER_PHASE
+		"defeat", "skip":
+			pollution += BASE_POLLUTION_INCREASE_PER_PHASE
+		_:
+			pollution += BASE_POLLUTION_INCREASE_PER_PHASE
+	pollution = max(pollution, 0)
 
 #全局暴击率
 func get_global_crit_rate() -> float:

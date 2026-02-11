@@ -14,12 +14,15 @@ class_name WizardEnemy
 @export var hard_attack_depth_mm = 0 #硬攻深度 = 0
 @export var is_elite: bool = false  # 是否为精英敌人
 @export var is_boss: bool = false  # 是否为BOSS
+@export var is_aiming_player: bool = false  # 是否正在瞄准玩家（用于激光压制/红外对抗）
 
 var is_moving = false
 
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
+	# 阶段四：将 Wizard 视为“远程敌人”，供激光压制等锁定逻辑使用
+	add_to_group("ranged_enemy")
 
 func initialize_enemy(properties: Dictionary = {}):
 	"""
@@ -65,6 +68,15 @@ func initialize_enemy(properties: Dictionary = {}):
 
 
 func _process(delta):
+	# MARK（待细化）：当前“瞄准判定”使用简化口径——5米内视为正在瞄准玩家。
+	# 后续可替换为更真实的状态机（例如：停下→进入瞄准→开火→冷却/丢失目标等）。
+	var player = get_tree().get_first_node_in_group("player") as Node2D
+	if player:
+		var aim_range_px = 5.0 * GlobalFomulaManager.METERS_TO_PIXELS
+		is_aiming_player = global_position.distance_squared_to(player.global_position) <= aim_range_px * aim_range_px
+	else:
+		is_aiming_player = false
+
 	if is_moving:
 		velocity_component.accelerate_to_player()
 	else:

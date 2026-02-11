@@ -4,6 +4,7 @@ class_name HealthComponent
 signal died
 signal health_changed
 signal health_decreased
+signal healed(amount: int)  # 回复耐久时发出，供车载空调等使用
 
 @export var max_health: float = 50
 var current_health
@@ -13,16 +14,24 @@ func _ready():
 	current_health = max_health
 
 
-func damage(damage_amount: float):
-	current_health = clamp(current_health - damage_amount, 0, max_health)
+func damage(damage_amount: float, context: Dictionary = {}):
+	var final_amount := damage_amount
+	# 在进入 HealthComponent 前，允许 owner 拦截/修改伤害（用于一次性免死等）
+	if final_amount > 0 and owner != null and owner.has_method("before_take_damage"):
+		final_amount = owner.before_take_damage(final_amount, self, context)
+	
+	current_health = clamp(current_health - final_amount, 0, max_health)
 	health_changed.emit()
-	if damage_amount > 0:
+	if final_amount > 0:
 		health_decreased.emit()
 	Callable(check_death).call_deferred()
 
 
 func heal(heal_amount: int):
+	if heal_amount <= 0:
+		return
 	damage(-heal_amount)
+	healed.emit(heal_amount)
 
 
 func get_health_percent():

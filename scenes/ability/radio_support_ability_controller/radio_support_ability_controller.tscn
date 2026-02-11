@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://dradiocontroller0000"]
+
+[ext_resource type="Script" path="res://scenes/ability/radio_support_ability_controller/radio_support_ability_controller.gd" id="1_ctrl"]
+[ext_resource type="PackedScene" path="res://scenes/ability/radio_support_ability/radio_strike_marker.tscn" id="2_marker"]
+
+[node name="RadioSupportAbilityController" type="Node"]
+script = ExtResource("1_ctrl")
+marker_scene = ExtResource("2_marker")
+

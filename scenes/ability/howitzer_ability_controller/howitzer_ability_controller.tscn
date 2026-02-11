@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://c1b5r2p2y7a8l"]
+
+[ext_resource type="Script" uid="uid://clfgd6dasy5uw" path="res://scenes/ability/howitzer_ability_controller/howitzer_ability_controller.gd" id="1_2m7x1"]
+[ext_resource type="PackedScene" uid="uid://c0t8x0y1v8h2u" path="res://scenes/ability/howitzer_ability/howitzer_shell.tscn" id="2_v1y0u"]
+
+[node name="HowitzerAbilityController" type="Node"]
+script = ExtResource("1_2m7x1")
+shell_scene = ExtResource("2_v1y0u")
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true

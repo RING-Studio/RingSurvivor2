@@ -138,7 +138,7 @@ func initialize_enemy_properties(enemy: Node2D, is_random: bool = true):
 	else:
 		enemy.add_to_group(GROUP_FIXED_ENEMY)
 	
-	# TODO: 设置精英/BOSS标签（根据scale判断）
+	# 精英/BOSS 标签：根据 scale 或固定生成标记（BOSS 在 spawn_boss 中单独设置）
 	# 使用 get() 检查属性是否存在（不存在返回 null）
 	if enemy.get("is_elite") != null and enemy.get("is_boss") != null:
 		# BOSS判断：scale >= 4.0 或 is_in_group("fixed_enemy")且scale较大
@@ -195,19 +195,21 @@ func calculate_max_random_enemies() -> int:
 
 
 func calculate_enemy_property_multiplier() -> float:
-	"""根据点污染度计算属性倍率"""
+	"""根据点污染度计算属性倍率（与 关卡.md 一致）"""
 	var point_pollution = calculate_point_pollution()
-	print(point_pollution)
 	match current_region_type:
 		RegionType.REGION_TYPE_1:
-			return 1.0 + point_pollution / 10000.0
+			return 1.0 + point_pollution / 1000.0
 		RegionType.REGION_TYPE_2, RegionType.REGION_TYPE_3:
-			return 1.1 + point_pollution / 10000.0
+			return 1.1 + point_pollution / 500.0
 		_:
 			return 1.0
 
 
 # ========== 敌人生成方法 ==========
+
+# 精英生成概率（随机敌人生成时）
+const ELITE_SPAWN_CHANCE: float = 0.12  # 12% 概率生成精英（用于 is_elite 可识别验收）
 
 func spawn_random_enemy():
 	"""生成一个随机敌人"""
@@ -217,6 +219,10 @@ func spawn_random_enemy():
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
 	enemy.global_position = get_spawn_position()
+	
+	# 精英标记：按概率生成体型更大的精英，initialize_enemy_properties 会根据 scale 设置 is_elite
+	if randf() < ELITE_SPAWN_CHANCE:
+		enemy.scale = Vector2(2.0, 2.0)
 	
 	initialize_enemy_properties(enemy, true)
 

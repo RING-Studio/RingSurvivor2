@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8l0u7d4y2j1p"]
+
+[ext_resource type="Script" path="res://scenes/ability/tank_gun_ability/tank_shell.gd" id="1_5r8nq"]
+[ext_resource type="PackedScene" path="res://scenes/component/hitbox_component.tscn" id="2_0x0yq"]
+[ext_resource type="Texture2D" path="res://Assets/Weapons/tank_shell_sprite.png" id="3_sprite"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 6.0
+
+[node name="TankGunShell" type="Node2D"]
+script = ExtResource("1_5r8nq")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.12, 0.12)
+texture = ExtResource("3_sprite")
+
+[node name="HitboxComponent" parent="." instance=ExtResource("2_0x0yq")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("CircleShape2D_1")

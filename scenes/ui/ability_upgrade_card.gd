@@ -140,13 +140,23 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 		"chain_fire_penalty_value", "chain_fire_max_stacks_value", "burst_fire_max_stacks_value", "sweep_fire_bonus_value",
 		"breakthrough_max_bonus_value", "fire_suppression_per_part_value", "penetration_damage_penalty_value",
 		"breath_hold_rate_value", "focus_crit_rate_value", "mg_heavy_round_penalty_value",
-		"mine_cooldown_value", "cooling_device_value", "mine_anti_tank_value"
+		"mine_cooldown_value", "cooling_device_value", "mine_anti_tank_value",
+		# 阶段三
+		"cabin_ac_value", "christie_suspension_value", "gas_turbine_value", "relief_valve_value",
+		# 阶段四
+		"smoke_slow_value", "missile_damage_bonus_value",
+		# 阶段五（主武器专属）
+		"howitzer_reload_value", "missile_reload_value"
 	]
 	
 	# 特殊占位符处理（根据等级计算特定值）
 	var special_placeholder_values = {}
 	
 	match upgrade_id:
+		"howitzer_radius":
+			# 每级 +0.5m，显示 1 位小数
+			special_placeholder_values["howitzer_radius_value"] = "%.1f" % (0.5 * next_level)
+		
 		"scatter_shot":
 			# 10/8/7/6/5次
 			var interval_values = [10, 8, 7, 6, 5]
@@ -314,6 +324,72 @@ func _process_description_placeholders(description: String, upgrade_id: String, 
 			# 所有【冷却类】配件冷却速度 +15lv%
 			var cooldown_reduction = 15 * next_level
 			special_placeholder_values["cooling_device_value"] = cooldown_reduction
+		
+		# ===== 阶段三 =====
+		"heat_sink":
+			# 耐久上限 -5lv
+			special_placeholder_values["heat_sink_penalty_value"] = 5 * next_level
+			# 冷却速度：差值=5*lv，+差值*0.1*lv% => +0.5*lv^2 %
+			var cooling_percent = 0.5 * float(next_level) * float(next_level)
+			# 显示为“X%”
+			special_placeholder_values["heat_sink_cooling_desc"] = "%.1f%%" % cooling_percent
+		
+		"addon_armor":
+			# 耐久 +4lv
+			special_placeholder_values["addon_armor_health_value"] = 4 * next_level
+			# 被击穿时伤害减免 5lv%
+			special_placeholder_values["addon_armor_reduction_value"] = 5 * next_level
+		
+		# ===== 阶段四 =====
+		"smoke_grenade":
+			# 基础半径 1m；烟雾弹·范围每级 +2m
+			var radius_m = 1.0
+			var range_level = GameManager.current_upgrades.get("smoke_range", {}).get("level", 0)
+			# 描述展示“下一等级”的效果时，这里按 next_level 估算主配件等级
+			var smoke_level = max(next_level, 1)
+			radius_m += 2.0 * float(range_level)
+			special_placeholder_values["smoke_radius_value"] = "%.1f" % radius_m
+			special_placeholder_values["smoke_slow_value"] = 20 * smoke_level
+			# 持续时间：基础 3s + smoke_duration*1s
+			var duration_level = GameManager.current_upgrades.get("smoke_duration", {}).get("level", 0)
+			var duration_s = 3 + duration_level
+			special_placeholder_values["smoke_duration_value"] = duration_s
+		
+		"smoke_range":
+			special_placeholder_values["smoke_range_value"] = 2 * next_level
+		
+		"smoke_duration":
+			special_placeholder_values["smoke_duration_bonus_value"] = 1 * next_level
+		
+		"radio_support":
+			# 基础伤害：50+20lv（lv=next_level）
+			special_placeholder_values["radio_damage_value"] = 50 + 20 * next_level
+			# 基础半径：20m + radio_radius
+			var radius_m = 20.0 + float(GameManager.current_upgrades.get("radio_radius", {}).get("level", 0))
+			special_placeholder_values["radio_radius_value"] = "%.1f" % radius_m
+			# 冷却：60-5lv
+			special_placeholder_values["radio_cooldown_value"] = 60 - 5 * next_level
+		
+		"radio_radius":
+			special_placeholder_values["radio_radius_bonus_value"] = 1 * next_level
+		
+		"laser_suppress":
+			# 固定：持续5秒、范围5米、每秒5次；基础伤害 4+2lv；冷却30秒
+			special_placeholder_values["laser_duration_value"] = 5
+			special_placeholder_values["laser_range_value"] = 5
+			special_placeholder_values["laser_hits_per_second_value"] = 5
+			special_placeholder_values["laser_damage_value"] = 4 + 2 * next_level
+			special_placeholder_values["laser_cooldown_value"] = 30
+		
+		"external_missile":
+			# 锁定 10m、爆炸 3m；基础伤害 20+10lv；冷却暂用 15s（若你后续指定会在文档与实现中对齐）
+			special_placeholder_values["missile_lock_range_value"] = 10
+			special_placeholder_values["missile_radius_value"] = 3
+			special_placeholder_values["missile_damage_value"] = 20 + 10 * next_level
+			special_placeholder_values["missile_cooldown_value"] = 6
+		
+		"missile_damage":
+			special_placeholder_values["missile_damage_bonus_value"] = 25 * next_level
 	
 	# 查找所有占位符（格式：{xxx_value} 或 {中文占位符}）
 	var regex = RegEx.new()

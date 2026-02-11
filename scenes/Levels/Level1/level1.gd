@@ -6,6 +6,7 @@ var pause_menu_scene = preload("res://scenes/ui/pause_menu.tscn")
 
 
 func _ready():
+	GameManager.start_mission()
 	$%Player.health_component.died.connect(on_player_died)
 	Transitions.transition(Transitions.transition_type.Diamond, true)
 	setup_region_detection()
@@ -173,8 +174,8 @@ func _unhandled_input(event):
 		var keycode = event.keycode
 		# 检测字符输入
 		if keycode >= KEY_A and keycode <= KEY_Z:
-			var char = char(keycode - KEY_A + 65)
-			debug_input_buffer += char
+			var ch = char(keycode - KEY_A + 65)
+			debug_input_buffer += ch
 			# 保持缓冲区大小
 			if debug_input_buffer.length() > debug_sequence.length():
 				debug_input_buffer = debug_input_buffer.substr(debug_input_buffer.length() - debug_sequence.length())
@@ -186,8 +187,8 @@ func _unhandled_input(event):
 				get_tree().root.set_input_as_handled()
 				return
 		elif keycode >= KEY_0 and keycode <= KEY_9:
-			var char = char(keycode - KEY_0 + 48)
-			debug_input_buffer += char
+			var ch = char(keycode - KEY_0 + 48)
+			debug_input_buffer += ch
 			if debug_input_buffer.length() > debug_sequence.length():
 				debug_input_buffer = debug_input_buffer.substr(debug_input_buffer.length() - debug_sequence.length())
 			if debug_input_buffer == debug_sequence:
@@ -214,6 +215,9 @@ func _unhandled_input(event):
 
 
 func on_player_died():
+	if not GameManager.apply_mission_result("defeat"):
+		return
+	GlobalSaveData.save_game()
 	var end_screen_instance = end_screen_scene.instantiate()
 	add_child(end_screen_instance)
 	end_screen_instance.set_defeat()

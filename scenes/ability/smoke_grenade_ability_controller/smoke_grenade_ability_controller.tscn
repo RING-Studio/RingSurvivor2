@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0gm82xson8a2"]
+
+[ext_resource type="Script" uid="uid://cslectnoicrga" path="res://scenes/ability/smoke_grenade_ability_controller/smoke_grenade_ability_controller.gd" id="1_ctrl"]
+[ext_resource type="PackedScene" uid="uid://bgxfmexgcvl16" path="res://scenes/ability/smoke_grenade_ability/smoke_cloud.tscn" id="2_cloud"]
+
+[node name="SmokeGrenadeAbilityController" type="Node"]
+script = ExtResource("1_ctrl")
+smoke_cloud_scene = ExtResource("2_cloud")
