@@ -1,7 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dradiomarker000000"]
+[gd_scene load_steps=2 format=3 uid="uid://b7iml02ak46b8"]
 
-[ext_resource type="Script" path="res://scenes/ability/radio_support_ability/radio_strike_marker.gd" id="1_marker"]
+[ext_resource type="Script" uid="uid://bs2jrm1wok2xj" path="res://scenes/ability/radio_support_ability/radio_strike_marker.gd" id="1_marker"]
 
 [node name="RadioStrikeMarker" type="Node2D"]
 script = ExtResource("1_marker")
-

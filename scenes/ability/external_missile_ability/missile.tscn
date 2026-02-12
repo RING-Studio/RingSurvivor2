@@ -1,11 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://dmissile000000000"]
+[gd_scene load_steps=4 format=3 uid="uid://dmissile000000000"]
 
 [ext_resource type="Script" path="res://scenes/ability/external_missile_ability/missile.gd" id="1_missile"]
 [ext_resource type="Texture2D" path="res://Assets/Weapons/external_missile_sprite.png" id="2_sprite"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_explosion"]
+radius = 48.0
 
 [node name="ExternalMissile" type="Node2D"]
 script = ExtResource("1_missile")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.1, 0.1)
+scale = Vector2(0.035, 0.035)
 texture = ExtResource("2_sprite")
+
+[node name="ExplosionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExplosionArea"]
+shape = SubResource("CircleShape2D_explosion")

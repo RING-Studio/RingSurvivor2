@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dempulse00000000"]
+
+[ext_resource type="Script" path="res://scenes/ability/emp_pulse_ability_controller/emp_pulse_ability_controller.gd" id="1_ctrl"]
+
+[node name="EmpPulseAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

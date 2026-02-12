@@ -62,7 +62,7 @@ func _on_hitbox_area_entered(area: Area2D):
 	
 	var dmg := base_damage * damage_ratio
 	if WeaponUpgradeHandler.instance:
-		dmg = WeaponUpgradeHandler.instance.get_damage_modifier(dmg)
+		dmg = WeaponUpgradeHandler.instance.get_damage_modifier(dmg, target)
 	
 	# 暴击
 	var base_crit_rate = GameManager.get_global_crit_rate()
@@ -94,6 +94,14 @@ func _on_hitbox_area_entered(area: Area2D):
 		target.get("hardAttackDamageReductionPercent") if target.get("hardAttackDamageReductionPercent") else 0.0
 	)
 	hurtbox.apply_damage(final_damage, "weapon", is_critical)
+	
+	# 击杀检测
+	var t_hc = target.get_node_or_null("HealthComponent")
+	if t_hc and t_hc.current_health <= 0:
+		if WeaponUpgradeHandler.instance:
+			WeaponUpgradeHandler.instance.on_enemy_killed(target)
+			if is_critical:
+				WeaponUpgradeHandler.instance.on_enemy_killed_by_critical(target)
 	
 	if _hits_remaining <= 0:
 		queue_free()

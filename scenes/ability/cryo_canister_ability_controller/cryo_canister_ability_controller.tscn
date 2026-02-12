@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dcryocanister00000"]
+
+[ext_resource type="Script" path="res://scenes/ability/cryo_canister_ability_controller/cryo_canister_ability_controller.gd" id="1_ctrl"]
+
+[node name="CryoCanisterAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

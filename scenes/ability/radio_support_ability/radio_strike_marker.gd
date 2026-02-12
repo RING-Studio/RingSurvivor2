@@ -24,4 +24,3 @@ func _draw():
 	var c_ring = Color(1.0, 0.2, 0.2, 140.0 / 255.0)
 	draw_circle(Vector2.ZERO, radius_pixels, c_fill)
 	draw_arc(Vector2.ZERO, radius_pixels, 0.0, TAU, 64, c_ring, 2.0)
-

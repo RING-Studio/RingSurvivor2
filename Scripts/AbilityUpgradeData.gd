@@ -4,7 +4,7 @@ extends Node
 	# 通用强化
 	{
 		"id": "crit_rate",
-		"name": "暴击强化",
+		"name": "精准校射",
 		"description": "暴击率 +{crit_rate_value}%",
 		"quality": "blue",
 		"max_level": -1,
@@ -14,7 +14,7 @@ extends Node
 	},
 	{
 		"id": "crit_damage",
-		"name": "暴伤强化",
+		"name": "要害瞄具",
 		"description": "暴击伤害 +{crit_damage_value}%",
 		"quality": "white",
 		"max_level": -1,
@@ -24,7 +24,7 @@ extends Node
 	},
 	{
 		"id": "damage_bonus",
-		"name": "伤害强化",
+		"name": "增效装药",
 		"description": "伤害 +{damage_bonus_value}%",
 		"quality": "white",
 		"max_level": -1,
@@ -34,7 +34,7 @@ extends Node
 	},
 	{
 		"id": "health",
-		"name": "耐久强化",
+		"name": "加固结构",
 		"description": "耐久 +{health_value}",
 		"quality": "white",
 		"max_level": -1,
@@ -45,7 +45,7 @@ extends Node
 	# 主武器通用强化
 	{
 		"id": "rapid_fire",
-		"name": "速射",
+		"name": "高速供弹",
 		"description": "射速 +{rapid_fire_value}%",
 		"quality": "white",
 		"max_level": -1,
@@ -55,7 +55,7 @@ extends Node
 	},
 	{
 		"id": "chain_fire",
-		"name": "连射",
+		"name": "连发回路",
 		"description": "射速 -{chain_fire_penalty_value}%。主武器射击时，+3%射速，最多叠加{chain_fire_max_stacks_value}层，每1秒减少1层",
 		"quality": "blue",
 		"max_level": 5,
@@ -65,7 +65,7 @@ extends Node
 	},
 	{
 		"id": "scatter_shot",
-		"name": "散弹",
+		"name": "余弹",
 		"description": "主武器每射击{scatter_shot_interval_value}次，向随机方向进行{scatter_shot_count_value}次额外射击",
 		"quality": "blue",
 		"max_level": 5,
@@ -75,7 +75,7 @@ extends Node
 	},
 	{
 		"id": "burst_fire",
-		"name": "爆射",
+		"name": "应激扳机",
 		"description": "主武器暴击时，+4%射速，最多叠加{burst_fire_max_stacks_value}层，每1秒减少1层",
 		"quality": "purple",
 		"max_level": 10,
@@ -85,7 +85,7 @@ extends Node
 	},
 	{
 		"id": "sweep_fire",
-		"name": "扫射",
+		"name": "伺服追踪",
 		"description": "主武器射击方向变更-扫射*：主武器射击方向旋转追踪最近敌人\n射速 +{sweep_fire_bonus_value}%",
 		"quality": "blue",
 		"max_level": 2,
@@ -95,7 +95,7 @@ extends Node
 	},
 	{
 		"id": "chaos_fire",
-		"name": "乱射",
+		"name": "暴走",
 		"description": "主武器射击方向变更-乱射*：主武器射击方向随机（每次射击完全随机方向）\n射速 +100%",
 		"quality": "blue",
 		"max_level": 1,
@@ -125,7 +125,7 @@ extends Node
 	},
 	{
 		"id": "penetration",
-		"name": "穿透",
+		"name": "贯穿弹芯",
 		"description": "伤害 -{penetration_damage_penalty_value}%，主武器穿透+{penetration_penetration_value}",
 		"quality": "blue",
 		"max_level": 5,
@@ -135,7 +135,7 @@ extends Node
 	},
 	{
 		"id": "windmill",
-		"name": "风车",
+		"name": "回转射界",
 		"description": "主武器射击方向变更-风车*：主武器射击方向随时间顺时针旋转，各弹道均匀分布\n射速 -50%\n伤害 -20%\n主武器弹道+2",
 		"quality": "blue",
 		"max_level": 1,
@@ -146,7 +146,7 @@ extends Node
 	# 风车衍生强化
 	{
 		"id": "windmill_spread",
-		"name": "风车·弹道",
+		"name": "回转射界·增程弹道",
 		"description": "伤害 -{windmill_spread_damage_penalty_value}%\n主武器弹道+{windmill_spread_value}",
 		"quality": "blue",
 		"max_level": 3,
@@ -156,7 +156,7 @@ extends Node
 	},
 	{
 		"id": "windmill_speed",
-		"name": "风车·转速",
+		"name": "回转射界·角速驱动",
 		"description": "射速 +{windmill_speed_fire_rate_value}%\n风车旋转速度 +{windmill_speed_rotation_value}%",
 		"quality": "blue",
 		"max_level": 3,
@@ -166,7 +166,7 @@ extends Node
 	},
 	{
 		"id": "ricochet",
-		"name": "弹射",
+		"name": "跳弹寻的",
 		"description": "主武器子弹命中后，有{ricochet_chance_value}%概率向最近敌人弹射。弹射在穿透前判定，成功则不消耗穿透次数",
 		"quality": "purple",
 		"max_level": 4,
@@ -176,7 +176,7 @@ extends Node
 	},
 	{
 		"id": "spread_shot",
-		"name": "扩散",
+		"name": "扇区弹幕",
 		"description": "主武器弹道+{spread_shot_spread_value}，每发子弹造成{spread_shot_damage_ratio_value}%伤害",
 		"quality": "red",
 		"max_level": 3,
@@ -186,7 +186,7 @@ extends Node
 	},
 	{
 		"id": "split_shot",
-		"name": "分裂",
+		"name": "破片分束",
 		"description": "主武器暴击时，子弹分裂成{split_shot_count_value}发，每发造成50%伤害。仅在弹射失败时触发，不消耗穿透次数。分裂子弹无法再分裂",
 		"quality": "red",
 		"max_level": 2,
@@ -196,7 +196,7 @@ extends Node
 	},
 	{
 		"id": "breath_hold",
-		"name": "屏息",
+		"name": "蓄势待发",
 		"description": "主武器未进行射击时，以+{breath_hold_rate_value}%/秒的速率给予暴击伤害加成。主武器射击后清空所有加成",
 		"quality": "purple",
 		"max_level": 10,
@@ -206,7 +206,7 @@ extends Node
 	},
 	{
 		"id": "focus",
-		"name": "专注",
+		"name": "锁定集火",
 		"description": "主武器连续命中同一敌人时，每发+{focus_crit_rate_value}%暴击率，最多叠加5层。未命中该敌人时重新计算",
 		"quality": "purple",
 		"max_level": 5,
@@ -216,7 +216,7 @@ extends Node
 	},
 	{
 		"id": "harvest",
-		"name": "收割",
+		"name": "战场回收",
 		"description": "暴击击杀敌人时，恢复{harvest_heal_value}点耐久",
 		"quality": "purple",
 		"max_level": 5,
@@ -226,7 +226,7 @@ extends Node
 	},
 	{
 		"id": "lethal_strike",
-		"name": "致命一击",
+		"name": "终结射序",
 		"description": "主武器每射击{lethal_strike_interval_value}次，下一次射击暴击率+100%，且暴击伤害翻倍",
 		"quality": "red",
 		"max_level": 4,
@@ -236,7 +236,7 @@ extends Node
 	},
 	{
 		"id": "crit_conversion",
-		"name": "暴击转换",
+		"name": "暴击溢流",
 		"description": "暴击时，暴击率加成会作用于暴击伤害加成",
 		"quality": "red",
 		"max_level": 1,
@@ -341,7 +341,7 @@ extends Node
 	# 配件
 	{
 		"id": "mine",
-		"name": "地雷",
+		"name": "反装甲触发雷",
 		"description": "放置一个地雷，接触敌人后对{爆炸范围}米范围内敌人造成{基础伤害=5lv}点伤害。\n基础装填间隔：{冷却时间}秒\n部署上限：{mine_max_deployed_value}",
 		"quality": "blue",
 		"max_level": 4,
@@ -407,7 +407,7 @@ extends Node
 		"description": "每{repair_kit_interval_value}秒回复 1 点耐久",
 		"quality": "white",
 		"max_level": 9,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
@@ -417,7 +417,7 @@ extends Node
 		"description": "回复耐久时，冷却速度 +{cabin_ac_value}%，持续3秒。不可叠加。",
 		"quality": "white",
 		"max_level": 5,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
@@ -427,7 +427,7 @@ extends Node
 		"description": "耐久上限 -{heat_sink_penalty_value}。耐久上限越低，全局冷却速度越快（+{heat_sink_cooling_desc}）",
 		"quality": "white",
 		"max_level": 5,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
@@ -437,7 +437,7 @@ extends Node
 		"description": "移速 +{christie_suspension_value}%",
 		"quality": "blue",
 		"max_level": 5,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
@@ -447,7 +447,7 @@ extends Node
 		"description": "移速 +{gas_turbine_value}%",
 		"quality": "purple",
 		"max_level": 3,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
@@ -457,17 +457,17 @@ extends Node
 		"description": "受到的移速惩罚减半",
 		"quality": "purple",
 		"max_level": 1,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
 	{
 		"id": "addon_armor",
-		"name": "车身附加装甲",
+		"name": "附加复合装甲",
 		"description": "耐久 +{addon_armor_health_value}，被击穿时受到的伤害减免 {addon_armor_reduction_value}%",
 		"quality": "blue",
 		"max_level": 5,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
@@ -477,14 +477,14 @@ extends Node
 		"description": "被击穿时受到的伤害减免 {relief_valve_value}%",
 		"quality": "blue",
 		"max_level": 6,
-		"upgrade_type": "enhancement",
+		"upgrade_type": "accessory",
 		"exclusive_for": "",
 		"prefix": ""
 	},
 	# ========== 阶段四：配件系统扩展 ==========
 	{
 		"id": "smoke_grenade",
-		"name": "烟雾弹",
+		"name": "多谱烟幕弹",
 		"description": "原地释放烟雾，{smoke_radius_value}米范围内敌人移速 -{smoke_slow_value}%，持续{smoke_duration_value}秒。\n装填：10秒",
 		"quality": "blue",
 		"max_level": 5,
@@ -494,7 +494,7 @@ extends Node
 	},
 	{
 		"id": "radio_support",
-		"name": "无线电通讯",
+		"name": "火力校射电台",
 		"description": "呼叫炮击锁定随机区域，10秒后在该区域造成范围伤害。\n基础伤害：{radio_damage_value}\n范围：{radio_radius_value}米\n冷却：{radio_cooldown_value}秒",
 		"quality": "purple",
 		"max_level": 3,
@@ -524,7 +524,7 @@ extends Node
 	},
 	{
 		"id": "spall_liner",
-		"name": "纤维内衬",
+		"name": "防破片内衬",
 		"description": "被动：抵御一次致命击穿伤害，触发后失效",
 		"quality": "blue",
 		"max_level": 1,
@@ -544,7 +544,7 @@ extends Node
 	},
 	{
 		"id": "ir_counter",
-		"name": "红外对抗",
+		"name": "红外对抗套件",
 		"description": "5米范围内正在瞄准玩家的最近的远程敌人穿甲率固定为0%",
 		"quality": "red",
 		"max_level": 1,
@@ -591,6 +591,329 @@ extends Node
 		"max_level": 5,
 		"upgrade_type": "enhancement",
 		"exclusive_for": "external_missile",
+		"prefix": ""
+	},
+	# ========== 阶段八：新增通用强化 ==========
+	{
+		"id": "emergency_repair",
+		"name": "应急抢修",
+		"description": "耐久低于30%时，每5秒回复{emergency_repair_value}点耐久",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "reinforced_bulkhead",
+		"name": "复合隔舱",
+		"description": "受到致命伤害时保留1点耐久（每局可触发{reinforced_bulkhead_value}次）",
+		"quality": "blue",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "kinetic_buffer",
+		"name": "动能缓冲层",
+		"description": "非击穿伤害减免{kinetic_buffer_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "overpressure_limiter",
+		"name": "过压限制器",
+		"description": "被连续命中时，后续2秒内受伤减少{overpressure_limiter_value}%",
+		"quality": "purple",
+		"max_level": 4,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "mobility_servos",
+		"name": "伺服助力",
+		"description": "转向响应 +{mobility_servos_turn_value}%，倒车速度 +{mobility_servos_reverse_value}%",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "target_computer",
+		"name": "火控计算机",
+		"description": "最近敌人方向偏差修正 +{target_computer_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "battle_awareness",
+		"name": "战场感知",
+		"description": "周围敌人越多，暴击率越高（上限 +{battle_awareness_value}%）",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	# ========== 阶段八：新增主武器通用强化 ==========
+	{
+		"id": "armor_breaker",
+		"name": "破甲尖锥",
+		"description": "对中重甲目标额外伤害 +{armor_breaker_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "weakpoint_strike",
+		"name": "弱点标定",
+		"description": "连续命中同目标后，第{weakpoint_strike_interval_value}发获得伤害加成",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "overdrive_trigger",
+		"name": "超频扳机",
+		"description": "满血时射速 +{overdrive_trigger_value}%，低血时伤害 +{overdrive_trigger_value}%",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "recoil_compensator",
+		"name": "后坐补偿器",
+		"description": "连续射击后散布不再继续扩大（散布上限 -{recoil_compensator_value}%）",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "tracer_rounds",
+		"name": "曳光校正",
+		"description": "子弹寿命 +{tracer_rounds_value}%，更易命中远端目标",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "shock_core",
+		"name": "震荡芯体",
+		"description": "命中时减速敌人{shock_core_value}秒",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "execution_protocol",
+		"name": "处决协议",
+		"description": "目标耐久低于20%时，额外伤害 +{execution_protocol_value}%",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "hot_load",
+		"name": "高装药",
+		"description": "弹速 +{hot_load_value}%",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "fin_stabilized",
+		"name": "尾翼稳定器",
+		"description": "弹道扩散角 -{fin_stabilized_value}%",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "sharpened",
+		"name": "破片嵌入",
+		"description": "暴击时附加{sharpened_value}层破片（对生物造成持续伤害）",
+		"quality": "white",
+		"max_level": 3,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "bloodletting",
+		"name": "破片淬火",
+		"description": "每层破片持续伤害 +{bloodletting_value}",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "sharpened",
+		"prefix": ""
+	},
+	{
+		"id": "laceration",
+		"name": "集束破片",
+		"description": "破片层数上限提升{laceration_value}层并追加层数",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "sharpened",
+		"prefix": ""
+	},
+	{
+		"id": "kill_chain",
+		"name": "杀戮链",
+		"description": "连续5秒内有击杀时，全伤害 +{kill_chain_value}%（可刷新）",
+		"quality": "red",
+		"max_level": 5,
+		"upgrade_type": "enhancement",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	# ========== 阶段八：新增配件 ==========
+	{
+		"id": "decoy_drone",
+		"name": "诱饵无人机",
+		"description": "周期生成诱饵吸引敌人{decoy_drone_duration_value}秒\n冷却：{decoy_drone_cooldown_value}秒",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "auto_turret",
+		"name": "自主火力塔",
+		"description": "部署火力塔自动射击最近敌人\n基础伤害：{auto_turret_damage_value}\n冷却：{auto_turret_cooldown_value}秒",
+		"quality": "purple",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "repair_beacon",
+		"name": "维修信标",
+		"description": "放置信标，周围友军每秒回复{repair_beacon_heal_value}点耐久\n持续：{repair_beacon_duration_value}秒\n冷却：{repair_beacon_cooldown_value}秒",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "shield_emitter",
+		"name": "相位护盾发生器",
+		"description": "生成护盾吸收{shield_emitter_capacity_value}点伤害\n持续：{shield_emitter_duration_value}秒\n冷却：{shield_emitter_cooldown_value}秒",
+		"quality": "red",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "emp_pulse",
+		"name": "EMP脉冲器",
+		"description": "周期电磁脉冲，禁用范围内远程敌人瞄准{emp_pulse_duration_value}秒\n范围：{emp_pulse_radius_value}米\n冷却：{emp_pulse_cooldown_value}秒",
+		"quality": "red",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "grav_trap",
+		"name": "引力陷阱",
+		"description": "生成牵引场，将范围内敌人拉向中心\n范围：{grav_trap_radius_value}米\n持续：{grav_trap_duration_value}秒\n冷却：{grav_trap_cooldown_value}秒",
+		"quality": "purple",
+		"max_level": 4,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "thunder_coil",
+		"name": "雷霆线圈",
+		"description": "周期释放连锁电击，命中{thunder_coil_targets_value}个目标\n基础伤害：{thunder_coil_damage_value}\n冷却：{thunder_coil_cooldown_value}秒",
+		"quality": "red",
+		"max_level": 3,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "cryo_canister",
+		"name": "冷凝抑制器",
+		"description": "投射冻结区域，减速并降低敌人攻速\n范围：{cryo_canister_radius_value}米\n持续：{cryo_canister_duration_value}秒\n冷却：{cryo_canister_cooldown_value}秒",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "incendiary_canister",
+		"name": "温压投射器",
+		"description": "投射燃烧区域，造成持续伤害\n基础伤害：{incendiary_canister_damage_value}/秒\n范围：{incendiary_canister_radius_value}米\n冷却：{incendiary_canister_cooldown_value}秒",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "acid_sprayer",
+		"name": "酸蚀喷射器",
+		"description": "锥形持续伤害并降低敌方护甲\n基础伤害：{acid_sprayer_damage_value}/秒\n冷却：{acid_sprayer_cooldown_value}秒",
+		"quality": "blue",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "orbital_ping",
+		"name": "轨道引导标",
+		"description": "标记敌人后延时高伤单点打击\n基础伤害：{orbital_ping_damage_value}\n延迟：{orbital_ping_delay_value}秒\n冷却：{orbital_ping_cooldown_value}秒",
+		"quality": "white",
+		"max_level": 4,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
+		"prefix": ""
+	},
+	{
+		"id": "med_spray",
+		"name": "纳米修复喷雾",
+		"description": "周期释放修复喷雾，范围内每秒回复{med_spray_heal_value}点耐久\n范围：{med_spray_radius_value}米\n冷却：{med_spray_cooldown_value}秒",
+		"quality": "white",
+		"max_level": 5,
+		"upgrade_type": "accessory",
+		"exclusive_for": "",
 		"prefix": ""
 	}
 ]

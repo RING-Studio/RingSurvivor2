@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddecoydrone000001"]
+
+[ext_resource type="Script" path="res://scenes/ability/decoy_drone_ability_controller/decoy_drone_ability_controller.gd" id="1_ctrl"]
+
+[node name="DecoyDroneAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

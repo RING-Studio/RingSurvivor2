@@ -4,6 +4,8 @@ class_name HowitzerShell
 const AoECircleEffect = preload("res://scenes/effects/aoe_circle_effect.gd")
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
+@onready var explosion_area: Area2D = $ExplosionArea
+@onready var explosion_collision: CollisionShape2D = $ExplosionArea/CollisionShape2D
 
 var direction: Vector2 = Vector2.RIGHT
 var speed_pixels_per_second: float = 520.0
@@ -19,6 +21,8 @@ func _ready():
 	t.timeout.connect(queue_free)
 	hitbox_component.area_entered.connect(_on_hitbox_area_entered)
 	hitbox_component.damage_type = "weapon"
+	# 同步爆炸半径到 Area2D 碰撞形状
+	_sync_explosion_shape()
 
 func _process(delta: float):
 	global_position += direction.normalized() * speed_pixels_per_second * delta
@@ -29,6 +33,11 @@ func setup(dir: Vector2, dmg: float, radius_px: float, ratio: float = 1.0):
 	explosion_radius_px = radius_px
 	damage_ratio = ratio
 	rotation = dir.angle()  # 让 Sprite2D 朝向移动方向
+	_sync_explosion_shape()
+
+func _sync_explosion_shape():
+	if explosion_collision and explosion_collision.shape is CircleShape2D:
+		(explosion_collision.shape as CircleShape2D).radius = explosion_radius_px
 
 func _draw():
 	# 占位：炮弹小点
@@ -51,30 +60,42 @@ func _explode():
 		fx.setup(explosion_radius_px, Color(1.0, 0.2, 0.2, 64.0 / 255.0), 0.22)
 		layer.add_child(fx)
 	
-	var dmg := base_damage * damage_ratio
-	# 伤害修正（主武器通用强化）
-	if WeaponUpgradeHandler.instance:
-		dmg = WeaponUpgradeHandler.instance.get_damage_modifier(dmg)
+	var base_dmg := base_damage * damage_ratio
 	
-	# 暴击（主武器通用强化）
-	var base_crit_rate = GameManager.get_global_crit_rate()
-	var final_crit = base_crit_rate
-	if WeaponUpgradeHandler.instance:
-		final_crit = WeaponUpgradeHandler.instance.get_crit_rate_modifier(base_crit_rate, null)
-	var is_critical = randf() < final_crit
-	var crit_mult = 2.0
-	if WeaponUpgradeHandler.instance:
-		crit_mult = WeaponUpgradeHandler.instance.get_crit_damage_modifier(2.0, max(0.0, final_crit - base_crit_rate))
-	if is_critical:
-		dmg *= crit_mult
+	# AOE 伤害：通过 ExplosionArea 获取范围内的 HurtboxComponent
+	var enemies: Array[Node2D] = []
+	if explosion_area:
+		var overlapping = explosion_area.get_overlapping_areas()
+		for area in overlapping:
+			if area is HurtboxComponent:
+				var enemy = area.get_parent()
+				if enemy and enemy.is_in_group("enemy") and is_instance_valid(enemy):
+					if not enemies.has(enemy):
+						enemies.append(enemy)
 	
-	# AOE 伤害
-	var enemies = get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
-		if not is_instance_valid(enemy):
-			continue
-		if enemy.global_position.distance_squared_to(global_position) > explosion_radius_px * explosion_radius_px:
-			continue
+		# 伤害修正（主武器通用强化 + 目标特定加成）
+		var dmg := base_dmg
+		if WeaponUpgradeHandler.instance:
+			dmg = WeaponUpgradeHandler.instance.get_damage_modifier(dmg, enemy)
+		
+		# 暴击
+		var base_crit_rate = GameManager.get_global_crit_rate()
+		var final_crit = base_crit_rate
+		if WeaponUpgradeHandler.instance:
+			final_crit = WeaponUpgradeHandler.instance.get_crit_rate_modifier(base_crit_rate, enemy)
+		var is_critical = randf() < final_crit
+		var crit_mult = 2.0
+		if WeaponUpgradeHandler.instance:
+			crit_mult = WeaponUpgradeHandler.instance.get_crit_damage_modifier(2.0, max(0.0, final_crit - base_crit_rate))
+		if is_critical:
+			dmg *= crit_mult
+			if WeaponUpgradeHandler.instance:
+				WeaponUpgradeHandler.instance.on_weapon_critical(enemy)
+		
+		# 命中通知
+		if WeaponUpgradeHandler.instance:
+			WeaponUpgradeHandler.instance.on_weapon_hit(enemy)
 		
 		var armor_coverage: float = 0.0
 		if enemy.get("armorCoverage") != null:
@@ -94,5 +115,12 @@ func _explode():
 		var hb = enemy.get_node_or_null("HurtboxComponent")
 		if hb:
 			hb.apply_damage(final_damage, "weapon", is_critical)
+			# 击杀检测
+			var e_hc = enemy.get_node_or_null("HealthComponent")
+			if e_hc and e_hc.current_health <= 0:
+				if WeaponUpgradeHandler.instance:
+					WeaponUpgradeHandler.instance.on_enemy_killed(enemy)
+					if is_critical:
+						WeaponUpgradeHandler.instance.on_enemy_killed_by_critical(enemy)
 	
 	queue_free()

@@ -394,6 +394,236 @@ static var upgrade_configs: Dictionary = {
 		"type": "custom",
 		"level_effects": { 1: 1.0 },
 		"max_level": 1
+	},
+
+	# ========== 阶段八：新增通用强化 ==========
+
+	# 应急抢修：每级回复 1+lv 点（低于30%耐久时每5秒触发）
+	"emergency_repair": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 复合隔舱：免死次数 = 1+lv
+	"reinforced_bulkhead": {
+		"type": "custom",
+		"level_effects": { 1: 2.0, 2: 3.0, 3: 4.0 },
+		"max_level": 3
+	},
+
+	# 动能缓冲层：非击穿伤害减免 6%*lv
+	"kinetic_buffer": {
+		"type": "linear",
+		"per_level_value": 0.06,
+		"max_level": 5
+	},
+
+	# 过压限制器：被连续命中后2秒内受伤 -8%*lv
+	"overpressure_limiter": {
+		"type": "linear",
+		"per_level_value": 0.08,
+		"max_level": 4
+	},
+
+	# 伺服助力：转向响应 +12%*lv（倒车速度在 player 中处理）
+	"mobility_servos": {
+		"type": "linear",
+		"per_level_value": 0.12,
+		"max_level": 5
+	},
+
+	# 火控计算机：方向偏差修正 +10%*lv
+	"target_computer": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+
+	# 战场感知：每级上限 +2% 暴击率
+	"battle_awareness": {
+		"type": "linear",
+		"per_level_value": 0.02,
+		"max_level": 5
+	},
+
+	# ========== 阶段八：新增主武器通用强化 ==========
+
+	# 破甲尖锥：对中重甲额外伤害 +8%*lv
+	"armor_breaker": {
+		"type": "linear",
+		"per_level_value": 0.08,
+		"max_level": 5
+	},
+
+	# 弱点标定：连续命中后第 N 发加成（N 随等级递减）
+	"weakpoint_strike": {
+		"type": "custom",
+		"level_effects": { 1: 4.0, 2: 3.0, 3: 3.0, 4: 2.0, 5: 2.0 },
+		"max_level": 5
+	},
+
+	# 超频扳机：满血射速 or 低血伤害 +7%*lv
+	"overdrive_trigger": {
+		"type": "linear",
+		"per_level_value": 0.07,
+		"max_level": 5
+	},
+
+	# 后坐补偿器：连射散布上限 -20%*lv
+	"recoil_compensator": {
+		"type": "linear",
+		"per_level_value": 0.20,
+		"max_level": 5
+	},
+
+	# 曳光校正：子弹寿命 +10%*lv
+	"tracer_rounds": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+
+	# 震荡芯体：命中减速 0.4*lv 秒
+	"shock_core": {
+		"type": "linear",
+		"per_level_value": 0.4,
+		"max_level": 5
+	},
+
+	# 处决协议：目标低于20%耐久时额外 +6%*lv 伤害
+	"execution_protocol": {
+		"type": "linear",
+		"per_level_value": 0.06,
+		"max_level": 5
+	},
+
+	# 高装药：弹速 +10%*lv
+	"hot_load": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+
+	# 尾翼稳定器：弹道扩散角 -20%*lv
+	"fin_stabilized": {
+		"type": "linear",
+		"per_level_value": 0.20,
+		"max_level": 5
+	},
+
+	# 破片嵌入：每级 +1 层破片
+	"sharpened": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+
+	# 破片淬火：每层破片伤害 +0.2*lv
+	"bloodletting": {
+		"type": "linear",
+		"per_level_value": 0.2,
+		"max_level": 5
+	},
+
+	# 集束破片：每级提升破片上限 +1 并追加 1 层
+	"laceration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 杀戮链：连续击杀期间全伤害 +6%*lv
+	"kill_chain": {
+		"type": "linear",
+		"per_level_value": 0.06,
+		"max_level": 5
+	},
+
+	# ========== 阶段八：新增配件 ==========
+
+	# 诱饵无人机
+	"decoy_drone": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 自主火力塔
+	"auto_turret": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 维修信标
+	"repair_beacon": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 相位护盾发生器
+	"shield_emitter": {
+		"type": "custom",
+		"level_effects": { 1: 30.0, 2: 50.0, 3: 75.0 },
+		"max_level": 3
+	},
+
+	# EMP脉冲器
+	"emp_pulse": {
+		"type": "custom",
+		"level_effects": { 1: 3.0, 2: 4.0, 3: 5.0 },
+		"max_level": 3
+	},
+
+	# 引力陷阱
+	"grav_trap": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+
+	# 雷霆线圈
+	"thunder_coil": {
+		"type": "custom",
+		"level_effects": { 1: 15.0, 2: 25.0, 3: 40.0 },
+		"max_level": 3
+	},
+
+	# 冷凝抑制器
+	"cryo_canister": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 温压投射器
+	"incendiary_canister": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 酸蚀喷射器
+	"acid_sprayer": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+
+	# 轨道引导标
+	"orbital_ping": {
+		"type": "custom",
+		"level_effects": { 1: 80.0, 2: 120.0, 3: 160.0, 4: 200.0 },
+		"max_level": 4
+	},
+
+	# 纳米修复喷雾
+	"med_spray": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
 	}
 }
 

@@ -1,10 +1,12 @@
 extends Node
 class_name RadioSupportAbilityController
 
+const AoECircleEffect = preload("res://scenes/effects/aoe_circle_effect.gd")
+
 @export var marker_scene: PackedScene
 
 @export var base_cooldown_seconds: float = 60.0
-@export var base_radius_m: float = 20.0
+@export var base_radius_m: float = 40.0
 @export var strike_delay_seconds: float = 10.0
 
 var _cooldown_timer: Timer
@@ -29,7 +31,6 @@ func _get_cooldown_seconds() -> float:
 		return INF
 	var base = base_cooldown_seconds - 5.0 * float(lvl)  # 60-5lv
 	base = max(base, 5.0)
-	# cooling_device：仅影响冷却类配件
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
 	var speed_bonus := 0.0
 	if cd_lvl > 0:
@@ -70,30 +71,31 @@ func _on_cooldown():
 	var radius_px := _get_radius_pixels()
 	var base_damage := _get_base_damage()
 	
-	# 选择随机区域：以玩家为中心随机点
+	# 以玩家为中心随机点
 	var target_pos = player.global_position + Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, 400.0)
 	
-	# 视觉提示
-	if marker_scene:
-		var marker = marker_scene.instantiate()
-		get_tree().get_first_node_in_group("foreground_layer").add_child(marker)
-		marker.global_position = target_pos
-		if marker.has_method("setup"):
-			marker.setup(radius_px, strike_delay_seconds)
+	# 预警圆（淡红 alpha32，闪烁直到轰炸）
+	var layer = get_tree().get_first_node_in_group("foreground_layer")
+	var warning_fx: Node2D = null
+	if layer:
+		warning_fx = _create_blinking_circle(target_pos, radius_px, Color(1.0, 0.2, 0.2, 32.0 / 255.0))
+		layer.add_child(warning_fx)
 	
 	# 延迟打击
 	var timer = get_tree().create_timer(strike_delay_seconds)
 	timer.timeout.connect(func():
+		if is_instance_valid(warning_fx):
+			warning_fx.queue_free()
 		_apply_strike(target_pos, radius_px, base_damage)
 	)
 
 func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
-	# 视觉占位：alpha=64 红色圆形范围提示（打击瞬间）
+	# 轰炸圆（红 alpha64，短暂闪烁）
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:
 		var fx = AoECircleEffect.new()
 		fx.global_position = center
-		fx.setup(radius_px, Color(1.0, 0.2, 0.2, 64.0 / 255.0), 0.22)
+		fx.setup(radius_px, Color(1.0, 0.2, 0.2, 64.0 / 255.0), 0.15)
 		layer.add_child(fx)
 
 	# 伤害加成
@@ -102,19 +104,48 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 	if damage_bonus_level > 0:
 		dmg *= (1.0 + UpgradeEffectManager.get_effect("damage_bonus", damage_bonus_level))
 	
-	# 炮击对敌人：可暴击（来源 accessory）
 	var base_crit_rate = GameManager.get_global_crit_rate()
 	var crit_damage_multiplier = 2.0
 	var crit_damage_level = GameManager.current_upgrades.get("crit_damage", {}).get("level", 0)
 	if crit_damage_level > 0:
 		crit_damage_multiplier += UpgradeEffectManager.get_effect("crit_damage", crit_damage_level)
 	
-	var enemies = get_tree().get_nodes_in_group("enemy")
+	# 动态 Area2D 检测范围内敌人
+	var strike_area := Area2D.new()
+	strike_area.collision_layer = 0
+	strike_area.collision_mask = 4
+	strike_area.global_position = center
+	var shape_node := CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = radius_px
+	shape_node.shape = circle
+	strike_area.add_child(shape_node)
+	if layer:
+		layer.add_child(strike_area)
+	else:
+		get_tree().current_scene.add_child(strike_area)
+	
+	# 等一帧让物理引擎检测重叠
+	await get_tree().physics_frame
+	
+	var enemies: Array[Node2D] = []
+	for area in strike_area.get_overlapping_areas():
+		if area is HurtboxComponent:
+			var enemy = area.get_parent()
+			if enemy and enemy.is_in_group("enemy") and is_instance_valid(enemy):
+				if not enemies.has(enemy):
+					enemies.append(enemy)
+	
+	# 玩家友伤检测（玩家不在 mask=4，保留距离判断）
+	var player_in_range := false
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		if player.global_position.distance_squared_to(center) <= radius_px * radius_px:
+			player_in_range = true
+	
+	strike_area.queue_free()
+	
 	for enemy in enemies:
-		if not is_instance_valid(enemy):
-			continue
-		if enemy.global_position.distance_squared_to(center) > radius_px * radius_px:
-			continue
 		var is_critical = randf() < base_crit_rate
 		var applied = dmg
 		if is_critical:
@@ -140,9 +171,16 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 		if hurtbox:
 			hurtbox.apply_damage(final_damage, "accessory", is_critical)
 	
-	# 不分敌我：玩家也会受伤（按“基础伤害+伤害加成”，不暴击，不走护甲公式）
-	var player = get_tree().get_first_node_in_group("player")
-	if player and player.has_node("HealthComponent"):
-		if player.global_position.distance_squared_to(center) <= radius_px * radius_px:
-			var hc = player.get_node("HealthComponent")
-			hc.damage(dmg, {"damage_source": "radio_support", "is_pierced": false})
+	# 不分敌我：玩家也会受伤
+	if player_in_range and player and player.has_node("HealthComponent"):
+		var hc = player.get_node("HealthComponent")
+		hc.damage(dmg, {"damage_source": "radio_support", "is_pierced": false})
+
+func _create_blinking_circle(pos: Vector2, radius: float, color: Color) -> Node2D:
+	"""创建闪烁预警圆（0.3s 亮 / 0.3s 暗循环）"""
+	var node := Node2D.new()
+	node.global_position = pos
+	node.set_meta("_radius", radius)
+	node.set_meta("_color", color)
+	node.set_script(load("res://scenes/ability/radio_support_ability/radio_blink_circle.gd"))
+	return node

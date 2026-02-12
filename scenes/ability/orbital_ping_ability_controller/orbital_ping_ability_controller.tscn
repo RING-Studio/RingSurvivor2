@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dorbitalpingctrl"]
+
+[ext_resource type="Script" path="res://scenes/ability/orbital_ping_ability_controller/orbital_ping_ability_controller.gd" id="1_ctrl"]
+
+[node name="OrbitalPingAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

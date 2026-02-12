@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 @export var arena_time_manager: Node
 
-@export var rotation_speed: float = 4.0
+@export var rotation_speed: float = 1.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -46,23 +46,60 @@ var has_era_block: bool = false
 var era_block_used: bool = false
 var has_ir_counter: bool = false
 
+# 阶段八：新增配件/强化等级缓存
+var emergency_repair_level: int = 0
+var _emergency_repair_timer: Timer = null
+var reinforced_bulkhead_level: int = 0
+var reinforced_bulkhead_charges: int = 0
+var kinetic_buffer_level: int = 0
+var overpressure_limiter_level: int = 0
+var _overpressure_active_until_msec: int = 0
+var mobility_servos_level: int = 0
+var target_computer_level: int = 0
+
 func before_take_damage(amount: float, _hc: HealthComponent, context: Dictionary) -> float:
-	"""HealthComponent.damage 前一层：一次性免死等在此拦截。返回最终伤害值。"""
+	"""HealthComponent.damage 前一层：护盾吸收 → 减伤 → 一次性免死。返回最终伤害值。"""
 	if amount <= 0:
 		return amount
+	
+	# 护盾吸收（shield_emitter）：优先消耗护盾
+	var shield_ctrl := _get_shield_emitter_controller()
+	if shield_ctrl and shield_ctrl.shield_remaining > 0:
+		amount = shield_ctrl.absorb_damage(amount)
+		if amount <= 0:
+			return 0.0
+	
+	var is_pierced := bool(context.get("is_pierced", false))
+	
+	# 动能缓冲：非击穿伤害减免 6%*lv
+	if kinetic_buffer_level > 0 and not is_pierced:
+		var reduction := 0.06 * float(kinetic_buffer_level)
+		amount *= (1.0 - reduction)
+	
+	# 超压限制器：被连续命中后 2 秒内受伤 -8%*lv
+	if overpressure_limiter_level > 0 and Time.get_ticks_msec() < _overpressure_active_until_msec:
+		var reduction := 0.08 * float(overpressure_limiter_level)
+		amount *= (1.0 - reduction)
+	# 记录本次受伤，激活超压限制器 2 秒
+	if overpressure_limiter_level > 0:
+		_overpressure_active_until_msec = Time.get_ticks_msec() + 2000
+	
 	# 仅玩家自身的 HealthComponent 会走到这里
 	var will_die = (health_component.current_health - amount) <= 0
 	if not will_die:
 		return amount
 	
+	# 加固隔舱：致命伤时保留 1 点耐久（每局 1+lv 次）
+	if reinforced_bulkhead_level > 0 and reinforced_bulkhead_charges > 0:
+		reinforced_bulkhead_charges -= 1
+		return max(health_component.current_health - 1, 0)
+	
 	# 爆反：抵御一次任意致命伤害（优先）
 	if has_era_block and not era_block_used:
 		era_block_used = true
-		# 让本次伤害后至少剩 1 点耐久
 		return max(health_component.current_health - 1, 0)
 	
 	# 纤维内衬：抵御一次致命击穿伤害
-	var is_pierced := bool(context.get("is_pierced", false))
 	if is_pierced and has_spall_liner and not spall_liner_used:
 		spall_liner_used = true
 		return max(health_component.current_health - 1, 0)
@@ -88,6 +125,15 @@ func _ready():
 	_repair_kit_timer.autostart = false
 	add_child(_repair_kit_timer)
 	_repair_kit_timer.timeout.connect(_on_repair_kit_timeout)
+	
+	# 应急抢修定时器
+	_emergency_repair_timer = Timer.new()
+	_emergency_repair_timer.name = "EmergencyRepairTimer"
+	_emergency_repair_timer.one_shot = false
+	_emergency_repair_timer.autostart = false
+	_emergency_repair_timer.wait_time = 5.0
+	add_child(_emergency_repair_timer)
+	_emergency_repair_timer.timeout.connect(_on_emergency_repair_timeout)
 	
 	# 创建 WeaponUpgradeHandler
 	var upgrade_handler = WeaponUpgradeHandler.new()
@@ -128,6 +174,12 @@ func _apply_health_bonus():
 		var penalty := 1.0 - final_speed_multiplier
 		final_speed_multiplier = 1.0 - penalty * 0.5
 	velocity_component.max_speed = int(base_speed * final_speed_multiplier)
+	
+	# 机动伺服：转向响应 +12%*lv
+	if mobility_servos_level > 0:
+		rotation_speed = 1.0 * (1.0 + 0.12 * float(mobility_servos_level))
+	else:
+		rotation_speed = 1.0
 	
 	# 维护工具箱：刷新间隔并启停
 	_update_repair_kit_timer()
@@ -256,55 +308,11 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 		var entry = AbilityUpgradeData.get_entry(upgrade_id)
 		if entry and entry.get("upgrade_type", "") == "accessory":
 			# 检查是否已经实例化了该配件的Controller
-			var controller_exists = false
-			for child in abilities.get_children():
-				match upgrade_id:
-					"mine":
-						if child is MineAbilityController:
-							controller_exists = true
-							break
-					"smoke_grenade":
-						if child is SmokeGrenadeAbilityController:
-							controller_exists = true
-							break
-					"radio_support":
-						if child is RadioSupportAbilityController:
-							controller_exists = true
-							break
-					"laser_suppress":
-						if child is LaserSuppressAbilityController:
-							controller_exists = true
-							break
-					"external_missile":
-						if child is ExternalMissileAbilityController:
-							controller_exists = true
-							break
-					# 其他配件...
+			var controller_exists := _has_accessory_controller(upgrade_id)
 			
 			# 如果不存在，则实例化
 			if not controller_exists and upgrade_id in equipped_accessories:
-				match upgrade_id:
-					"mine":
-						var mine_controller = preload("res://scenes/ability/mine_ability_controller/mine_ability_controller.tscn").instantiate()
-						abilities.add_child(mine_controller)
-						print("已装备地雷")
-					"smoke_grenade":
-						var smoke_controller = preload("res://scenes/ability/smoke_grenade_ability_controller/smoke_grenade_ability_controller.tscn").instantiate()
-						abilities.add_child(smoke_controller)
-						print("已装备烟雾弹")
-					"radio_support":
-						var radio_controller = preload("res://scenes/ability/radio_support_ability_controller/radio_support_ability_controller.tscn").instantiate()
-						abilities.add_child(radio_controller)
-						print("已装备无线电通讯")
-					"laser_suppress":
-						var laser_controller = preload("res://scenes/ability/laser_suppress_ability_controller/laser_suppress_ability_controller.tscn").instantiate()
-						abilities.add_child(laser_controller)
-						print("已装备激光压制")
-					"external_missile":
-						var missile_controller = preload("res://scenes/ability/external_missile_ability_controller/external_missile_ability_controller.tscn").instantiate()
-						abilities.add_child(missile_controller)
-						print("已装备外挂导弹")
-					# 其他配件...
+				_instantiate_accessory_controller(upgrade_id)
 	
 	print("-------------------")	
 	print("基础伤害: " + str(GameManager.get_player_base_damage()))
@@ -329,6 +337,13 @@ func _reset_to_base_values():
 	heat_sink_level = 0
 	addon_armor_level = 0
 	relief_valve_level = 0
+	# 阶段八
+	emergency_repair_level = 0
+	reinforced_bulkhead_level = 0
+	kinetic_buffer_level = 0
+	overpressure_limiter_level = 0
+	mobility_servos_level = 0
+	target_computer_level = 0
 
 func _recalculate_all_attributes(current_upgrades: Dictionary):
 	"""根据当前所有升级重新计算属性"""
@@ -345,6 +360,9 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 			"repair_kit", "cabin_ac", "heat_sink",
 			"christie_suspension", "gas_turbine", "hydro_pneumatic",
 			"addon_armor", "relief_valve",
+			# 阶段八
+			"emergency_repair", "reinforced_bulkhead", "kinetic_buffer",
+			"overpressure_limiter", "mobility_servos", "target_computer",
 		]
 		
 		if not is_global_upgrade and not is_new_global_upgrade:
@@ -382,9 +400,25 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 				global_health_bonus += int(effect_value)
 			"relief_valve":
 				relief_valve_level = level
+			# ===== 阶段八 =====
+			"emergency_repair":
+				emergency_repair_level = level
+			"reinforced_bulkhead":
+				reinforced_bulkhead_level = level
+				reinforced_bulkhead_charges = 1 + level
+			"kinetic_buffer":
+				kinetic_buffer_level = level
+			"overpressure_limiter":
+				overpressure_limiter_level = level
+			"mobility_servos":
+				mobility_servos_level = level
+			"target_computer":
+				target_computer_level = level
 	
 	# 应用耐久加成
 	_apply_health_bonus()
+	# 更新应急抢修定时器
+	_update_emergency_repair_timer()
 
 
 func _get_cooling_speed_bonus() -> float:
@@ -499,28 +533,7 @@ func setup_equipped_abilities():
 	for accessory_id in equipped_accessories:
 		if accessory_id is not String:
 			continue
-		match accessory_id:
-			"mine":
-				var mine_controller = preload("res://scenes/ability/mine_ability_controller/mine_ability_controller.tscn").instantiate()
-				abilities.add_child(mine_controller)
-				print("已装备地雷")
-			"smoke_grenade":
-				var smoke_controller = preload("res://scenes/ability/smoke_grenade_ability_controller/smoke_grenade_ability_controller.tscn").instantiate()
-				abilities.add_child(smoke_controller)
-				print("已装备烟雾弹")
-			"radio_support":
-				var radio_controller = preload("res://scenes/ability/radio_support_ability_controller/radio_support_ability_controller.tscn").instantiate()
-				abilities.add_child(radio_controller)
-				print("已装备无线电通讯")
-			"laser_suppress":
-				var laser_controller = preload("res://scenes/ability/laser_suppress_ability_controller/laser_suppress_ability_controller.tscn").instantiate()
-				abilities.add_child(laser_controller)
-				print("已装备激光压制")
-			"external_missile":
-				var missile_controller = preload("res://scenes/ability/external_missile_ability_controller/external_missile_ability_controller.tscn").instantiate()
-				abilities.add_child(missile_controller)
-				print("已装备外挂导弹")
-			# 其他配件...
+		_instantiate_accessory_controller(accessory_id)
 
 func _sync_passive_accessories(current_upgrades: Dictionary):
 	"""根据 current_upgrades 同步被动配件拥有状态（不重置已消耗状态）"""
@@ -551,3 +564,115 @@ func on_arena_difficulty_increased(difficulty: int):
 		var is_thirty_second_interval = (difficulty % 6) == 0
 		if is_thirty_second_interval:
 			health_component.heal(health_regeneration_quantity)
+
+# ========== 应急抢修 ==========
+
+func _update_emergency_repair_timer():
+	if _emergency_repair_timer == null:
+		return
+	if emergency_repair_level <= 0:
+		if not _emergency_repair_timer.is_stopped():
+			_emergency_repair_timer.stop()
+		return
+	if _emergency_repair_timer.is_stopped():
+		_emergency_repair_timer.start()
+
+func _on_emergency_repair_timeout():
+	"""应急抢修：耐久低于 30% 时每 5 秒回复 (1 + lv) 点"""
+	if emergency_repair_level <= 0:
+		return
+	var hp_ratio: float = float(health_component.current_health) / float(health_component.max_health)
+	if hp_ratio < 0.30:
+		health_component.heal(1 + emergency_repair_level)
+
+# ========== 配件控制器映射表 ==========
+
+# { accessory_id: [class_name_type, preload_path] }
+const ACCESSORY_CONTROLLER_MAP := {
+	"mine": ["MineAbilityController", "res://scenes/ability/mine_ability_controller/mine_ability_controller.tscn"],
+	"smoke_grenade": ["SmokeGrenadeAbilityController", "res://scenes/ability/smoke_grenade_ability_controller/smoke_grenade_ability_controller.tscn"],
+	"radio_support": ["RadioSupportAbilityController", "res://scenes/ability/radio_support_ability_controller/radio_support_ability_controller.tscn"],
+	"laser_suppress": ["LaserSuppressAbilityController", "res://scenes/ability/laser_suppress_ability_controller/laser_suppress_ability_controller.tscn"],
+	"external_missile": ["ExternalMissileAbilityController", "res://scenes/ability/external_missile_ability_controller/external_missile_ability_controller.tscn"],
+	"decoy_drone": ["DecoyDroneAbilityController", "res://scenes/ability/decoy_drone_ability_controller/decoy_drone_ability_controller.tscn"],
+	"auto_turret": ["AutoTurretAbilityController", "res://scenes/ability/auto_turret_ability_controller/auto_turret_ability_controller.tscn"],
+	"repair_beacon": ["RepairBeaconAbilityController", "res://scenes/ability/repair_beacon_ability_controller/repair_beacon_ability_controller.tscn"],
+	"shield_emitter": ["ShieldEmitterAbilityController", "res://scenes/ability/shield_emitter_ability_controller/shield_emitter_ability_controller.tscn"],
+	"emp_pulse": ["EmpPulseAbilityController", "res://scenes/ability/emp_pulse_ability_controller/emp_pulse_ability_controller.tscn"],
+	"grav_trap": ["GravTrapAbilityController", "res://scenes/ability/grav_trap_ability_controller/grav_trap_ability_controller.tscn"],
+	"thunder_coil": ["ThunderCoilAbilityController", "res://scenes/ability/thunder_coil_ability_controller/thunder_coil_ability_controller.tscn"],
+	"cryo_canister": ["CryoCanisterAbilityController", "res://scenes/ability/cryo_canister_ability_controller/cryo_canister_ability_controller.tscn"],
+	"incendiary_canister": ["IncendiaryCanisterAbilityController", "res://scenes/ability/incendiary_canister_ability_controller/incendiary_canister_ability_controller.tscn"],
+	"acid_sprayer": ["AcidSprayerAbilityController", "res://scenes/ability/acid_sprayer_ability_controller/acid_sprayer_ability_controller.tscn"],
+	"orbital_ping": ["OrbitalPingAbilityController", "res://scenes/ability/orbital_ping_ability_controller/orbital_ping_ability_controller.tscn"],
+	"med_spray": ["MedSprayAbilityController", "res://scenes/ability/med_spray_ability_controller/med_spray_ability_controller.tscn"],
+}
+
+# 名称到 class 的映射（GDScript 无法 const 字典存 class，改用 match）
+func _has_accessory_controller(accessory_id: String) -> bool:
+	"""检查 abilities 子节点中是否已存在该配件的控制器"""
+	for child in abilities.get_children():
+		match accessory_id:
+			"mine":
+				if child is MineAbilityController: return true
+			"smoke_grenade":
+				if child is SmokeGrenadeAbilityController: return true
+			"radio_support":
+				if child is RadioSupportAbilityController: return true
+			"laser_suppress":
+				if child is LaserSuppressAbilityController: return true
+			"external_missile":
+				if child is ExternalMissileAbilityController: return true
+			"decoy_drone":
+				if child is DecoyDroneAbilityController: return true
+			"auto_turret":
+				if child is AutoTurretAbilityController: return true
+			"repair_beacon":
+				if child is RepairBeaconAbilityController: return true
+			"shield_emitter":
+				if child is ShieldEmitterAbilityController: return true
+			"emp_pulse":
+				if child is EmpPulseAbilityController: return true
+			"grav_trap":
+				if child is GravTrapAbilityController: return true
+			"thunder_coil":
+				if child is ThunderCoilAbilityController: return true
+			"cryo_canister":
+				if child is CryoCanisterAbilityController: return true
+			"incendiary_canister":
+				if child is IncendiaryCanisterAbilityController: return true
+			"acid_sprayer":
+				if child is AcidSprayerAbilityController: return true
+			"orbital_ping":
+				if child is OrbitalPingAbilityController: return true
+			"med_spray":
+				if child is MedSprayAbilityController: return true
+	return false
+
+func _instantiate_accessory_controller(accessory_id: String) -> void:
+	"""实例化配件控制器并添加到 abilities 节点"""
+	if not ACCESSORY_CONTROLLER_MAP.has(accessory_id):
+		push_warning("未知配件 ID: %s" % accessory_id)
+		return
+	var entry = ACCESSORY_CONTROLLER_MAP[accessory_id]
+	var scene_path: String = entry[1]
+	var controller = load(scene_path).instantiate()
+	abilities.add_child(controller)
+	print("已装备配件: %s" % accessory_id)
+
+# ========== 护盾吸收（shield_emitter） ==========
+
+func _get_shield_emitter_controller() -> ShieldEmitterAbilityController:
+	"""查找 abilities 下的 ShieldEmitterAbilityController"""
+	for child in abilities.get_children():
+		if child is ShieldEmitterAbilityController:
+			return child as ShieldEmitterAbilityController
+	return null
+
+# ========== 对外接口（供 WeaponUpgradeHandler 查询） ==========
+
+func get_target_computer_level() -> int:
+	return target_computer_level
+
+func get_mobility_servos_level() -> int:
+	return mobility_servos_level

@@ -59,7 +59,7 @@ func _request_request_completed(result: int, response_code: int, headers: Packed
 	var current_version: String = editor_plugin.get_version()
 
 	# Work out the next version from the releases information on GitHub
-	var response: Array = JSON.parse_string(body.get_string_from_utf8())
+	var response = JSON.parse_string(body.get_string_from_utf8())
 	if typeof(response) != TYPE_ARRAY: return
 
 	# GitHub releases are in order of creation, not order of version

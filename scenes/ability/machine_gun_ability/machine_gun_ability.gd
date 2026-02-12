@@ -112,11 +112,13 @@ func _on_hitbox_area_entered(area: Area2D):
 	# 主目标扣血 + 伤害数字
 	apply_damage_to_hurtbox(hurtbox, damage, damage_source, is_critical)
 	
-	# 收割：检查暴击击杀（在伤害应用后）
-	if is_critical:
-		var enemy_health = target.get_node_or_null("HealthComponent")
-		if enemy_health and enemy_health.current_health <= 0:
-			if WeaponUpgradeHandler.instance:
+	# 击杀检测（在伤害应用后）
+	var enemy_health = target.get_node_or_null("HealthComponent")
+	if enemy_health and enemy_health.current_health <= 0:
+		if WeaponUpgradeHandler.instance:
+			WeaponUpgradeHandler.instance.on_enemy_killed(target)
+			# 收割：暴击击杀
+			if is_critical:
 				WeaponUpgradeHandler.instance.on_enemy_killed_by_critical(target)
 
 	# 溅射

@@ -5,14 +5,25 @@ const AoECircleEffect = preload("res://scenes/effects/aoe_circle_effect.gd")
 
 @export var speed_pixels_per_second: float = 360.0
 
+@onready var explosion_area: Area2D = $ExplosionArea
+@onready var explosion_collision: CollisionShape2D = $ExplosionArea/CollisionShape2D
+
 var target: Node2D
 var explosion_radius_px: float = 48.0
 var base_damage: float = 30.0
+
+func _ready():
+	_sync_explosion_shape()
 
 func setup(target_node: Node2D, damage: float, radius_px: float):
 	target = target_node
 	base_damage = damage
 	explosion_radius_px = radius_px
+	_sync_explosion_shape()
+
+func _sync_explosion_shape():
+	if explosion_collision and explosion_collision.shape is CircleShape2D:
+		(explosion_collision.shape as CircleShape2D).radius = explosion_radius_px
 
 func _process(delta: float):
 	if target == null or not is_instance_valid(target):
@@ -40,8 +51,15 @@ func _explode():
 		fx.setup(explosion_radius_px, Color(1.0, 0.2, 0.2, 64.0 / 255.0), 0.22)
 		layer.add_child(fx)
 
-	# AOE：按距离遍历 enemy 组
-	var enemies = get_tree().get_nodes_in_group("enemy")
+	# AOE：通过 ExplosionArea 获取范围内敌人
+	var enemies: Array[Node2D] = []
+	if explosion_area:
+		for area in explosion_area.get_overlapping_areas():
+			if area is HurtboxComponent:
+				var enemy = area.get_parent()
+				if enemy and enemy.is_in_group("enemy") and is_instance_valid(enemy):
+					if not enemies.has(enemy):
+						enemies.append(enemy)
 	
 	# 伤害加成
 	var dmg := base_damage
@@ -62,10 +80,6 @@ func _explode():
 		crit_damage_multiplier += UpgradeEffectManager.get_effect("crit_damage", crit_damage_level)
 	
 	for enemy in enemies:
-		if not is_instance_valid(enemy):
-			continue
-		if enemy.global_position.distance_squared_to(global_position) > explosion_radius_px * explosion_radius_px:
-			continue
 		var applied = dmg
 		var is_critical = randf() < base_crit_rate
 		if is_critical:

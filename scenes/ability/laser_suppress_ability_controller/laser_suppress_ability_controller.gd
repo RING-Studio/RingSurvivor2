@@ -10,6 +10,10 @@ var _cooldown_timer: Timer
 var _tick_timer: Timer
 var _active_until_msec: int = 0
 
+# 检测范围 Area2D（动态创建，挂在 player 下随之移动）
+var _detect_area: Area2D = null
+var _detect_shape: CollisionShape2D = null
+
 func _ready():
 	_cooldown_timer = Timer.new()
 	_cooldown_timer.one_shot = false
@@ -25,6 +29,24 @@ func _ready():
 	
 	GameEvents.ability_upgrade_added.connect(_on_upgrade_added)
 	_update_cooldown_timer()
+	
+	# 延迟一帧创建检测区域（等 player 就绪）
+	await get_tree().process_frame
+	_setup_detect_area()
+
+func _setup_detect_area():
+	var player = get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	_detect_area = Area2D.new()
+	_detect_area.collision_layer = 0
+	_detect_area.collision_mask = 4  # 检测 HurtboxComponent
+	_detect_shape = CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = range_m * GlobalFomulaManager.METERS_TO_PIXELS
+	_detect_shape.shape = circle
+	_detect_area.add_child(_detect_shape)
+	player.add_child(_detect_area)
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
 	if upgrade_id in ["laser_suppress", "cooling_device", "damage_bonus", "crit_damage", "crit_rate"]:
@@ -35,7 +57,6 @@ func _get_cooldown_seconds() -> float:
 	if lvl <= 0:
 		return INF
 	var base := base_cooldown_seconds
-	# cooling_device：仅影响冷却类配件
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
 	var speed_bonus := 0.0
 	if cd_lvl > 0:
@@ -65,37 +86,42 @@ func _on_tick():
 		_tick_timer.stop()
 		return
 	
+	if _detect_area == null:
+		return
+	
+	# 从检测区域获取范围内的敌人，筛选"正在瞄准玩家"的远程敌人
+	var target: Node2D = null
 	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
 	
-	# 目标选择口径：锁定“正在瞄准玩家”的远程敌人（WizardEnemy 视为远程敌人并提供 is_aiming_player）
-	var range_px := range_m * GlobalFomulaManager.METERS_TO_PIXELS
-	var ranged = get_tree().get_nodes_in_group("ranged_enemy")
-	var target: Node2D = null
-	var best := INF
-	for e in ranged:
-		if not is_instance_valid(e):
+	var best_dist_sq := INF
+	for area in _detect_area.get_overlapping_areas():
+		if not area is HurtboxComponent:
 			continue
-		if e.get("is_aiming_player") != true:
+		var enemy = area.get_parent()
+		if enemy == null or not is_instance_valid(enemy):
 			continue
-		var d2 = e.global_position.distance_squared_to(player.global_position)
-		if d2 <= range_px * range_px and d2 < best:
-			best = d2
-			target = e
+		if not enemy.is_in_group("ranged_enemy"):
+			continue
+		if enemy.get("is_aiming_player") != true:
+			continue
+		var d2 = enemy.global_position.distance_squared_to(player.global_position)
+		if d2 < best_dist_sq:
+			best_dist_sq = d2
+			target = enemy
+	
 	if target == null:
 		return
 	
 	var lvl = GameManager.current_upgrades.get("laser_suppress", {}).get("level", 0)
 	var base_damage = 4.0 + 2.0 * float(max(lvl, 1))
 	
-	# 伤害加成
 	var dmg: float = base_damage
 	var damage_bonus_level = GameManager.current_upgrades.get("damage_bonus", {}).get("level", 0)
 	if damage_bonus_level > 0:
 		dmg *= (1.0 + UpgradeEffectManager.get_effect("damage_bonus", damage_bonus_level))
 	
-	# 可暴击（来源 accessory）
 	var base_crit_rate = GameManager.get_global_crit_rate()
 	var crit_damage_multiplier = 2.0
 	var crit_damage_level = GameManager.current_upgrades.get("crit_damage", {}).get("level", 0)
