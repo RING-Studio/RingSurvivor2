@@ -22,7 +22,7 @@ func _ready():
 	_update_timer()
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["radio_support", "radio_radius", "cooling_device", "damage_bonus", "crit_damage", "crit_rate"]:
+	if upgrade_id in ["radio_support", "radio_radius", "radio_barrage_count", "cooling_device", "damage_bonus", "crit_damage", "crit_rate"]:
 		_update_timer()
 
 func _get_cooldown_seconds() -> float:
@@ -32,16 +32,16 @@ func _get_cooldown_seconds() -> float:
 	var base = base_cooldown_seconds - 5.0 * float(lvl)  # 60-5lv
 	base = max(base, 5.0)
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var speed_bonus := 0.0
+	var speed_bonus: float = 0.0
 	if cd_lvl > 0:
 		speed_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
-	var speed_multiplier := 1.0 + speed_bonus
+	var speed_multiplier: float = 1.0 + speed_bonus
 	if speed_multiplier <= 0.0:
 		return INF
 	return max(base / speed_multiplier, 0.5)
 
 func _get_radius_pixels() -> float:
-	var radius_m := base_radius_m
+	var radius_m: float = base_radius_m
 	var bonus_lvl = GameManager.current_upgrades.get("radio_radius", {}).get("level", 0)
 	if bonus_lvl > 0:
 		radius_m += UpgradeEffectManager.get_effect("radio_radius", bonus_lvl)
@@ -51,8 +51,12 @@ func _get_base_damage() -> float:
 	var lvl = GameManager.current_upgrades.get("radio_support", {}).get("level", 0)
 	return 50.0 + 20.0 * float(max(lvl, 1))
 
+func _get_barrage_count() -> int:
+	var extra_level = GameManager.current_upgrades.get("radio_barrage_count", {}).get("level", 0)
+	return 1 + int(UpgradeEffectManager.get_effect("radio_barrage_count", extra_level))
+
 func _update_timer():
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if _cooldown_timer == null:
 		return
 	if is_inf(interval):
@@ -68,8 +72,8 @@ func _on_cooldown():
 	if player == null:
 		return
 	
-	var radius_px := _get_radius_pixels()
-	var base_damage := _get_base_damage()
+	var radius_px: float = _get_radius_pixels()
+	var base_damage: float = _get_base_damage()
 	
 	# 以玩家为中心随机点
 	var target_pos = player.global_position + Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, 400.0)
@@ -81,12 +85,16 @@ func _on_cooldown():
 		warning_fx = _create_blinking_circle(target_pos, radius_px, Color(1.0, 0.2, 0.2, 32.0 / 255.0))
 		layer.add_child(warning_fx)
 	
+	var barrage_count = _get_barrage_count()
+	
 	# 延迟打击
 	var timer = get_tree().create_timer(strike_delay_seconds)
 	timer.timeout.connect(func():
 		if is_instance_valid(warning_fx):
 			warning_fx.queue_free()
-		_apply_strike(target_pos, radius_px, base_damage)
+		for i in range(barrage_count):
+			var offset = Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, radius_px * 0.3)
+			_apply_strike(target_pos + offset, radius_px, base_damage)
 	)
 
 func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
@@ -99,7 +107,7 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 		layer.add_child(fx)
 
 	# 伤害加成
-	var dmg := base_damage
+	var dmg: float = base_damage
 	var damage_bonus_level = GameManager.current_upgrades.get("damage_bonus", {}).get("level", 0)
 	if damage_bonus_level > 0:
 		dmg *= (1.0 + UpgradeEffectManager.get_effect("damage_bonus", damage_bonus_level))
@@ -111,12 +119,12 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 		crit_damage_multiplier += UpgradeEffectManager.get_effect("crit_damage", crit_damage_level)
 	
 	# 动态 Area2D 检测范围内敌人
-	var strike_area := Area2D.new()
+	var strike_area: Area2D = Area2D.new()
 	strike_area.collision_layer = 0
 	strike_area.collision_mask = 4
 	strike_area.global_position = center
-	var shape_node := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
+	var shape_node: CollisionShape2D = CollisionShape2D.new()
+	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = radius_px
 	shape_node.shape = circle
 	strike_area.add_child(shape_node)
@@ -137,7 +145,7 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 					enemies.append(enemy)
 	
 	# 玩家友伤检测（玩家不在 mask=4，保留距离判断）
-	var player_in_range := false
+	var player_in_range: bool = false
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		if player.global_position.distance_squared_to(center) <= radius_px * radius_px:
@@ -178,7 +186,7 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 
 func _create_blinking_circle(pos: Vector2, radius: float, color: Color) -> Node2D:
 	"""创建闪烁预警圆（0.3s 亮 / 0.3s 暗循环）"""
-	var node := Node2D.new()
+	var node: Node2D = Node2D.new()
 	node.global_position = pos
 	node.set_meta("_radius", radius)
 	node.set_meta("_color", color)

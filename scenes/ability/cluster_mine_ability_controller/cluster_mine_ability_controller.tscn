@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cluster_mine_controller"]
+
+[ext_resource type="Script" path="res://scenes/ability/cluster_mine_ability_controller/cluster_mine_ability_controller.gd" id="1_ctrl"]
+
+[node name="ClusterMineAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

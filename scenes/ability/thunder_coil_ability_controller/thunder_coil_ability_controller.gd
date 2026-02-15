@@ -17,33 +17,41 @@ func _ready():
 	_update_timer()
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["thunder_coil", "cooling_device", "damage_bonus", "crit_damage", "crit_rate"]:
+	if upgrade_id in ["thunder_coil", "cooling_device", "coil_chain_count", "coil_damage", "damage_bonus", "crit_damage", "crit_rate"]:
 		_update_timer()
 
 func _get_cooldown_seconds() -> float:
 	var lvl = GameManager.current_upgrades.get("thunder_coil", {}).get("level", 0)
 	if lvl <= 0:
 		return INF
-	var base := base_cooldown_seconds
+	var base: float = base_cooldown_seconds
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var cooling_device_bonus := 0.0
+	var cooling_device_bonus: float = 0.0
 	if cd_lvl > 0:
 		cooling_device_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
 	return max(base / (1.0 + cooling_device_bonus), 0.5)
 
 func _get_target_count() -> int:
 	var lvl = GameManager.current_upgrades.get("thunder_coil", {}).get("level", 0)
-	return 3 + max(lvl, 1)
+	var count = 3 + max(lvl, 1)
+	var bonus_lvl = GameManager.current_upgrades.get("coil_chain_count", {}).get("level", 0)
+	if bonus_lvl > 0:
+		count += int(UpgradeEffectManager.get_effect("coil_chain_count", bonus_lvl))
+	return count
 
 func _get_base_damage() -> float:
 	var lvl = GameManager.current_upgrades.get("thunder_coil", {}).get("level", 0)
-	return UpgradeEffectManager.get_effect("thunder_coil", max(lvl, 1))
+	var dmg = UpgradeEffectManager.get_effect("thunder_coil", max(lvl, 1))
+	var bonus_lvl = GameManager.current_upgrades.get("coil_damage", {}).get("level", 0)
+	if bonus_lvl > 0:
+		dmg += UpgradeEffectManager.get_effect("coil_damage", bonus_lvl)
+	return dmg
 
 func _get_radius_pixels() -> float:
 	return base_radius_m * GlobalFomulaManager.METERS_TO_PIXELS
 
 func _update_timer() -> void:
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if _cooldown_timer == null:
 		return
 	if is_inf(interval):
@@ -60,15 +68,15 @@ func _on_cooldown() -> void:
 		return
 	
 	var center: Vector2 = player.global_position
-	var radius_px := _get_radius_pixels()
-	var target_count := _get_target_count()
+	var radius_px: float = _get_radius_pixels()
+	var target_count: int = _get_target_count()
 	
-	var coil_area := Area2D.new()
+	var coil_area: Area2D = Area2D.new()
 	coil_area.collision_layer = 0
 	coil_area.collision_mask = 4
 	coil_area.global_position = center
-	var shape_node := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
+	var shape_node: CollisionShape2D = CollisionShape2D.new()
+	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = radius_px
 	shape_node.shape = circle
 	coil_area.add_child(shape_node)
@@ -103,7 +111,7 @@ func _on_cooldown() -> void:
 	
 	coil_area.queue_free()
 	
-	var base_dmg := _get_base_damage()
+	var base_dmg: float = _get_base_damage()
 	var dmg: float = base_dmg
 	var damage_bonus_level = GameManager.current_upgrades.get("damage_bonus", {}).get("level", 0)
 	if damage_bonus_level > 0:

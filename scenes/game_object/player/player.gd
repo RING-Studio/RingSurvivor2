@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const AoECircleEffect = preload("res://scenes/effects/aoe_circle_effect.gd")
+
 @export var arena_time_manager: Node
 
 @export var rotation_speed: float = 1.0
@@ -45,6 +47,12 @@ var spall_liner_used: bool = false
 var has_era_block: bool = false
 var era_block_used: bool = false
 var has_ir_counter: bool = false
+var spall_liner_charges: int = 0
+var spall_liner_max_charges: int = 0
+var _spall_rearm_at_msec: int = 0
+var era_block_charges: int = 0
+var era_block_max_charges: int = 0
+var _era_rearm_at_msec: int = 0
 
 # 阶段八：新增配件/强化等级缓存
 var emergency_repair_level: int = 0
@@ -57,28 +65,55 @@ var _overpressure_active_until_msec: int = 0
 var mobility_servos_level: int = 0
 var target_computer_level: int = 0
 
+# 临时移动速度加成
+var _temp_speed_multiplier: float = 1.0
+var _temp_speed_bonus_until_msec: int = 0
+
+# 纳米装甲临时护盾
+var _nano_overcap_shield: float = 0.0
+var _nano_overcap_until_msec: int = 0
+
+# 动能屏障
+var _kinetic_barrier_reduction: float = 0.0
+var _kinetic_barrier_until_msec: int = 0
+
 func before_take_damage(amount: float, _hc: HealthComponent, context: Dictionary) -> float:
 	"""HealthComponent.damage 前一层：护盾吸收 → 减伤 → 一次性免死。返回最终伤害值。"""
 	if amount <= 0:
 		return amount
 	
 	# 护盾吸收（shield_emitter）：优先消耗护盾
-	var shield_ctrl := _get_shield_emitter_controller()
+	var shield_ctrl: Node = _get_shield_emitter_controller()
 	if shield_ctrl and shield_ctrl.shield_remaining > 0:
 		amount = shield_ctrl.absorb_damage(amount)
 		if amount <= 0:
 			return 0.0
 	
-	var is_pierced := bool(context.get("is_pierced", false))
+	# 纳米装甲临时护盾
+	if _nano_overcap_shield > 0.0:
+		if Time.get_ticks_msec() >= _nano_overcap_until_msec:
+			_nano_overcap_shield = 0.0
+		else:
+			var absorbed: float = min(amount, _nano_overcap_shield)
+			_nano_overcap_shield -= absorbed
+			amount -= absorbed
+			if amount <= 0.0:
+				return 0.0
+	
+	# 动能屏障减伤（仅在持续时间内）
+	if _kinetic_barrier_reduction > 0.0 and Time.get_ticks_msec() < _kinetic_barrier_until_msec:
+		amount *= (1.0 - _kinetic_barrier_reduction)
+	
+	var is_pierced: bool = bool(context.get("is_pierced", false))
 	
 	# 动能缓冲：非击穿伤害减免 6%*lv
 	if kinetic_buffer_level > 0 and not is_pierced:
-		var reduction := 0.06 * float(kinetic_buffer_level)
+		var reduction: float = 0.06 * float(kinetic_buffer_level)
 		amount *= (1.0 - reduction)
 	
 	# 超压限制器：被连续命中后 2 秒内受伤 -8%*lv
 	if overpressure_limiter_level > 0 and Time.get_ticks_msec() < _overpressure_active_until_msec:
-		var reduction := 0.08 * float(overpressure_limiter_level)
+		var reduction: float = 0.08 * float(overpressure_limiter_level)
 		amount *= (1.0 - reduction)
 	# 记录本次受伤，激活超压限制器 2 秒
 	if overpressure_limiter_level > 0:
@@ -95,13 +130,22 @@ func before_take_damage(amount: float, _hc: HealthComponent, context: Dictionary
 		return max(health_component.current_health - 1, 0)
 	
 	# 爆反：抵御一次任意致命伤害（优先）
-	if has_era_block and not era_block_used:
-		era_block_used = true
+	if has_era_block and era_block_charges > 0:
+		era_block_charges -= 1
+		var rearm_level = GameManager.current_upgrades.get("era_rearm", {}).get("level", 0)
+		if rearm_level > 0 and era_block_charges < era_block_max_charges:
+			_era_rearm_at_msec = Time.get_ticks_msec() + int(_get_era_rearm_seconds(rearm_level) * 1000.0)
+		var shock_level = GameManager.current_upgrades.get("era_shockwave", {}).get("level", 0)
+		if shock_level > 0:
+			_trigger_era_shockwave(shock_level)
 		return max(health_component.current_health - 1, 0)
 	
 	# 纤维内衬：抵御一次致命击穿伤害
-	if is_pierced and has_spall_liner and not spall_liner_used:
-		spall_liner_used = true
+	if is_pierced and has_spall_liner and spall_liner_charges > 0:
+		spall_liner_charges -= 1
+		var rearm_level = GameManager.current_upgrades.get("spall_reload", {}).get("level", 0)
+		if rearm_level > 0 and spall_liner_charges < spall_liner_max_charges:
+			_spall_rearm_at_msec = Time.get_ticks_msec() + int(_get_spall_rearm_seconds(rearm_level) * 1000.0)
 		return max(health_component.current_health - 1, 0)
 	
 	return amount
@@ -169,9 +213,11 @@ func _apply_health_bonus():
 	
 	# 移速：base_speed * move_speed_multiplier
 	# 液气悬挂：若存在移速惩罚（倍率<1），惩罚减半
-	var final_speed_multiplier := move_speed_multiplier
+	var final_speed_multiplier: float = move_speed_multiplier
+	if _temp_speed_multiplier > 1.0:
+		final_speed_multiplier *= _temp_speed_multiplier
 	if hydro_pneumatic_half_penalty and final_speed_multiplier < 1.0:
-		var penalty := 1.0 - final_speed_multiplier
+		var penalty: float = 1.0 - final_speed_multiplier
 		final_speed_multiplier = 1.0 - penalty * 0.5
 	velocity_component.max_speed = int(base_speed * final_speed_multiplier)
 	
@@ -189,6 +235,14 @@ func get_global_crit_rate_bonus() -> float:
 	return global_crit_rate_bonus
 
 func _process(delta):
+	# 临时速度加成到期
+	if _temp_speed_multiplier > 1.0 and Time.get_ticks_msec() >= _temp_speed_bonus_until_msec:
+		_temp_speed_multiplier = 1.0
+		_apply_health_bonus()
+	
+	# 纤维内衬 / 爆反 复位
+	_handle_passive_rearm()
+	
 	var rotation_input = Input.get_action_strength("right") - Input.get_action_strength("left")
 	rotation += rotation_input * rotation_speed * delta
 	
@@ -201,7 +255,7 @@ func _process(delta):
 	velocity_component.move(self)
 	
 	# cabin_ac buff 结束时，刷新维护工具箱间隔（避免一直保持加速）
-	var cabin_ac_active_now := (Time.get_ticks_msec() < cabin_ac_active_until_msec)
+	var cabin_ac_active_now: bool = (Time.get_ticks_msec() < cabin_ac_active_until_msec)
 	if _cabin_ac_last_active and not cabin_ac_active_now:
 		_update_repair_kit_timer()
 	_cabin_ac_last_active = cabin_ac_active_now
@@ -213,6 +267,103 @@ func _process(delta):
 	# 	# animation_player.play("RESET")
 	# 	pass
 
+func _handle_passive_rearm() -> void:
+	var now = Time.get_ticks_msec()
+	# 纤维内衬复位
+	if has_spall_liner and spall_liner_charges < spall_liner_max_charges and _spall_rearm_at_msec > 0 and now >= _spall_rearm_at_msec:
+		spall_liner_charges += 1
+		if spall_liner_charges < spall_liner_max_charges:
+			var reload_level = GameManager.current_upgrades.get("spall_reload", {}).get("level", 0)
+			if reload_level > 0:
+				_spall_rearm_at_msec = now + int(_get_spall_rearm_seconds(reload_level) * 1000.0)
+			else:
+				_spall_rearm_at_msec = 0
+		else:
+			_spall_rearm_at_msec = 0
+	
+	# 爆反复位
+	if has_era_block and era_block_charges < era_block_max_charges and _era_rearm_at_msec > 0 and now >= _era_rearm_at_msec:
+		era_block_charges += 1
+		if era_block_charges < era_block_max_charges:
+			var rearm_level = GameManager.current_upgrades.get("era_rearm", {}).get("level", 0)
+			if rearm_level > 0:
+				_era_rearm_at_msec = now + int(_get_era_rearm_seconds(rearm_level) * 1000.0)
+			else:
+				_era_rearm_at_msec = 0
+		else:
+			_era_rearm_at_msec = 0
+
+func _get_spall_rearm_seconds(level: int) -> float:
+	var base: float = 45.0
+	var reduction: float = UpgradeEffectManager.get_effect("spall_reload", level)
+	return max(base - reduction, 12.0)
+
+func _get_era_rearm_seconds(level: int) -> float:
+	var base: float = 60.0
+	var reduction: float = UpgradeEffectManager.get_effect("era_rearm", level)
+	return max(base - reduction, 15.0)
+
+func _get_ir_counter_range_m() -> float:
+	var bonus_level = GameManager.current_upgrades.get("ir_wideband", {}).get("level", 0)
+	return 5.0 + UpgradeEffectManager.get_effect("ir_wideband", bonus_level)
+
+func _get_ir_lockbreak_seconds() -> float:
+	var bonus_level = GameManager.current_upgrades.get("ir_lockbreak", {}).get("level", 0)
+	return UpgradeEffectManager.get_effect("ir_lockbreak", bonus_level)
+
+func _trigger_era_shockwave(level: int) -> void:
+	var radius_px: float = 2.0 * GlobalFomulaManager.METERS_TO_PIXELS
+	var base_damage: float = 8.0 + UpgradeEffectManager.get_effect("era_shockwave", level)
+	
+	# 伤害加成
+	var damage_bonus_level = GameManager.current_upgrades.get("damage_bonus", {}).get("level", 0)
+	if damage_bonus_level > 0:
+		base_damage *= (1.0 + UpgradeEffectManager.get_effect("damage_bonus", damage_bonus_level))
+	
+	# 暴击参数
+	var base_crit_rate = GameManager.get_global_crit_rate()
+	var crit_damage_multiplier = 2.0
+	var crit_damage_level = GameManager.current_upgrades.get("crit_damage", {}).get("level", 0)
+	if crit_damage_level > 0:
+		crit_damage_multiplier += UpgradeEffectManager.get_effect("crit_damage", crit_damage_level)
+	
+	# 视觉冲击
+	var layer = get_tree().get_first_node_in_group("foreground_layer")
+	if layer:
+		var fx = AoECircleEffect.new()
+		fx.global_position = global_position
+		fx.setup(radius_px, Color(1.0, 0.6, 0.2, 80.0 / 255.0), 0.2)
+		layer.add_child(fx)
+	
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if not is_instance_valid(enemy) or not (enemy is Node2D):
+			continue
+		var d2 = (enemy as Node2D).global_position.distance_squared_to(global_position)
+		if d2 > radius_px * radius_px:
+			continue
+		var dmg = base_damage
+		var is_critical = randf() < base_crit_rate
+		if is_critical:
+			dmg *= crit_damage_multiplier
+		var armor_coverage: float = 0.0
+		if enemy.get("armorCoverage") != null:
+			armor_coverage = float(enemy.get("armorCoverage"))
+		elif enemy.get("armor_coverage") != null:
+			armor_coverage = float(enemy.get("armor_coverage"))
+		var final_damage = GlobalFomulaManager.calculate_damage(
+			dmg,
+			GameManager.get_player_hard_attack_multiplier_percent(),
+			GameManager.get_player_soft_attack_multiplier_percent(),
+			GameManager.get_player_hard_attack_depth_mm(),
+			enemy.get("armor_thickness") if enemy.get("armor_thickness") else 0,
+			armor_coverage,
+			enemy.get("hardAttackDamageReductionPercent") if enemy.get("hardAttackDamageReductionPercent") else 0.0
+		)
+		var hurtbox = enemy.get_node_or_null("HurtboxComponent")
+		if hurtbox:
+			hurtbox.apply_damage(final_damage, "accessory", is_critical)
+
 
 func check_deal_damage():
 	if number_colliding_bodies == 0 || !damage_interval_timer.is_stopped():
@@ -220,19 +371,22 @@ func check_deal_damage():
 
 	var damage: float = 0
 	var pierced_any: bool = false
-	# 红外对抗：选取 5m 内“正在瞄准玩家”的最近远程敌人
+	# 红外对抗：选取范围内“正在瞄准玩家”的最近远程敌人
 	var ir_target: Node2D = null
 	if has_ir_counter:
-		ir_target = _get_nearest_aiming_ranged_enemy(5.0)
+		ir_target = _get_nearest_aiming_ranged_enemy(_get_ir_counter_range_m())
+		var lock_seconds = _get_ir_lockbreak_seconds()
+		if ir_target != null and lock_seconds > 0.0 and ir_target.has_method("disable_aiming"):
+			ir_target.disable_aiming(lock_seconds)
 	
 	for body in enemys_in_contact:
 		if body.is_in_group("enemy"):
 			var player_armor_thickness = GameManager.get_player_armor_thickness()
-			var depth_mm := int(body.hard_attack_depth_mm)
+			var depth_mm: int = int(body.hard_attack_depth_mm)
 			# 红外对抗：对目标敌人的“穿甲率固定为0%”——这里实现为强制不击穿（hard_attack_depth_mm=0）
 			if ir_target != null and body == ir_target:
 				depth_mm = 0
-			var raw_damage := float(GlobalFomulaManager.calculate_damage(
+			var raw_damage: float = float(GlobalFomulaManager.calculate_damage(
 				body.base_damage,
 				body.hardAttackMultiplierPercent,
 				body.soft_attack_multiplier_percent,
@@ -243,7 +397,7 @@ func check_deal_damage():
 			))
 			
 			# 阶段三：击穿减伤（addon_armor / relief_valve）
-			var is_pierced := (int(body.hard_attack_depth_mm) > int(player_armor_thickness))
+			var is_pierced: bool = (int(body.hard_attack_depth_mm) > int(player_armor_thickness))
 			if is_pierced:
 				pierced_any = true
 				raw_damage *= (1.0 - _get_pierce_damage_reduction_ratio())
@@ -308,7 +462,7 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 		var entry = AbilityUpgradeData.get_entry(upgrade_id)
 		if entry and entry.get("upgrade_type", "") == "accessory":
 			# 检查是否已经实例化了该配件的Controller
-			var controller_exists := _has_accessory_controller(upgrade_id)
+			var controller_exists: bool = _has_accessory_controller(upgrade_id)
 			
 			# 如果不存在，则实例化
 			if not controller_exists and upgrade_id in equipped_accessories:
@@ -423,12 +577,12 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 
 func _get_cooling_speed_bonus() -> float:
 	"""全局冷却速度加成（倍率加成部分）。用于维护工具箱等“冷却类”强化。"""
-	var bonus := 0.0
+	var bonus: float = 0.0
 	
 	# 散热器：全局冷却速度 +{初始耐久上限-耐久上限}*0.1lv%
 	# 当前实现：差值 = 5*heat_sink_level
 	if heat_sink_level > 0:
-		var diff := 5.0 * float(heat_sink_level)
+		var diff: float = 5.0 * float(heat_sink_level)
 		bonus += diff * 0.001 * float(heat_sink_level)  # diff * 0.1*lv% => diff * 0.001 * lv
 	
 	# 车载空调：回复耐久时，冷却速度 +5lv%，持续3秒，不叠加
@@ -442,8 +596,8 @@ func _get_repair_kit_interval_seconds() -> float:
 	"""维护工具箱间隔（秒）= 基础间隔 / (1 + 冷却速度加成)。"""
 	if repair_kit_level <= 0:
 		return INF
-	var base_interval := UpgradeEffectManager.get_effect("repair_kit", repair_kit_level)
-	var speed_multiplier := 1.0 + _get_cooling_speed_bonus()
+	var base_interval: float = UpgradeEffectManager.get_effect("repair_kit", repair_kit_level)
+	var speed_multiplier: float = 1.0 + _get_cooling_speed_bonus()
 	if speed_multiplier <= 0.0:
 		return INF
 	return max(float(base_interval) / speed_multiplier, 0.2)
@@ -456,7 +610,7 @@ func _update_repair_kit_timer():
 		if not _repair_kit_timer.is_stopped():
 			_repair_kit_timer.stop()
 		return
-	var interval := _get_repair_kit_interval_seconds()
+	var interval: float = _get_repair_kit_interval_seconds()
 	if is_inf(interval):
 		if not _repair_kit_timer.is_stopped():
 			_repair_kit_timer.stop()
@@ -483,12 +637,12 @@ func _on_player_healed(_amount: int):
 
 func _get_pierce_damage_reduction_ratio() -> float:
 	"""被击穿时受到伤害减免（0~0.95）。"""
-	var reduction := 0.0
+	var reduction: float = 0.0
 	
 	# 车身附加装甲：5%*等级（从 config 读取）
 	if addon_armor_level > 0:
-		var cfg := UpgradeEffectManager.get_config("addon_armor")
-		var per_level := float(cfg.get("pierce_reduction_per_level", 0.0))
+		var cfg: Dictionary = UpgradeEffectManager.get_config("addon_armor")
+		var per_level: float = float(cfg.get("pierce_reduction_per_level", 0.0))
 		reduction += per_level * float(addon_armor_level)
 	
 	# 泄压阀：10%*等级（get_effect 直接返回比例）
@@ -540,13 +694,44 @@ func _sync_passive_accessories(current_upgrades: Dictionary):
 	has_spall_liner = current_upgrades.get("spall_liner", {}).get("level", 0) > 0
 	has_era_block = current_upgrades.get("era_block", {}).get("level", 0) > 0
 	has_ir_counter = current_upgrades.get("ir_counter", {}).get("level", 0) > 0
+	
+	# 纤维内衬：补充最大次数
+	var spall_reserve_level = current_upgrades.get("spall_reserve", {}).get("level", 0)
+	var new_spall_max = (1 + spall_reserve_level) if has_spall_liner else 0
+	if new_spall_max > spall_liner_max_charges:
+		var diff = new_spall_max - spall_liner_max_charges
+		spall_liner_charges += diff
+	spall_liner_max_charges = new_spall_max
+	if not has_spall_liner:
+		spall_liner_charges = 0
+		spall_liner_max_charges = 0
+		_spall_rearm_at_msec = 0
+	else:
+		var spall_reload_level = current_upgrades.get("spall_reload", {}).get("level", 0)
+		if spall_reload_level > 0 and spall_liner_charges < spall_liner_max_charges and _spall_rearm_at_msec == 0:
+			_spall_rearm_at_msec = Time.get_ticks_msec() + int(_get_spall_rearm_seconds(spall_reload_level) * 1000.0)
+	
+	# 爆反：最大次数固定为 1（后续如有储备升级可在此扩展）
+	var new_era_max = 1 if has_era_block else 0
+	if new_era_max > era_block_max_charges:
+		var diff = new_era_max - era_block_max_charges
+		era_block_charges += diff
+	era_block_max_charges = new_era_max
+	if not has_era_block:
+		era_block_charges = 0
+		era_block_max_charges = 0
+		_era_rearm_at_msec = 0
+	else:
+		var rearm_level = current_upgrades.get("era_rearm", {}).get("level", 0)
+		if rearm_level > 0 and era_block_charges < era_block_max_charges and _era_rearm_at_msec == 0:
+			_era_rearm_at_msec = Time.get_ticks_msec() + int(_get_era_rearm_seconds(rearm_level) * 1000.0)
 
 func _get_nearest_aiming_ranged_enemy(range_m: float) -> Node2D:
 	var player = self as Node2D
-	var range_px := range_m * GlobalFomulaManager.METERS_TO_PIXELS
+	var range_px: float = range_m * GlobalFomulaManager.METERS_TO_PIXELS
 	var ranged = get_tree().get_nodes_in_group("ranged_enemy")
 	var target: Node2D = null
-	var best := INF
+	var best: float = INF
 	for e in ranged:
 		if not is_instance_valid(e):
 			continue
@@ -606,6 +791,19 @@ const ACCESSORY_CONTROLLER_MAP := {
 	"acid_sprayer": ["AcidSprayerAbilityController", "res://scenes/ability/acid_sprayer_ability_controller/acid_sprayer_ability_controller.tscn"],
 	"orbital_ping": ["OrbitalPingAbilityController", "res://scenes/ability/orbital_ping_ability_controller/orbital_ping_ability_controller.tscn"],
 	"med_spray": ["MedSprayAbilityController", "res://scenes/ability/med_spray_ability_controller/med_spray_ability_controller.tscn"],
+	"cluster_mine": ["ClusterMineAbilityController", "res://scenes/ability/cluster_mine_ability_controller/cluster_mine_ability_controller.tscn"],
+	"chaff_launcher": ["ChaffLauncherAbilityController", "res://scenes/ability/chaff_launcher_ability_controller/chaff_launcher_ability_controller.tscn"],
+	"flare_dispenser": ["FlareDispenserAbilityController", "res://scenes/ability/flare_dispenser_ability_controller/flare_dispenser_ability_controller.tscn"],
+	"nano_armor": ["NanoArmorAbilityController", "res://scenes/ability/nano_armor_ability_controller/nano_armor_ability_controller.tscn"],
+	"fuel_injector_module": ["FuelInjectorModuleAbilityController", "res://scenes/ability/fuel_injector_module_ability_controller/fuel_injector_module_ability_controller.tscn"],
+	"adrenaline_stim": ["AdrenalineStimAbilityController", "res://scenes/ability/adrenaline_stim_ability_controller/adrenaline_stim_ability_controller.tscn"],
+	"sonar_scanner": ["SonarScannerAbilityController", "res://scenes/ability/sonar_scanner_ability_controller/sonar_scanner_ability_controller.tscn"],
+	"ballistic_computer_pod": ["BallisticComputerPodAbilityController", "res://scenes/ability/ballistic_computer_pod_ability_controller/ballistic_computer_pod_ability_controller.tscn"],
+	"jammer_field": ["JammerFieldAbilityController", "res://scenes/ability/jammer_field_ability_controller/jammer_field_ability_controller.tscn"],
+	"overwatch_uav": ["OverwatchUavAbilityController", "res://scenes/ability/overwatch_uav_ability_controller/overwatch_uav_ability_controller.tscn"],
+	"grapeshot_pod": ["GrapeshotPodAbilityController", "res://scenes/ability/grapeshot_pod_ability_controller/grapeshot_pod_ability_controller.tscn"],
+	"scrap_collector": ["ScrapCollectorAbilityController", "res://scenes/ability/scrap_collector_ability_controller/scrap_collector_ability_controller.tscn"],
+	"kinetic_barrier": ["KineticBarrierAbilityController", "res://scenes/ability/kinetic_barrier_ability_controller/kinetic_barrier_ability_controller.tscn"],
 }
 
 # 名称到 class 的映射（GDScript 无法 const 字典存 class，改用 match）
@@ -647,6 +845,32 @@ func _has_accessory_controller(accessory_id: String) -> bool:
 				if child is OrbitalPingAbilityController: return true
 			"med_spray":
 				if child is MedSprayAbilityController: return true
+			"cluster_mine":
+				if child is ClusterMineAbilityController: return true
+			"chaff_launcher":
+				if child is ChaffLauncherAbilityController: return true
+			"flare_dispenser":
+				if child is FlareDispenserAbilityController: return true
+			"nano_armor":
+				if child is NanoArmorAbilityController: return true
+			"fuel_injector_module":
+				if child is FuelInjectorModuleAbilityController: return true
+			"adrenaline_stim":
+				if child is AdrenalineStimAbilityController: return true
+			"sonar_scanner":
+				if child is SonarScannerAbilityController: return true
+			"ballistic_computer_pod":
+				if child is BallisticComputerPodAbilityController: return true
+			"jammer_field":
+				if child is JammerFieldAbilityController: return true
+			"overwatch_uav":
+				if child is OverwatchUavAbilityController: return true
+			"grapeshot_pod":
+				if child is GrapeshotPodAbilityController: return true
+			"scrap_collector":
+				if child is ScrapCollectorAbilityController: return true
+			"kinetic_barrier":
+				if child is KineticBarrierAbilityController: return true
 	return false
 
 func _instantiate_accessory_controller(accessory_id: String) -> void:
@@ -676,3 +900,28 @@ func get_target_computer_level() -> int:
 
 func get_mobility_servos_level() -> int:
 	return mobility_servos_level
+
+func apply_temporary_speed_bonus(multiplier: float, duration_seconds: float) -> void:
+	if multiplier <= 1.0 or duration_seconds <= 0.0:
+		return
+	_temp_speed_multiplier = max(_temp_speed_multiplier, multiplier)
+	_temp_speed_bonus_until_msec = max(
+		_temp_speed_bonus_until_msec,
+		Time.get_ticks_msec() + int(duration_seconds * 1000.0)
+	)
+	_apply_health_bonus()
+
+func apply_nano_overcap_shield(amount: float, duration_seconds: float) -> void:
+	if amount <= 0.0 or duration_seconds <= 0.0:
+		return
+	_nano_overcap_shield += amount
+	_nano_overcap_until_msec = max(
+		_nano_overcap_until_msec,
+		Time.get_ticks_msec() + int(duration_seconds * 1000.0)
+	)
+
+func apply_kinetic_barrier(reduction: float, duration_seconds: float) -> void:
+	if reduction <= 0.0 or duration_seconds <= 0.0:
+		return
+	_kinetic_barrier_reduction = clamp(reduction, 0.0, 0.95)
+	_kinetic_barrier_until_msec = Time.get_ticks_msec() + int(duration_seconds * 1000.0)

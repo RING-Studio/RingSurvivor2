@@ -62,7 +62,7 @@ func _explode():
 						enemies.append(enemy)
 	
 	# 伤害加成
-	var dmg := base_damage
+	var dmg: float = base_damage
 	var damage_bonus_level = GameManager.current_upgrades.get("damage_bonus", {}).get("level", 0)
 	if damage_bonus_level > 0:
 		dmg *= (1.0 + UpgradeEffectManager.get_effect("damage_bonus", damage_bonus_level))

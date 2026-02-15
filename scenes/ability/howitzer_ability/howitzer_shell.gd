@@ -60,7 +60,7 @@ func _explode():
 		fx.setup(explosion_radius_px, Color(1.0, 0.2, 0.2, 64.0 / 255.0), 0.22)
 		layer.add_child(fx)
 	
-	var base_dmg := base_damage * damage_ratio
+	var base_dmg: float = base_damage * damage_ratio
 	
 	# AOE 伤害：通过 ExplosionArea 获取范围内的 HurtboxComponent
 	var enemies: Array[Node2D] = []
@@ -75,7 +75,7 @@ func _explode():
 	
 	for enemy in enemies:
 		# 伤害修正（主武器通用强化 + 目标特定加成）
-		var dmg := base_dmg
+		var dmg: float = base_dmg
 		if WeaponUpgradeHandler.instance:
 			dmg = WeaponUpgradeHandler.instance.get_damage_modifier(dmg, enemy)
 		

@@ -73,9 +73,9 @@ func _on_hitbox_area_entered(area: Area2D):
 	if WeaponUpgradeHandler.instance:
 		WeaponUpgradeHandler.instance.on_weapon_hit(target)
 
-	var damage := _compute_damage_against(target)
-	var damage_source := "weapon"
-	var is_critical := false
+	var damage: float = _compute_damage_against(target)
+	var damage_source: String = "weapon"
+	var is_critical: bool = false
 
 	# 计算最终暴击率（使用 WeaponUpgradeHandler）
 	var base_crit_rate = critical_chance + GameManager.get_global_crit_rate()
@@ -192,6 +192,10 @@ func _compute_damage_against(enemy: Node2D) -> float:
 	if has_spread_effect:
 		base_damage *= spread_damage_ratio
 	
+	# 目标相关伤害加成（弱点标定/护甲破拆/处决协议等）
+	if WeaponUpgradeHandler.instance:
+		base_damage = WeaponUpgradeHandler.instance.get_target_damage_modifier(base_damage, enemy)
+	
 	var armor_thickness: int = 0
 	var armor_coverage: float = 0.0
 	var hard_attack_damage_reduction: float = 0.0
@@ -245,7 +249,8 @@ func _trigger_split():
 	var split_count = [2, 3][min(split_level - 1, 1)]  # 2/3发
 	
 	# 获取子弹场景
-	var bullet_scene = preload("res://scenes/ability/machine_gun_ability/machine_gun_ability.tscn")
+	# 不能用 preload 加载自身所在的 .tscn（会导致循环加载 "Busy" 错误），用 load 代替
+	var bullet_scene: PackedScene = load("res://scenes/ability/machine_gun_ability/machine_gun_ability.tscn")
 	
 	# 创建分裂子弹
 	for i in range(split_count):

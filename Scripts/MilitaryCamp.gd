@@ -3,7 +3,6 @@ extends Control
 @export var next_scene: StringName = &""
 @export var npc_scene: StringName = &""
 @export var car_editor_scene: StringName = &""
-@export var tech_scene: StringName = &""
 @export var save_scene: StringName = &""
 
 
@@ -20,10 +19,6 @@ func npc():
 
 func millitary_camp():
 	Transitions.set_next_scene(car_editor_scene)
-	Transitions.transition( Transitions.transition_type.Diamond )
-
-func tech_base():
-	Transitions.set_next_scene(tech_scene)
 	Transitions.transition( Transitions.transition_type.Diamond )
 
 func save():

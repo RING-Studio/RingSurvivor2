@@ -19,8 +19,8 @@ func _ready():
 	_area = Area2D.new()
 	_area.collision_layer = 0
 	_area.collision_mask = 4
-	var shape_node := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
+	var shape_node: CollisionShape2D = CollisionShape2D.new()
+	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = zone_radius_px
 	shape_node.shape = circle
 	_area.add_child(shape_node)

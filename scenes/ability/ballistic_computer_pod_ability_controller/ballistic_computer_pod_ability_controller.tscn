@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ballistic_computer_pod_controller"]
+
+[ext_resource type="Script" path="res://scenes/ability/ballistic_computer_pod_ability_controller/ballistic_computer_pod_ability_controller.gd" id="1_ctrl"]
+
+[node name="BallisticComputerPodAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

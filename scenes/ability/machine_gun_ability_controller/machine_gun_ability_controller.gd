@@ -3,6 +3,8 @@ class_name MachineGunAbilityController
 
 const MAX_RANGE = 200
 const FIRE_RATE_MIN = 1
+const RECOIL_SPREAD_INCREASE_PER_SHOT_DEG = 0.4
+const RECOIL_SPREAD_DECAY_DEG_PER_SEC = 1.5
 
 enum SpreadPattern {
 	FOCUSED,  # 集中散射：按散射角在基础方向两侧分布
@@ -27,6 +29,7 @@ enum SpreadPattern {
 # 散射角（度）：集中散射时每发弹道相对基础方向的夹角，可被强化影响
 var spread_angle_deg: float = 3.0
 var fire_rate_bonus: float = 0.0
+var _recoil_spread_bonus_deg: float = 0.0
 
 func _ready():
 	_update_timer_interval()
@@ -35,6 +38,11 @@ func _ready():
 	
 	# 初始化时，根据已有升级重新计算属性
 	_recalculate_all_attributes(GameManager.current_upgrades)
+
+func _process(delta: float):
+	if _recoil_spread_bonus_deg <= 0.0:
+		return
+	_recoil_spread_bonus_deg = max(_recoil_spread_bonus_deg - RECOIL_SPREAD_DECAY_DEG_PER_SEC * delta, 0.0)
 
 func _update_timer_interval():
 	var base_rate = fire_rate_per_minute
@@ -70,6 +78,7 @@ func on_timer_timeout():
 			return
 
 	var player_position = player.global_position
+	_apply_recoil_on_fire()
 	
 	# 通知 WeaponUpgradeHandler 武器发射
 	var extra_shot_count = 0
@@ -94,6 +103,32 @@ func _get_spread_pattern() -> SpreadPattern:
 		return SpreadPattern.RANDOM
 	return SpreadPattern.FOCUSED
 
+func _get_base_spread_angle_deg() -> float:
+	var base = spread_angle_deg
+	if WeaponUpgradeHandler.instance:
+		base *= WeaponUpgradeHandler.instance.get_spread_angle_modifier()
+	return base
+
+func _get_recoil_extra_cap_deg(base_spread: float) -> float:
+	var cap_modifier = 1.0
+	if WeaponUpgradeHandler.instance:
+		cap_modifier = WeaponUpgradeHandler.instance.get_recoil_cap_modifier()
+	return max(base_spread * 2.0 * cap_modifier, 0.0)
+
+func _apply_recoil_on_fire():
+	var base_spread = _get_base_spread_angle_deg()
+	var extra_cap = _get_recoil_extra_cap_deg(base_spread)
+	if extra_cap <= 0.0:
+		_recoil_spread_bonus_deg = 0.0
+		return
+	_recoil_spread_bonus_deg = min(
+		_recoil_spread_bonus_deg + RECOIL_SPREAD_INCREASE_PER_SHOT_DEG,
+		extra_cap
+	)
+
+func _get_effective_spread_angle_deg() -> float:
+	return _get_base_spread_angle_deg() + _recoil_spread_bonus_deg
+
 func _fire_shot(player_position: Vector2, base_direction: Vector2):
 	"""
 	执行一次射击（处理多弹道逻辑）
@@ -113,8 +148,9 @@ func _distribute_bullets(pattern: SpreadPattern, base_direction: Vector2, shot_c
 	match pattern:
 		SpreadPattern.FOCUSED:
 			# 集中散射：每发按散射角在基础方向两侧分布
+			var spread_angle = _get_effective_spread_angle_deg()
 			for i in range(shot_count):
-				var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(spread_angle_deg)
+				var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(spread_angle)
 				var bullet_direction = base_direction.rotated(angle_offset)
 				_emit_bullet(player_position, bullet_direction)
 		SpreadPattern.UNIFORM:
@@ -163,15 +199,20 @@ func _resolve_fire_direction(player_position: Vector2, enemies: Array) -> Vector
 
 func _emit_bullet(player_position: Vector2, direction: Vector2):
 	var bullet_instance = machine_gun_ability.instantiate() as MachineGunAbility
+	var speed_multiplier = 1.0
+	var lifetime_multiplier = 1.0
+	if WeaponUpgradeHandler.instance:
+		speed_multiplier = WeaponUpgradeHandler.instance.get_bullet_speed_modifier()
+		lifetime_multiplier = WeaponUpgradeHandler.instance.get_bullet_lifetime_modifier()
 	# 在 add_child 之前设置所有参数，确保 _ready() 中的初始化使用正确的值
 	bullet_instance.global_position = player_position
 	bullet_instance.direction = direction
 	bullet_instance.rotation = direction.angle()
-	bullet_instance.bullet_lifetime = bullet_lifetime
+	bullet_instance.bullet_lifetime = bullet_lifetime * lifetime_multiplier
 	bullet_instance.penetration_capacity = bullet_penetration
 	bullet_instance.critical_chance = bullet_critical_chance
 	bullet_instance.critical_damage_multiplier = bullet_critical_damage_multiplier
-	bullet_instance.bullet_speed = bullet_speed
+	bullet_instance.bullet_speed = bullet_speed * speed_multiplier
 	bullet_instance.splash_count = splash_count
 	bullet_instance.splash_damage_ratio = splash_damage_ratio
 	bullet_instance.bleed_layers = bleed_layers
@@ -257,6 +298,9 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 	if WeaponUpgradeHandler.instance:
 		bullet_penetration = WeaponUpgradeHandler.instance.get_penetration_modifier(bullet_penetration)
 		spread_count = WeaponUpgradeHandler.instance.get_spread_modifier(spread_count)
+	
+	var base_spread = _get_base_spread_angle_deg()
+	_recoil_spread_bonus_deg = min(_recoil_spread_bonus_deg, _get_recoil_extra_cap_deg(base_spread))
 	
 	_update_timer_interval()
 

@@ -19,7 +19,7 @@ func _ready():
 
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["grav_trap", "cooling_device"]:
+	if upgrade_id in ["grav_trap", "cooling_device", "grav_pull", "grav_duration"]:
 		_update_timer()
 
 
@@ -27,12 +27,12 @@ func _get_cooldown_seconds() -> float:
 	var lvl = GameManager.current_upgrades.get("grav_trap", {}).get("level", 0)
 	if lvl <= 0:
 		return INF
-	var base := BASE_COOLDOWN
+	var base: float = BASE_COOLDOWN
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var cooling_bonus := 0.0
+	var cooling_bonus: float = 0.0
 	if cd_lvl > 0:
 		cooling_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
-	var speed_multiplier := 1.0 + cooling_bonus
+	var speed_multiplier: float = 1.0 + cooling_bonus
 	if speed_multiplier <= 0.0:
 		return INF
 	return max(base / speed_multiplier, 0.5)
@@ -40,7 +40,15 @@ func _get_cooldown_seconds() -> float:
 
 func _get_trap_duration() -> float:
 	var lvl = GameManager.current_upgrades.get("grav_trap", {}).get("level", 0)
-	return 3.0 + float(max(lvl, 1))
+	var duration = 3.0 + float(max(lvl, 1))
+	var bonus_lvl = GameManager.current_upgrades.get("grav_duration", {}).get("level", 0)
+	if bonus_lvl > 0:
+		duration += UpgradeEffectManager.get_effect("grav_duration", bonus_lvl)
+	return duration
+
+func _get_pull_force() -> float:
+	var bonus_lvl = GameManager.current_upgrades.get("grav_pull", {}).get("level", 0)
+	return PULL_FORCE + UpgradeEffectManager.get_effect("grav_pull", bonus_lvl)
 
 
 func _get_trap_radius_px() -> float:
@@ -48,7 +56,7 @@ func _get_trap_radius_px() -> float:
 
 
 func _update_timer():
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if _cooldown_timer == null:
 		return
 	if is_inf(interval):
@@ -73,7 +81,7 @@ func _on_cooldown():
 	trap.global_position = spawn_pos
 	trap.set_meta("_radius", _get_trap_radius_px())
 	trap.set_meta("_duration", _get_trap_duration())
-	trap.set_meta("_pull_force", PULL_FORCE)
+	trap.set_meta("_pull_force", _get_pull_force())
 	
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:

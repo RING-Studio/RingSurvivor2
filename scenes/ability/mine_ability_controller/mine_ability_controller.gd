@@ -11,7 +11,7 @@ var deployed_mines: Array[Node2D] = []  # 已部署的地雷列表（FIFO队列�
 
 func _ready():
 	mine_timer = Timer.new()
-	var interval := _get_load_interval_seconds()
+	var interval: float = _get_load_interval_seconds()
 	if not is_inf(interval):
 		mine_timer.wait_time = interval
 		mine_timer.autostart = true
@@ -24,7 +24,7 @@ func _ready():
 
 func _get_load_interval_seconds() -> float:
 	"""装填间隔（秒）= 基础间隔 / 装填速度倍率；速度倍率 = 1 + 装填速度加成（百分比）。若倍率≤0 则返回 INF（不触发）。"""
-	var base_interval_seconds := base_cooldown
+	var base_interval_seconds: float = base_cooldown
 	
 	# 地雷·AT：装填间隔 +5秒（方案1：加在基础上再除以倍率）
 	var anti_tank_level = GameManager.current_upgrades.get("mine_anti_tank", {}).get("level", 0)
@@ -32,15 +32,15 @@ func _get_load_interval_seconds() -> float:
 		base_interval_seconds += 5.0
 	
 	# 地雷·装填速度：+15% per level（倍率加成，与射速一致）
-	var load_speed_bonus := 0.0
+	var load_speed_bonus: float = 0.0
 	var cooldown_level = GameManager.current_upgrades.get("mine_cooldown", {}).get("level", 0)
 	if cooldown_level > 0:
 		load_speed_bonus += UpgradeEffectManager.get_effect("mine_cooldown", cooldown_level)
 	
-	var speed_multiplier := 1.0 + load_speed_bonus
+	var speed_multiplier: float = 1.0 + load_speed_bonus
 	if speed_multiplier <= 0.0:
 		return INF  # 倍率为零或负时不再装填
-	var interval := base_interval_seconds / speed_multiplier
+	var interval: float = base_interval_seconds / speed_multiplier
 	return max(interval, 0.1)  # 最小 0.1 秒，避免除零或过密
 
 func _get_mines_per_deploy() -> int:
@@ -91,7 +91,7 @@ func _on_timer_timeout():
 	if player == null:
 		return
 	
-	var deploy_count := _get_mines_per_deploy()
+	var deploy_count: int = _get_mines_per_deploy()
 	for i in range(deploy_count):
 		# 检查部署上限（逐个处理，避免一次性部署超过上限）
 		var max_deployed = _get_max_deployed()
@@ -107,7 +107,7 @@ func _on_timer_timeout():
 		_deploy_mine(player.global_position + offset)
 	
 	# 更新计时器（若间隔为 INF 则不重启，等效不装填）
-	var interval := _get_load_interval_seconds()
+	var interval: float = _get_load_interval_seconds()
 	if is_inf(interval):
 		return
 	mine_timer.wait_time = interval
@@ -134,7 +134,7 @@ func _on_mine_exploded(mine: Node2D):
 func _on_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 	"""升级添加时更新"""
 	if upgrade_id in ["mine", "mine_cooldown", "mine_anti_tank"]:
-		var interval := _get_load_interval_seconds()
+		var interval: float = _get_load_interval_seconds()
 		if is_inf(interval):
 			mine_timer.stop()
 		else:

@@ -24,6 +24,30 @@ const COOLDOWN_ACCESSORY_IDS: Array[String] = [
 	"radio_support",
 	"laser_suppress",
 	"external_missile",
+	"decoy_drone",
+	"auto_turret",
+	"repair_beacon",
+	"shield_emitter",
+	"emp_pulse",
+	"grav_trap",
+	"thunder_coil",
+	"cryo_canister",
+	"incendiary_canister",
+	"acid_sprayer",
+	"orbital_ping",
+	"med_spray",
+	"cluster_mine",
+	"chaff_launcher",
+	"flare_dispenser",
+	"nano_armor",
+	"fuel_injector_module",
+	"adrenaline_stim",
+	"sonar_scanner",
+	"ballistic_computer_pod",
+	"jammer_field",
+	"overwatch_uav",
+	"grapeshot_pod",
+	"kinetic_barrier",
 ]
 
 func _ready():
@@ -83,7 +107,7 @@ func initialize_active_pools():
 		
 		# 冷却装置：仅当存在【冷却类】配件时才进入池（避免当前版本出现无效升级）
 		if should_add and upgrade_id == "cooling_device":
-			var has_cooldown_accessory := false
+			var has_cooldown_accessory: bool = false
 			for accessory_id in equipped_accessories:
 				if accessory_id in COOLDOWN_ACCESSORY_IDS:
 					has_cooldown_accessory = true
@@ -217,16 +241,16 @@ func _add_exclusive_upgrades_for_weapon(weapon_id: Variant):
 func _get_quality_probabilities(current_level: int) -> Dictionary:
 	"""
 	计算品质概率分布
-	基础：白:蓝:紫:红 = 85:13:2:0
+	基础（微调）：白:蓝:紫:红 = 80:15:4:1
 	50级及以上固定：白:蓝:紫:红 = 30:40:20:10
 	线性增长
 	"""
 	var level_factor = min(float(current_level) / 50.0, 1.0)
 	
-	var white_prob = 85.0 - (level_factor * 55.0)  # 85 -> 30
-	var blue_prob = 13.0 + (level_factor * 27.0)   # 13 -> 40
-	var purple_prob = 2.0 + (level_factor * 18.0)  # 2 -> 20
-	var red_prob = 0.0 + (level_factor * 10.0)      # 0 -> 10
+	var white_prob = 80.0 - (level_factor * 50.0)  # 80 -> 30
+	var blue_prob = 15.0 + (level_factor * 25.0)   # 15 -> 40
+	var purple_prob = 4.0 + (level_factor * 16.0)  # 4 -> 20
+	var red_prob = 1.0 + (level_factor * 9.0)      # 1 -> 10
 	
 	return {
 		"white": white_prob,

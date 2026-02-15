@@ -56,7 +56,7 @@ func _on_timeout():
 	
 	# 选择最近目标（锁定）
 	var nearest: Node2D = null
-	var nearest_dsq := INF
+	var nearest_dsq: float = INF
 	for e in enemies:
 		if not is_instance_valid(e):
 			continue
@@ -77,20 +77,27 @@ func _on_timeout():
 	if WeaponUpgradeHandler.instance:
 		salvo_count = max(WeaponUpgradeHandler.instance.get_spread_modifier(salvo_count), 1)
 	
-	var damage_ratio := 1.0
+	var damage_ratio: float = 1.0
 	if WeaponUpgradeHandler.instance and salvo_count > 1:
 		damage_ratio = WeaponUpgradeHandler.instance.get_spread_damage_ratio()
 	
+	var speed_multiplier = 1.0
+	var lifetime_multiplier = 1.0
+	if WeaponUpgradeHandler.instance:
+		speed_multiplier = WeaponUpgradeHandler.instance.get_bullet_speed_modifier()
+		lifetime_multiplier = WeaponUpgradeHandler.instance.get_bullet_lifetime_modifier()
+	
 	for i in range(salvo_count):
-		_spawn_one(player.global_position, nearest, damage_ratio)
+		_spawn_one(player.global_position, nearest, damage_ratio, speed_multiplier, lifetime_multiplier)
 	
 	for i in range(extra_shot_count):
-		_spawn_one(player.global_position, nearest, damage_ratio)
+		_spawn_one(player.global_position, nearest, damage_ratio, speed_multiplier, lifetime_multiplier)
 
-func _spawn_one(origin: Vector2, target: Node2D, ratio: float):
+func _spawn_one(origin: Vector2, target: Node2D, ratio: float, speed_multiplier: float, lifetime_multiplier: float):
 	var missile = missile_scene.instantiate() as MissileWeaponProjectile
-	get_tree().get_first_node_in_group("foreground_layer").add_child(missile)
+	missile.lifetime_seconds *= lifetime_multiplier
 	missile.global_position = origin
-	missile.speed_pixels_per_second = missile_speed
+	missile.speed_pixels_per_second = missile_speed * speed_multiplier
+	get_tree().get_first_node_in_group("foreground_layer").add_child(missile)
 	var radius_px = explosion_radius_m * GlobalFomulaManager.METERS_TO_PIXELS
 	missile.setup(target, _base_damage, radius_px, ratio)

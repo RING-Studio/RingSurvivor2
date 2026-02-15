@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://adrenaline_stim_controller"]
+
+[ext_resource type="Script" path="res://scenes/ability/adrenaline_stim_ability_controller/adrenaline_stim_ability_controller.gd" id="1_ctrl"]
+
+[node name="AdrenalineStimAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

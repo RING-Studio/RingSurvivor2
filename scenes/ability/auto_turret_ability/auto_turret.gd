@@ -21,8 +21,8 @@ func _ready():
 	_detect_area = Area2D.new()
 	_detect_area.collision_layer = 0
 	_detect_area.collision_mask = 4
-	var shape_node := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
+	var shape_node: CollisionShape2D = CollisionShape2D.new()
+	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = DETECT_RADIUS
 	shape_node.shape = circle
 	shape_node.position = Vector2.ZERO
@@ -47,7 +47,7 @@ func _ready():
 
 func _on_fire():
 	var nearest: Node2D = null
-	var nearest_dist_sq := INF
+	var nearest_dist_sq: float = INF
 	
 	for area in _detect_area.get_overlapping_areas():
 		if not area is HurtboxComponent:
@@ -68,7 +68,7 @@ func _on_fire():
 		return
 	
 	# 伤害加成与暴击
-	var dmg := turret_damage
+	var dmg: float = turret_damage
 	var damage_bonus_level = GameManager.current_upgrades.get("damage_bonus", {}).get("level", 0)
 	if damage_bonus_level > 0:
 		dmg *= (1.0 + UpgradeEffectManager.get_effect("damage_bonus", damage_bonus_level))

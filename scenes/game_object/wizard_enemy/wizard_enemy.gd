@@ -17,6 +17,7 @@ class_name WizardEnemy
 @export var is_aiming_player: bool = false  # 是否正在瞄准玩家（用于激光压制/红外对抗）
 
 var is_moving = false
+var _aiming_disabled_until_msec: int = 0
 
 
 func _ready():
@@ -71,7 +72,9 @@ func _process(delta):
 	# MARK（待细化）：当前“瞄准判定”使用简化口径——5米内视为正在瞄准玩家。
 	# 后续可替换为更真实的状态机（例如：停下→进入瞄准→开火→冷却/丢失目标等）。
 	var player = get_tree().get_first_node_in_group("player") as Node2D
-	if player:
+	if Time.get_ticks_msec() < _aiming_disabled_until_msec:
+		is_aiming_player = false
+	elif player:
 		var aim_range_px = 5.0 * GlobalFomulaManager.METERS_TO_PIXELS
 		is_aiming_player = global_position.distance_squared_to(player.global_position) <= aim_range_px * aim_range_px
 	else:
@@ -95,3 +98,9 @@ func set_is_moving(moving: bool):
 
 func on_hit():
 	$HitRandomAudioPlayerComponent.play_random()
+
+func disable_aiming(duration_seconds: float) -> void:
+	_aiming_disabled_until_msec = max(
+		_aiming_disabled_until_msec,
+		Time.get_ticks_msec() + int(duration_seconds * 1000.0)
+	)

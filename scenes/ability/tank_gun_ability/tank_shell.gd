@@ -60,7 +60,7 @@ func _on_hitbox_area_entered(area: Area2D):
 	if WeaponUpgradeHandler.instance:
 		WeaponUpgradeHandler.instance.on_weapon_hit(target)
 	
-	var dmg := base_damage * damage_ratio
+	var dmg: float = base_damage * damage_ratio
 	if WeaponUpgradeHandler.instance:
 		dmg = WeaponUpgradeHandler.instance.get_damage_modifier(dmg, target)
 	

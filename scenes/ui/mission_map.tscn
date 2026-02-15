@@ -1,0 +1,135 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/mission_map.gd" id="1_script"]
+
+[node name="MissionMap" type="CanvasLayer"]
+process_mode = 3
+layer = 50
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.06, 0.04, 0.92)
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = 45.0
+grow_horizontal = 2
+theme_override_constants/separation = 30
+
+[node name="DayLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "第 1 天"
+
+[node name="PhaseLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1.0, 1)
+theme_override_font_sizes/font_size = 16
+text = "时段：早（剩余 3）"
+
+[node name="PollutionLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "污染度：1000"
+
+[node name="Spacer" type="Control" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "返回军营"
+
+[node name="MapTitle" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 52.0
+offset_right = 120.0
+offset_bottom = 80.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = "— 作战地图 —"
+
+[node name="MapContainer" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 90.0
+offset_right = -350.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DetailPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -250.0
+offset_right = -10.0
+offset_bottom = 250.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="DetailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="DetailPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="DetailPanel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "目的地名称"
+
+[node name="MissionList" type="VBoxContainer" parent="DetailPanel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Info" type="RichTextLabel" parent="DetailPanel/MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_active = true
+custom_minimum_size = Vector2(0, 120)
+
+[node name="Buttons" type="HBoxContainer" parent="DetailPanel/MarginContainer/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Confirm" type="Button" parent="DetailPanel/MarginContainer/VBox/Buttons"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 35)
+text = "确认出击"
+
+[node name="Cancel" type="Button" parent="DetailPanel/MarginContainer/VBox/Buttons"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 35)
+text = "返回"

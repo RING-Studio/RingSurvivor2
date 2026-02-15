@@ -1,11 +1,11 @@
 extends Control
 
-@export var level1: Array[StringName]
+@export var levels: Array[StringName]
 
 var selected_vehicle = 0
 var max_vehicles = 4
 
-func change_level1():
+func change_level():
 	pass
 
 func left_button_pressed():

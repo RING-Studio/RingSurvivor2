@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scenes/game_object/boss_hive/boss_hive.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c1efdw5lm8ey5" path="res://Assets/敌人1small.png" id="8_texture"]
+[ext_resource type="PackedScene" uid="uid://b5pwrnbjb564j" path="res://scenes/component/health_component.tscn" id="2_health"]
+[ext_resource type="PackedScene" uid="uid://n6jd5id3a0wg" path="res://scenes/component/vial_drop_component.tscn" id="3_vial"]
+[ext_resource type="PackedScene" uid="uid://xekbbeidb2pu" path="res://scenes/component/hurtbox_component.tscn" id="4_hurtbox"]
+[ext_resource type="PackedScene" uid="uid://dj43c6qi3nu43" path="res://scenes/component/velocity_component.tscn" id="5_velocity"]
+[ext_resource type="PackedScene" uid="uid://bfr1vtlsrf5io" path="res://scenes/component/death_component.tscn" id="6_death"]
+[ext_resource type="Script" uid="uid://cbhmw3okmc8eb" path="res://scenes/component/enemy_hurtbox_component.gd" id="7_enemy_hurtbox"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurtbox"]
+radius = 18.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 12.0
+
+[node name="BossHive" type="CharacterBody2D" groups=["enemy"]]
+collision_layer = 8
+collision_mask = 9
+motion_mode = 1
+scale = Vector2(2.5, 2.5)
+script = ExtResource("1_script")
+
+[node name="HealthComponent" parent="." instance=ExtResource("2_health")]
+max_health = 350.0
+
+[node name="VialDropComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_vial")]
+drop_percent = 1.0
+health_component = NodePath("../HealthComponent")
+
+[node name="VelocityComponent" parent="." instance=ExtResource("5_velocity")]
+
+[node name="DeathComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("6_death")]
+health_component = NodePath("../HealthComponent")
+sprite = NodePath("../Visuals/Sprite2D")
+
+[node name="HurtboxComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_hurtbox")]
+visible = false
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("7_enemy_hurtbox")
+health_component = NodePath("../HealthComponent")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent"]
+position = Vector2(0, -5)
+shape = SubResource("CircleShape2D_hurtbox")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visuals"]
+texture = ExtResource("8_texture")
+offset = Vector2(0, -4)
+self_modulate = Color(0.4, 0.25, 0.5, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(0, -5)
+shape = SubResource("CircleShape2D_body")

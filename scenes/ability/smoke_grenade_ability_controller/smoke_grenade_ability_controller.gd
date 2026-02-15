@@ -34,7 +34,7 @@ func _update_timer():
 		_timer.start()
 
 func _get_radius_pixels() -> float:
-	var radius_m := base_radius_m
+	var radius_m: float = base_radius_m
 	var range_lvl = GameManager.current_upgrades.get("smoke_range", {}).get("level", 0)
 	if range_lvl > 0:
 		# 烟雾弹·范围：+2m per level
@@ -42,7 +42,7 @@ func _get_radius_pixels() -> float:
 	return radius_m * GlobalFomulaManager.METERS_TO_PIXELS
 
 func _get_duration_seconds() -> float:
-	var d := base_duration_s
+	var d: float = base_duration_s
 	var duration_lvl = GameManager.current_upgrades.get("smoke_duration", {}).get("level", 0)
 	if duration_lvl > 0:
 		# 烟雾弹·持续：+1s per level

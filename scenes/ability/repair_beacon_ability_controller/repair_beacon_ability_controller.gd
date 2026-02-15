@@ -19,22 +19,22 @@ func _ready():
 	_update_timer()
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["repair_beacon", "cooling_device"]:
+	if upgrade_id in ["repair_beacon", "cooling_device", "beacon_heal", "beacon_uptime"]:
 		_update_timer()
 
 func _get_cooldown_seconds() -> float:
 	var lvl = GameManager.current_upgrades.get("repair_beacon", {}).get("level", 0)
 	if lvl <= 0:
 		return INF
-	var base := base_cooldown_seconds
+	var base: float = base_cooldown_seconds
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var speed_bonus := 0.0
+	var speed_bonus: float = 0.0
 	if cd_lvl > 0:
 		speed_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
 	return max(base / (1.0 + speed_bonus), 0.5)
 
 func _update_timer():
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if _cooldown_timer == null:
 		return
 	if is_inf(interval):
@@ -51,8 +51,14 @@ func _on_cooldown():
 		return
 	
 	var lvl = GameManager.current_upgrades.get("repair_beacon", {}).get("level", 1)
-	var beacon_duration := 8.0 + 2.0 * float(lvl)
-	var heal_per_second := 1.0 + float(lvl)
+	var beacon_duration: float = 8.0 + 2.0 * float(lvl)
+	var uptime_lvl = GameManager.current_upgrades.get("beacon_uptime", {}).get("level", 0)
+	if uptime_lvl > 0:
+		beacon_duration += UpgradeEffectManager.get_effect("beacon_uptime", uptime_lvl)
+	var heal_per_second: float = 1.0 + float(lvl)
+	var heal_lvl = GameManager.current_upgrades.get("beacon_heal", {}).get("level", 0)
+	if heal_lvl > 0:
+		heal_per_second += UpgradeEffectManager.get_effect("beacon_heal", heal_lvl)
 	
 	var beacon = RepairBeacon.new()
 	beacon.global_position = player.global_position

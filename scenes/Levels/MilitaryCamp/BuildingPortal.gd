@@ -14,12 +14,12 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _player == null:
-		var players := get_tree().get_nodes_in_group("player")
+		var players: Array = get_tree().get_nodes_in_group("player")
 		if players.size() > 0:
 			_player = players[0] as Node2D
 		return
 
-	var dist := global_position.distance_to(_player.global_position)
+	var dist: float = global_position.distance_to(_player.global_position)
 	_in_range = dist <= interact_distance
 	if has_node("Label"):
 		$Label.visible = _in_range

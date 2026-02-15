@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://jammer_field_controller"]
+
+[ext_resource type="Script" path="res://scenes/ability/jammer_field_ability_controller/jammer_field_ability_controller.gd" id="1_ctrl"]
+
+[node name="JammerFieldAbilityController" type="Node"]
+script = ExtResource("1_ctrl")

@@ -42,32 +42,41 @@ func _setup_detect_area():
 	_detect_area.collision_layer = 0
 	_detect_area.collision_mask = 4  # 检测 HurtboxComponent
 	_detect_shape = CollisionShape2D.new()
-	var circle := CircleShape2D.new()
-	circle.radius = range_m * GlobalFomulaManager.METERS_TO_PIXELS
+	var circle: CircleShape2D = CircleShape2D.new()
+	circle.radius = _get_range_pixels()
 	_detect_shape.shape = circle
 	_detect_area.add_child(_detect_shape)
 	player.add_child(_detect_area)
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["laser_suppress", "cooling_device", "damage_bonus", "crit_damage", "crit_rate"]:
+	if upgrade_id in ["laser_suppress", "cooling_device", "laser_focus", "laser_overheat_cut", "damage_bonus", "crit_damage", "crit_rate"]:
 		_update_cooldown_timer()
+		_update_detect_area()
 
 func _get_cooldown_seconds() -> float:
 	var lvl = GameManager.current_upgrades.get("laser_suppress", {}).get("level", 0)
 	if lvl <= 0:
 		return INF
-	var base := base_cooldown_seconds
+	var base: float = base_cooldown_seconds
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var speed_bonus := 0.0
+	var speed_bonus: float = 0.0
 	if cd_lvl > 0:
 		speed_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
-	var speed_multiplier := 1.0 + speed_bonus
+	var cut_level = GameManager.current_upgrades.get("laser_overheat_cut", {}).get("level", 0)
+	if cut_level > 0:
+		speed_bonus += UpgradeEffectManager.get_effect("laser_overheat_cut", cut_level)
+	var speed_multiplier: float = 1.0 + speed_bonus
 	if speed_multiplier <= 0.0:
 		return INF
 	return max(base / speed_multiplier, 0.5)
 
+func _get_range_pixels() -> float:
+	var bonus_level = GameManager.current_upgrades.get("laser_focus", {}).get("level", 0)
+	var radius_m = range_m + UpgradeEffectManager.get_effect("laser_focus", bonus_level)
+	return radius_m * GlobalFomulaManager.METERS_TO_PIXELS
+
 func _update_cooldown_timer():
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if is_inf(interval):
 		if _cooldown_timer and not _cooldown_timer.is_stopped():
 			_cooldown_timer.stop()
@@ -75,6 +84,12 @@ func _update_cooldown_timer():
 	_cooldown_timer.wait_time = interval
 	if _cooldown_timer.is_stopped():
 		_cooldown_timer.start()
+
+func _update_detect_area():
+	if _detect_shape == null:
+		return
+	if _detect_shape.shape is CircleShape2D:
+		(_detect_shape.shape as CircleShape2D).radius = _get_range_pixels()
 
 func _on_cooldown():
 	_active_until_msec = Time.get_ticks_msec() + int(active_duration_seconds * 1000.0)
@@ -95,7 +110,7 @@ func _on_tick():
 	if player == null:
 		return
 	
-	var best_dist_sq := INF
+	var best_dist_sq: float = INF
 	for area in _detect_area.get_overlapping_areas():
 		if not area is HurtboxComponent:
 			continue

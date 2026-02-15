@@ -18,7 +18,7 @@ func _ready():
 
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["incendiary_canister", "cooling_device"]:
+	if upgrade_id in ["incendiary_canister", "cooling_device", "fire_duration", "fire_damage"]:
 		_update_timer()
 
 
@@ -26,12 +26,12 @@ func _get_cooldown_seconds() -> float:
 	var lvl = GameManager.current_upgrades.get("incendiary_canister", {}).get("level", 0)
 	if lvl <= 0:
 		return INF
-	var base := BASE_COOLDOWN
+	var base: float = BASE_COOLDOWN
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var cooling_bonus := 0.0
+	var cooling_bonus: float = 0.0
 	if cd_lvl > 0:
 		cooling_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
-	var speed_multiplier := 1.0 + cooling_bonus
+	var speed_multiplier: float = 1.0 + cooling_bonus
 	if speed_multiplier <= 0.0:
 		return INF
 	return max(base / speed_multiplier, 0.5)
@@ -39,7 +39,11 @@ func _get_cooldown_seconds() -> float:
 
 func _get_zone_duration() -> float:
 	var lvl = GameManager.current_upgrades.get("incendiary_canister", {}).get("level", 0)
-	return 5.0 + float(max(lvl, 1))
+	var duration = 5.0 + float(max(lvl, 1))
+	var bonus_lvl = GameManager.current_upgrades.get("fire_duration", {}).get("level", 0)
+	if bonus_lvl > 0:
+		duration += UpgradeEffectManager.get_effect("fire_duration", bonus_lvl)
+	return duration
 
 
 func _get_zone_radius_px() -> float:
@@ -48,11 +52,15 @@ func _get_zone_radius_px() -> float:
 
 func _get_damage_per_second() -> float:
 	var lvl = GameManager.current_upgrades.get("incendiary_canister", {}).get("level", 0)
-	return 3.0 + 2.0 * float(max(lvl, 1))
+	var dmg = 3.0 + 2.0 * float(max(lvl, 1))
+	var bonus_lvl = GameManager.current_upgrades.get("fire_damage", {}).get("level", 0)
+	if bonus_lvl > 0:
+		dmg += UpgradeEffectManager.get_effect("fire_damage", bonus_lvl)
+	return dmg
 
 
 func _update_timer():
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if _cooldown_timer == null:
 		return
 	if is_inf(interval):
@@ -72,7 +80,7 @@ func _on_cooldown():
 	var spawn_pos: Vector2
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var nearest: Node2D = null
-	var best_d2 := INF
+	var best_d2: float = INF
 	
 	for e in enemies:
 		if not is_instance_valid(e) or not (e is Node2D):

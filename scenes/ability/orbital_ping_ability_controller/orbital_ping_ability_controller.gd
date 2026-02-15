@@ -20,7 +20,7 @@ func _ready():
 
 
 func _on_upgrade_added(upgrade_id: String, _current: Dictionary):
-	if upgrade_id in ["orbital_ping", "cooling_device", "damage_bonus", "crit_damage", "crit_rate"]:
+	if upgrade_id in ["orbital_ping", "cooling_device", "orbital_delay_cut", "orbital_damage", "damage_bonus", "crit_damage", "crit_rate"]:
 		_update_timer()
 
 
@@ -28,9 +28,9 @@ func _get_cooldown_seconds() -> float:
 	var lvl = GameManager.current_upgrades.get("orbital_ping", {}).get("level", 0)
 	if lvl <= 0:
 		return INF
-	var base := base_cooldown_seconds
+	var base: float = base_cooldown_seconds
 	var cd_lvl = GameManager.current_upgrades.get("cooling_device", {}).get("level", 0)
-	var cooling_device_bonus := 0.0
+	var cooling_device_bonus: float = 0.0
 	if cd_lvl > 0:
 		cooling_device_bonus += UpgradeEffectManager.get_effect("cooling_device", cd_lvl)
 	return max(base / (1.0 + cooling_device_bonus), 0.5)
@@ -38,11 +38,20 @@ func _get_cooldown_seconds() -> float:
 
 func _get_base_damage() -> float:
 	var lvl = GameManager.current_upgrades.get("orbital_ping", {}).get("level", 0)
-	return UpgradeEffectManager.get_effect("orbital_ping", max(lvl, 1))
+	var dmg = UpgradeEffectManager.get_effect("orbital_ping", max(lvl, 1))
+	var bonus_lvl = GameManager.current_upgrades.get("orbital_damage", {}).get("level", 0)
+	if bonus_lvl > 0:
+		dmg += UpgradeEffectManager.get_effect("orbital_damage", bonus_lvl)
+	return dmg
+
+func _get_delay_seconds() -> float:
+	var bonus_lvl = GameManager.current_upgrades.get("orbital_delay_cut", {}).get("level", 0)
+	var delay = strike_delay_seconds - UpgradeEffectManager.get_effect("orbital_delay_cut", bonus_lvl)
+	return max(delay, 0.5)
 
 
 func _update_timer() -> void:
-	var interval := _get_cooldown_seconds()
+	var interval: float = _get_cooldown_seconds()
 	if _cooldown_timer == null:
 		return
 	if is_inf(interval):
@@ -60,12 +69,13 @@ func _on_cooldown() -> void:
 		return
 	
 	# 选择最近的敌人作为目标
-	var target := _find_nearest_enemy(player.global_position)
+	var target: Node2D = _find_nearest_enemy(player.global_position)
 	if target == null:
 		return
 	
-	var target_pos := (target as Node2D).global_position
-	var marker_radius_px := 0.5 * GlobalFomulaManager.METERS_TO_PIXELS
+	var target_pos: Vector2 = (target as Node2D).global_position
+	var marker_radius_px: float = 0.5 * GlobalFomulaManager.METERS_TO_PIXELS
+	var delay_seconds: float = _get_delay_seconds()
 	
 	# 预警标记（白色闪烁圆，表示即将打击的位置）
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
@@ -73,18 +83,18 @@ func _on_cooldown() -> void:
 	if layer:
 		warning_fx = AoECircleEffect.new()
 		warning_fx.global_position = target_pos
-		warning_fx.setup(marker_radius_px, Color(1.0, 0.9, 0.3, 64.0 / 255.0), strike_delay_seconds)
+		warning_fx.setup(marker_radius_px, Color(1.0, 0.9, 0.3, 64.0 / 255.0), delay_seconds)
 		layer.add_child(warning_fx)
 	
 	# 延迟打击
-	var timer = get_tree().create_timer(strike_delay_seconds)
+	var timer = get_tree().create_timer(delay_seconds)
 	timer.timeout.connect(func():
 		_apply_strike(target_pos)
 	)
 
 
 func _apply_strike(center: Vector2) -> void:
-	var base_damage := _get_base_damage()
+	var base_damage: float = _get_base_damage()
 	var dmg: float = base_damage
 	
 	# 伤害加成
@@ -100,7 +110,7 @@ func _apply_strike(center: Vector2) -> void:
 		crit_damage_multiplier += UpgradeEffectManager.get_effect("crit_damage", crit_damage_level)
 	
 	# 轰炸视觉效果（红色闪烁）
-	var strike_radius_px := 0.8 * GlobalFomulaManager.METERS_TO_PIXELS
+	var strike_radius_px: float = 0.8 * GlobalFomulaManager.METERS_TO_PIXELS
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:
 		var fx = AoECircleEffect.new()
@@ -109,12 +119,12 @@ func _apply_strike(center: Vector2) -> void:
 		layer.add_child(fx)
 	
 	# 使用 Area2D 检测打击范围内的敌人（单点打击，但有小范围）
-	var strike_area := Area2D.new()
+	var strike_area: Area2D = Area2D.new()
 	strike_area.collision_layer = 0
 	strike_area.collision_mask = 4
 	strike_area.global_position = center
-	var shape_node := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
+	var shape_node: CollisionShape2D = CollisionShape2D.new()
+	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = strike_radius_px
 	shape_node.shape = circle
 	strike_area.add_child(shape_node)
@@ -166,7 +176,7 @@ func _apply_strike(center: Vector2) -> void:
 func _find_nearest_enemy(from: Vector2) -> Node2D:
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var best: Node2D = null
-	var best_dist_sq := INF
+	var best_dist_sq: float = INF
 	for e in enemies:
 		if not is_instance_valid(e) or not (e is Node2D):
 			continue

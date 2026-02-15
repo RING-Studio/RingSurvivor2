@@ -26,6 +26,10 @@ var weakpoint_strike_target: Node2D = null
 var kill_chain_active_until_msec: int = 0  # 击杀链激活截止时间
 var _bleed_stacks: Dictionary = {}  # enemy_id -> {stacks: int, timer: Timer}
 
+# 临时射速加成（由配件触发）
+var _temp_fire_rate_bonus: float = 0.0
+var _temp_fire_rate_bonus_until_msec: int = 0
+
 # 计时器
 var chain_fire_timer: Timer
 var burst_fire_timer: Timer
@@ -113,6 +117,13 @@ func get_fire_rate_modifier() -> float:
 			if hc and hc.current_health >= hc.max_health:
 				modifier += 0.07 * overdrive_level
 	
+	# 临时射速加成（配件触发）
+	if _temp_fire_rate_bonus > 0.0:
+		if Time.get_ticks_msec() >= _temp_fire_rate_bonus_until_msec:
+			_temp_fire_rate_bonus = 0.0
+		else:
+			modifier += _temp_fire_rate_bonus
+	
 	return modifier
 
 func get_fire_direction_modifier(base_direction: Vector2, player_position: Vector2) -> Vector2:
@@ -172,28 +183,43 @@ func get_damage_modifier(base_damage: float, target: Node2D = null) -> float:
 			if hc and hc.current_health < hc.max_health * 0.5:
 				damage *= (1.0 + 0.07 * overdrive_level)
 	
-	# 终结协议：目标耐久低于 20% 时额外 +6%*lv 伤害
-	var exec_level = current_upgrades.get("execution_protocol", {}).get("level", 0)
-	if exec_level > 0 and target != null:
-		var t_hc = target.get_node_or_null("HealthComponent")
-		if t_hc and t_hc.current_health < t_hc.max_health * 0.20:
-			damage *= (1.0 + 0.06 * exec_level)
-	
 	# 击杀链：连续 5 秒有击杀时全伤害 +6%*lv
 	var kill_chain_level = current_upgrades.get("kill_chain", {}).get("level", 0)
 	if kill_chain_level > 0 and Time.get_ticks_msec() < kill_chain_active_until_msec:
 		damage *= (1.0 + 0.06 * kill_chain_level)
 	
+	if target != null:
+		damage = _apply_target_damage_modifiers(damage, target)
+	
+	return damage
+
+func get_target_damage_modifier(base_damage: float, target: Node2D) -> float:
+	"""仅应用“目标相关”的伤害加成（不包含全局伤害词条）。"""
+	if target == null:
+		return base_damage
+	return _apply_target_damage_modifiers(base_damage, target)
+
+func _apply_target_damage_modifiers(base_damage: float, target: Node2D) -> float:
+	var damage: float = base_damage
+	var current_upgrades = GameManager.current_upgrades
+	
+	# 终结协议：目标耐久低于 20% 时额外 +6%*lv 伤害
+	var exec_level = current_upgrades.get("execution_protocol", {}).get("level", 0)
+	if exec_level > 0:
+		var t_hc = target.get_node_or_null("HealthComponent")
+		if t_hc and t_hc.current_health < t_hc.max_health * 0.20:
+			damage *= (1.0 + 0.06 * exec_level)
+	
 	# 穿甲弹芯：对"重甲"（armor_thickness > 50）额外 +8%*lv
 	var armor_breaker_level = current_upgrades.get("armor_breaker", {}).get("level", 0)
-	if armor_breaker_level > 0 and target != null:
+	if armor_breaker_level > 0:
 		var armor = target.get("armor_thickness")
 		if armor != null and int(armor) > 50:
 			damage *= (1.0 + 0.08 * armor_breaker_level)
 	
 	# 弱点打击：对同一目标连续命中，第 N 发伤害 +3%*N*lv（上限 30%）
 	var wp_level = current_upgrades.get("weakpoint_strike", {}).get("level", 0)
-	if wp_level > 0 and target != null and target == weakpoint_strike_target:
+	if wp_level > 0 and target == weakpoint_strike_target:
 		var bonus = 0.03 * float(weakpoint_strike_counter) * float(wp_level)
 		damage *= (1.0 + min(bonus, 0.30))
 	
@@ -232,11 +258,11 @@ func get_crit_rate_modifier(base_crit_rate: float, target: Node2D = null) -> flo
 	if awareness_level > 0:
 		var player = get_tree().get_first_node_in_group("player") as Node2D
 		if player:
-			var count := 0
+			var count: int = 0
 			for e in get_tree().get_nodes_in_group("enemy"):
 				if is_instance_valid(e) and e.global_position.distance_squared_to(player.global_position) < 40000.0:
 					count += 1
-			var bonus := 0.01 * float(awareness_level) * float(count / 5)
+			var bonus: float = 0.01 * float(awareness_level) * float(count / 5)
 			modifier += min(bonus, 0.02 * float(awareness_level))
 	
 	return modifier
@@ -371,7 +397,7 @@ func on_weapon_hit(target: Node2D):
 	# 电击核心：命中时对目标减速 0.4*lv 秒
 	var shock_level = current_upgrades.get("shock_core", {}).get("level", 0)
 	if shock_level > 0 and is_instance_valid(target):
-		var slow_duration := 0.4 * float(shock_level)
+		var slow_duration: float = 0.4 * float(shock_level)
 		if target.has_method("apply_slow"):
 			target.apply_slow(0.5, slow_duration)  # 50% 减速
 
@@ -411,6 +437,25 @@ func on_enemy_killed(_target: Node2D):
 	var kill_chain_level = current_upgrades.get("kill_chain", {}).get("level", 0)
 	if kill_chain_level > 0:
 		kill_chain_active_until_msec = Time.get_ticks_msec() + 5000
+	
+	# 废料回收器：击杀概率回复耐久
+	var scrap_level = current_upgrades.get("scrap_collector", {}).get("level", 0)
+	if scrap_level > 0:
+		var chance = 0.10 + 0.03 * float(scrap_level)
+		var bonus_level = current_upgrades.get("scrap_drop_rate", {}).get("level", 0)
+		if bonus_level > 0:
+			chance += UpgradeEffectManager.get_effect("scrap_drop_rate", bonus_level)
+		chance = clamp(chance, 0.0, 0.9)
+		if randf() < chance:
+			var heal_amount = 1 + scrap_level
+			var value_level = current_upgrades.get("scrap_value", {}).get("level", 0)
+			if value_level > 0:
+				heal_amount += int(UpgradeEffectManager.get_effect("scrap_value", value_level))
+			var player = get_tree().get_first_node_in_group("player")
+			if player:
+				var hc = player.get_node_or_null("HealthComponent")
+				if hc:
+					hc.heal(heal_amount)
 
 func _process(delta):
 	"""每帧更新"""
@@ -597,6 +642,15 @@ func get_target_computer_accuracy_bonus() -> float:
 			return 0.10 * float(tc_level)
 	return 0.0
 
+func apply_temporary_fire_rate_bonus(bonus: float, duration_seconds: float) -> void:
+	if bonus <= 0.0 or duration_seconds <= 0.0:
+		return
+	_temp_fire_rate_bonus = max(_temp_fire_rate_bonus, bonus)
+	_temp_fire_rate_bonus_until_msec = max(
+		_temp_fire_rate_bonus_until_msec,
+		Time.get_ticks_msec() + int(duration_seconds * 1000.0)
+	)
+
 # ========== 破片/流血 DoT 系统 ==========
 
 func _apply_bleed_stacks(target: Node2D, stacks_to_add: int):
@@ -621,12 +675,12 @@ func _get_bleed_damage_per_tick(stacks: int) -> float:
 	"""计算每 tick 的流血伤害：每层 base 0.5 + 破片淬火 0.2*lv"""
 	var current_upgrades = GameManager.current_upgrades
 	var bloodletting_level = current_upgrades.get("bloodletting", {}).get("level", 0)
-	var per_stack := 0.5 + 0.2 * float(bloodletting_level)
+	var per_stack: float = 0.5 + 0.2 * float(bloodletting_level)
 	return per_stack * float(stacks)
 
 func _process_bleed_ticks(delta: float):
 	"""处理所有流血目标的 DoT（每秒 tick 一次）"""
-	var to_remove := []
+	var to_remove: Array = []
 	for target_id in _bleed_stacks:
 		var data = _bleed_stacks[target_id]
 		var target = data.get("target") as Node2D
@@ -641,7 +695,7 @@ func _process_bleed_ticks(delta: float):
 		
 		if data["tick_accumulator"] >= 1.0:
 			data["tick_accumulator"] -= 1.0
-			var dmg := _get_bleed_damage_per_tick(data["stacks"])
+			var dmg: float = _get_bleed_damage_per_tick(data["stacks"])
 			var t_hc = target.get_node_or_null("HealthComponent")
 			if t_hc and t_hc.has_method("damage"):
 				t_hc.damage(dmg, {"damage_source": "bleed"})

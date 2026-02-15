@@ -75,7 +75,16 @@ func refresh_choice_list(slot:String) -> void:
 						button.modulate = Color(0.5, 1, 1, 1)
 			else:
 				button.use_parent_material = true
-		if not first_accessory_id.is_empty():
+		# 保持当前选中项（如果仍在列表中），否则选第一个
+		var keep_current: bool = false
+		if selected_part_id is String and not (selected_part_id as String).is_empty():
+			for entry2 in AbilityUpgradeData.entries:
+				if entry2.get("upgrade_type", "") == "accessory" and entry2.get("id", "") == selected_part_id:
+					keep_current = true
+					break
+		if keep_current:
+			_on_part_selected(selected_part_id)
+		elif not first_accessory_id.is_empty():
 			_on_part_selected(first_accessory_id)
 		return
 

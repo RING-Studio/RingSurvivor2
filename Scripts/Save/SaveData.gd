@@ -2,10 +2,10 @@ class_name SaveData
 extends Node
 
 func save_game(file_path := "user://autosave.json") -> void:
-	var now := Time.get_datetime_dict_from_system()
+	var now: Dictionary = Time.get_datetime_dict_from_system()
 	# {year:2024, month:12, day:22, hour:19, minute:10, second:33, ...}
 
-	var formatted_time := "%04d/%02d/%02d %02d:%02d:%02d" % [
+	var formatted_time: String = "%04d/%02d/%02d %02d:%02d:%02d" % [
 		now.year, now.month, now.day,
 		now.hour, now.minute, now.second
 	]
@@ -16,7 +16,9 @@ func save_game(file_path := "user://autosave.json") -> void:
 			"time_phase": GameManager.time_phase,
 			"pollution": GameManager.pollution,
 			"mission_progress": GameManager.mission_progress,
+			"chapter_progress": GameManager.chapter_progress,
 			"npc_dialogues": GameManager.npc_dialogues,
+			"objectives": GameManager.objectives,
 			"chapter": GameManager.chapter
 		},
 		"selection": {
@@ -26,7 +28,7 @@ func save_game(file_path := "user://autosave.json") -> void:
 		"vehicles_config": GameManager.vehicles_config,
 		"unlocked_vehicles": GameManager.unlocked_vehicles,
 		"unlocked_parts": GameManager.unlocked_parts,
-		"tech_upgrades": GameManager.tech_upgrades,
+		"materials": GameManager.materials,
 		"money": GameManager.money,
 		"save_time": formatted_time,
 	}
@@ -98,14 +100,16 @@ func load_game(file_path := "user://autosave.json") -> void:
 	GameManager.time_phase = save_data["game_state"]["time_phase"]
 	GameManager.pollution = save_data["game_state"]["pollution"]
 	GameManager.mission_progress = save_data["game_state"]["mission_progress"]
-	GameManager.chapter = save_data["game_state"]["chapter"]
+	GameManager.chapter_progress = save_data["game_state"]["chapter_progress"]
 	GameManager.npc_dialogues = save_data["game_state"]["npc_dialogues"]
+	GameManager.objectives = save_data["game_state"]["objectives"]
+	GameManager.chapter = save_data["game_state"]["chapter"]
 	GameManager.current_vehicle = save_data["selection"]["current_vehicle"]
 	GameManager.current_skill = save_data["selection"]["current_skill"]
 	GameManager.vehicles_config = _normalize_vehicles_config(save_data["vehicles_config"])
 	GameManager.unlocked_vehicles = save_data["unlocked_vehicles"]
 	GameManager.unlocked_parts = _normalize_unlocked_parts(save_data["unlocked_parts"])
-	GameManager.tech_upgrades = save_data["tech_upgrades"]
+	GameManager.materials = save_data.get("materials", {})
 	GameManager.money = save_data["money"]
 
 func HasSave(save_slot_name: String):

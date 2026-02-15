@@ -30,9 +30,7 @@ func refresh():
 			var save_time =  save_data["save_time"]
 			var day = save_data["game_state"]["day"]
 			var chapter = save_data["game_state"]["chapter"]
-			var mission_progress = save_data["game_state"]["mission_progress"]
-
-			info = "{0} {1}  第{2}天 章节:{3} 进度:{4}".format([i, save_time, day as int , chapter as int, mission_progress] )
+			info = "{0} {1}  第{2}天 章节:{3}".format([i, save_time, day as int , chapter as int] )
 
 		var button = create_button(info)
 

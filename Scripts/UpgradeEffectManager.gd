@@ -624,6 +624,387 @@ static var upgrade_configs: Dictionary = {
 		"type": "linear",
 		"per_level_value": 1.0,
 		"max_level": 5
+	},
+	
+	# ========== 阶段九：新增配件 ==========
+	"cluster_mine": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"chaff_launcher": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"flare_dispenser": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"nano_armor": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+	"fuel_injector_module": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"adrenaline_stim": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+	"sonar_scanner": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"ballistic_computer_pod": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"jammer_field": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+	"overwatch_uav": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
+	},
+	"grapeshot_pod": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"scrap_collector": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"kinetic_barrier": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	
+	# ========== 阶段九：新增配件后置强化 ==========
+	"cluster_count": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"cluster_radius": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"chaff_density": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"chaff_duration": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"flare_count": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"flare_cooldown": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"nano_repair_rate": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"nano_overcap": {
+		"type": "linear",
+		"per_level_value": 2.0,
+		"max_level": 3
+	},
+	"fuel_boost": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"fuel_efficiency": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"stim_trigger_hp": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 4
+	},
+	"stim_duration": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 4
+	},
+	"sonar_range": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"sonar_expose_bonus": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 5
+	},
+	"ballistic_accuracy": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"ballistic_aoe": {
+		"type": "linear",
+		"per_level_value": 0.2,
+		"max_level": 5
+	},
+	"jammer_radius": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 4
+	},
+	"jammer_intensity": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 4
+	},
+	"uav_bomb_rate": {
+		"type": "linear",
+		"per_level_value": 0.15,
+		"max_level": 4
+	},
+	"uav_laser_tag": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 4
+	},
+	"grapeshot_pellets": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"grapeshot_cone": {
+		"type": "linear",
+		"per_level_value": 5.0,
+		"max_level": 5
+	},
+	"scrap_drop_rate": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 5
+	},
+	"scrap_value": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"barrier_angle": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 3
+	},
+	"barrier_reflect": {
+		"type": "linear",
+		"per_level_value": 0.08,
+		"max_level": 3
+	},
+	
+	# ========== 阶段九：旧配件后置强化补齐 ==========
+	"cooling_share": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 3
+	},
+	"cooling_safeguard": {
+		"type": "linear",
+		"per_level_value": 0.03,
+		"max_level": 5
+	},
+	"radio_barrage_count": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"laser_focus": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"laser_overheat_cut": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"spall_reload": {
+		"type": "linear",
+		"per_level_value": 5.0,
+		"max_level": 3
+	},
+	"spall_reserve": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"era_rearm": {
+		"type": "linear",
+		"per_level_value": 6.0,
+		"max_level": 3
+	},
+	"era_shockwave": {
+		"type": "linear",
+		"per_level_value": 6.0,
+		"max_level": 3
+	},
+	"missile_warhead": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"ir_wideband": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"ir_lockbreak": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 3
+	},
+	"decoy_duration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"decoy_count": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"turret_rate": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"turret_pierce": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"emp_duration": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 3
+	},
+	"emp_radius": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 3
+	},
+	"beacon_heal": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"beacon_uptime": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"shield_capacity": {
+		"type": "linear",
+		"per_level_value": 10.0,
+		"max_level": 3
+	},
+	"shield_regen": {
+		"type": "linear",
+		"per_level_value": 2.0,
+		"max_level": 3
+	},
+	"coil_chain_count": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 3
+	},
+	"coil_damage": {
+		"type": "linear",
+		"per_level_value": 5.0,
+		"max_level": 3
+	},
+	"cryo_slow": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 5
+	},
+	"cryo_duration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"fire_duration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"fire_damage": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5
+	},
+	"acid_armor_break": {
+		"type": "linear",
+		"per_level_value": 0.08,
+		"max_level": 5
+	},
+	"acid_spread": {
+		"type": "linear",
+		"per_level_value": 5.0,
+		"max_level": 5
+	},
+	"orbital_delay_cut": {
+		"type": "linear",
+		"per_level_value": 0.3,
+		"max_level": 4
+	},
+	"orbital_damage": {
+		"type": "linear",
+		"per_level_value": 20.0,
+		"max_level": 4
+	},
+	"med_tick_rate": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5
+	},
+	"med_radius": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 5
+	},
+	"grav_pull": {
+		"type": "linear",
+		"per_level_value": 20.0,
+		"max_level": 4
+	},
+	"grav_duration": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 4
 	}
 }
 
@@ -643,7 +1024,15 @@ static func get_effect(upgrade_id: String, level: int) -> float:
 		"linear":
 			# 线性计算：level * per_level_value
 			var per_level_value = config.get("per_level_value", 0.0)
-			return float(level) * per_level_value
+			var result = float(level) * per_level_value
+			if upgrade_id == "cooling_device":
+				var share_level = GameManager.current_upgrades.get("cooling_share", {}).get("level", 0)
+				var safeguard_level = GameManager.current_upgrades.get("cooling_safeguard", {}).get("level", 0)
+				if share_level > 0:
+					result += get_effect("cooling_share", share_level)
+				if safeguard_level > 0:
+					result += get_effect("cooling_safeguard", safeguard_level)
+			return result
 		
 		"custom":
 			# 自定义：从 level_effects 字典中查找

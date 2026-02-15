@@ -10,13 +10,13 @@ func _ready() -> void:
 
 func load_from_path(path: String) -> bool:
 	_source_path = path
-	var f := FileAccess.open(path, FileAccess.READ)
+	var f: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if f == null:
 		push_error("JSONLoader: cannot open file: %s" % path)
 		_data = null
 		return false
 
-	var text := f.get_as_text()
+	var text: String = f.get_as_text()
 	f.close()
 
 	var parsed_data: Variant = JSON.parse_string(text)
@@ -44,7 +44,7 @@ func get_field(path_or_keys: Variant, default: Variant = null) -> Variant:
 
 	var keys: Array
 	if typeof(path_or_keys) == TYPE_STRING:
-		var s := str(path_or_keys).strip_edges()
+		var s: String = str(path_or_keys).strip_edges()
 		if s == "":
 			return _data
 		keys = s.split("/") if s.find("/") != -1 else s.split(".")

@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://b010r7ggyd2qf"]
 
 [ext_resource type="Script" uid="uid://bsq6pa845dk31" path="res://scenes/ability/mine_ability/mine_ability.gd" id="1_mine"]
-[ext_resource type="Texture2D" uid="uid://cuybn460ie8ou" path="res://Assets/GPT/ChatGPT Mine.png" id="2_mine_texture"]
+[ext_resource type="Texture2D" uid="uid://cuybn460ie8ou" path="res://Assets/Upgrades/mine.png" id="2_mine_texture"]
 [ext_resource type="PackedScene" uid="uid://bukkiv0tbb2ka" path="res://scenes/component/hitbox_component.tscn" id="3_d6dvc"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_explosion"]

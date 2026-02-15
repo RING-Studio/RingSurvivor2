@@ -15,7 +15,7 @@ func _ready():
 
 
 func damage(damage_amount: float, context: Dictionary = {}):
-	var final_amount := damage_amount
+	var final_amount: float = damage_amount
 	# 在进入 HealthComponent 前，允许 owner 拦截/修改伤害（用于一次性免死等）
 	if final_amount > 0 and owner != null and owner.has_method("before_take_damage"):
 		final_amount = owner.before_take_damage(final_amount, self, context)

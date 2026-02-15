@@ -53,18 +53,10 @@ func _on_hitbox_area_entered(area: Area2D):
 	
 	# 检查是否仅精英/BOSS触发
 	if elite_only:
-		# 使用 get() 获取敌人的is_elite和is_boss属性
-		var is_elite_flag = enemy.get("is_elite")
-		var is_boss_flag = enemy.get("is_boss")
-		if is_elite_flag != null and is_boss_flag != null:
-			if not is_elite_flag and not is_boss_flag:
-				return
-		else:
-			# 兼容旧代码：如果没有属性，使用scale判断
-			var is_boss = enemy.scale.x >= 4.0 or (enemy.is_in_group("fixed_enemy") and enemy.scale.x >= 3.0)
-			var is_elite = enemy.scale.x >= 2.0 and enemy.scale.x < 4.0
-			if not is_elite and not is_boss:
-				return
+		# 使用 enemy_rank 枚举：0=NORMAL, 1=ELITE, 2=BOSS
+		var rank = enemy.get("enemy_rank")
+		if rank == null or int(rank) < 1:
+			return  # 无 enemy_rank 属性或为普通敌人，跳过
 	
 	# 触发爆炸
 	trigger_explosion()

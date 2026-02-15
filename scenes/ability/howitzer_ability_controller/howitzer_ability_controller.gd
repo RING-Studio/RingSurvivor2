@@ -108,18 +108,27 @@ func _fire_shells(origin: Vector2, base_direction: Vector2):
 	if WeaponUpgradeHandler.instance:
 		shot_count = max(WeaponUpgradeHandler.instance.get_spread_modifier(shot_count), 1)
 	
-	var damage_ratio := 1.0
+	var damage_ratio: float = 1.0
 	if WeaponUpgradeHandler.instance and shot_count > 1:
 		damage_ratio = WeaponUpgradeHandler.instance.get_spread_damage_ratio()
 	
+	var speed_multiplier = 1.0
+	var lifetime_multiplier = 1.0
+	if WeaponUpgradeHandler.instance:
+		speed_multiplier = WeaponUpgradeHandler.instance.get_bullet_speed_modifier()
+		lifetime_multiplier = WeaponUpgradeHandler.instance.get_bullet_lifetime_modifier()
+	
 	# howitzer：多弹道按散射角分布（集中散射），避免 360° 风车直接把炮弹全打散到身后
 	var spread_angle_deg = 6.0
+	if WeaponUpgradeHandler.instance:
+		spread_angle_deg *= WeaponUpgradeHandler.instance.get_spread_angle_modifier()
 	for i in range(shot_count):
 		var angle_offset = (float(i) - float(shot_count - 1) / 2.0) * deg_to_rad(spread_angle_deg)
 		var dir = base_direction.rotated(angle_offset)
 		var shell = shell_scene.instantiate() as HowitzerShell
-		get_tree().get_first_node_in_group("foreground_layer").add_child(shell)
+		shell.lifetime_seconds *= lifetime_multiplier
 		shell.global_position = origin
-		shell.speed_pixels_per_second = shell_speed
+		shell.speed_pixels_per_second = shell_speed * speed_multiplier
+		get_tree().get_first_node_in_group("foreground_layer").add_child(shell)
 		var radius_px = (explosion_radius_m + _exclusive_radius_bonus_m) * GlobalFomulaManager.METERS_TO_PIXELS
 		shell.setup(dir, _base_damage, radius_px, damage_ratio)
