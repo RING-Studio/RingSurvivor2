@@ -63,10 +63,16 @@ func update_info(id: Variant, table_name: String, vehicle_id: int) -> Dictionary
 		raw_description = _process_description(raw_description, upgrade_id, 1)
 	set_label_bbcode(raw_description)
 
-	var unlocked = GameManager.is_parts_unlocked(table_name, id)
-	parts_unlock_button.visible = !unlocked
+	var unlocked: bool = GameManager.is_parts_unlocked(table_name, id)
+	parts_unlock_button.visible = false  # 手动解锁按钮不再使用（配件通过任务内选取自动解锁）
 
-	var equipped = GameManager.is_equipped(vehicle_id, table_name, id)
+	# 未解锁配件显示解锁条件提示
+	if not unlocked and table_name == "配件":
+		set_label_bbcode("[color=#888888]" + raw_description + "[/color]\n\n[color=#ffcc00]🔒 解锁条件：在任务中选取过此配件[/color]")
+	elif not unlocked:
+		parts_unlock_button.visible = true
+
+	var equipped: bool = GameManager.is_equipped(vehicle_id, table_name, id)
 	load_button.visible = unlocked and !equipped
 	unload_button.visible = unlocked and equipped
 

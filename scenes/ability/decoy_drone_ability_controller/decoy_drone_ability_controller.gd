@@ -1,7 +1,7 @@
 extends Node
 class_name DecoyDroneAbilityController
 
-const DecoyDrone = preload("res://scenes/ability/decoy_drone_ability/decoy_drone.gd")
+const DecoyDroneScene: PackedScene = preload("res://scenes/ability/decoy_drone_ability/decoy_drone.tscn")
 
 @export var base_cooldown_seconds: float = 30.0
 
@@ -60,9 +60,9 @@ func _on_cooldown():
 	for i in range(decoy_count):
 		var offset = Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, 50.0)
 		var pos = player.global_position + offset
-		var decoy = DecoyDrone.new()
-		decoy.global_position = pos
+		var decoy: Node2D = DecoyDroneScene.instantiate()
 		decoy.setup(decoy_health, decoy_duration)
+		decoy.global_position = pos
 		if layer:
 			layer.add_child(decoy)
 		else:

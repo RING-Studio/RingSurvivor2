@@ -5,9 +5,23 @@ extends Node2D
 @export var npc_scene: StringName = &""
 @export var car_editor_scene: StringName = &""
 @export var save_scene: StringName = &""
+## NPC 对话资源（.dialogue 文件）
+@export var npc_dialogue_resource: DialogueResource
+## NPC 对话背景图（全屏模式下使用，留空则使用纯色背景）
+@export var npc_bg_texture: Texture2D
+## NPC 左侧角色立绘
+@export var npc_char_left: Texture2D
+## NPC 右侧角色立绘
+@export var npc_char_right: Texture2D
 
 const MissionMapScene: PackedScene = preload("res://scenes/ui/mission_map.tscn")
 var _mission_map: MissionMap = null
+
+# NPC 对话序列定义（14.2）— 按顺序播放，每次对话推进索引
+# 格式: { "npc_id": [Array of dialogue title strings] }
+const NPC_DIALOGUE_SEQUENCES: Dictionary = {
+	"npc_mechanic": ["intro", "day2", "day3", "idle"],
+}
 
 
 func _ready() -> void:
@@ -74,8 +88,35 @@ func ensure_main_weapon():
 		print("主武器为空，已自动设置为机炮")
 
 func npc():
-	Transitions.set_next_scene(npc_scene)
-	Transitions.transition( Transitions.transition_type.Diamond )
+	if npc_dialogue_resource:
+		# 获取 NPC 当前对话标题（14.2 进度追踪）
+		var npc_id: String = "npc_mechanic"
+		var sequence: Array = NPC_DIALOGUE_SEQUENCES.get(npc_id, ["start"])
+		var title: String = GameManager.get_npc_dialogue_title(npc_id, sequence)
+
+		# 使用 DialogueRunner 全屏模式对话（不离开军营场景）
+		var config: Dictionary = {
+			"mode": "fullscreen",
+			"pause_scene": true,
+			"free_scene": false,
+			"npc_id": npc_id,  # 对话结束后自动推进进度
+		}
+		if npc_bg_texture:
+			config["bg_texture"] = npc_bg_texture
+		if npc_char_left:
+			config["char_left"] = npc_char_left
+		if npc_char_right:
+			config["char_right"] = npc_char_right
+		_set_player_control(false)
+		DialogueRunner.dialogue_ended.connect(_on_npc_dialogue_ended, CONNECT_ONE_SHOT)
+		DialogueRunner.start(npc_dialogue_resource, title, config)
+	else:
+		# 后备：使用旧的场景切换方式
+		Transitions.set_next_scene(npc_scene)
+		Transitions.transition( Transitions.transition_type.Diamond )
+
+func _on_npc_dialogue_ended(_resource: DialogueResource) -> void:
+	_set_player_control(true)
 
 func car_editor():
 	Transitions.set_next_scene(car_editor_scene)
@@ -86,6 +127,9 @@ func save():
 	Transitions.transition( Transitions.transition_type.Diamond )
 
 func _unhandled_input(event: InputEvent) -> void:
+	# 对话进行中不处理交互
+	if DialogueRunner.is_active():
+		return
 	# 任务地图打开时不处理交互
 	if _mission_map != null and _mission_map.visible:
 		return

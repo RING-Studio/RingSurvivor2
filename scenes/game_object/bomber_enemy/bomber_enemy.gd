@@ -134,11 +134,13 @@ func _on_died():
 
 func _play_explosion_effect():
 	"""爆炸视觉占位：红色扩散圆"""
-	var effect: Node2D = Node2D.new()
+	var ExplosionScene: PackedScene = load("res://scenes/game_object/bomber_enemy/bomber_explosion_effect.tscn")
+	var effect: Node2D = ExplosionScene.instantiate()
+	effect.setup(EXPLODE_RADIUS)
 	effect.global_position = global_position
-	effect.set_script(preload("res://scenes/game_object/bomber_enemy/bomber_explosion_effect.gd"))
-	effect.set_meta("radius", EXPLODE_RADIUS)
-	get_tree().get_first_node_in_group("entities_layer").add_child(effect)
+	var layer: Node = get_tree().get_first_node_in_group("entities_layer")
+	if layer:
+		layer.add_child(effect)
 
 
 func on_hit():

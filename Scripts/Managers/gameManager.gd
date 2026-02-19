@@ -30,9 +30,8 @@ var mission_progress: Dictionary = {}
 # 格式: { "chapter_id": { "unlocked": bool, "completed": bool } }
 var chapter_progress: Dictionary = {}
 
-# npc_dialogues: NPC 对话进度
-# 格式: { "npc_id": { "completed": [], "next": "" } }
-# 暂未实现文本，先预留结构
+# npc_dialogues: NPC 对话进度追踪（14.2）
+# 格式: { "npc_id": int }  — int 为当前对话序列索引
 var npc_dialogues: Dictionary = {}
 
 # objectives: 目标（主线/支线）进度
@@ -87,6 +86,22 @@ var money: int = 100000
 # 格式: { "material_id": amount, ... }
 var materials: Dictionary = {}
 
+# ========== 单局会话数据（不存档，每局开始重置） ==========
+# 当局收集到的素材（类型 → 数量）
+var session_materials: Dictionary = {}
+# 当局玩家是否死亡（用于结算损失比例判定）
+var session_player_died: bool = false
+# 当局获得的升级 ID 列表（用于解锁配件，Mark E.1）
+var session_acquired_upgrades: Array[String] = []
+
+# ========== 升级品质基准值（用于结算返还能量计算） ==========
+const QUALITY_BASE_VALUE: Dictionary = {
+	"white": 1,
+	"blue": 3,
+	"purple": 8,
+	"red": 20,
+}
+
 func init_game():
 	"""初始化新游戏数据"""
 	# 重置游戏状态
@@ -125,6 +140,9 @@ func init_game():
 
 	# 初始化升级数据
 	current_upgrades = {}
+	session_materials = {}
+	session_player_died = false
+	session_acquired_upgrades = []
 
 func is_vehicle_unlocked(id:int):
 	for vehicle_id in unlocked_vehicles:
@@ -185,6 +203,10 @@ func is_equipped( vehicle_id:int, slot:String, part_id: Variant ):
 
 func equip_part( vehicle_id:int, slot:String, part_id: Variant ):
 	if slot == "配件" and part_id is not String:
+		return false
+	# 未解锁配件不允许装备
+	if not is_parts_unlocked(slot, part_id):
+		print("[Equip] 配件未解锁: %s" % str(part_id))
 		return false
 	if is_equipped( vehicle_id, slot, part_id ):
 		return false
@@ -459,9 +481,57 @@ func start_mission():
 	# Roguelike 核心：每局开始时清空上一局的升级
 	current_upgrades = {}
 	roll_points = 0
+	# 重置会话追踪
+	session_materials = {}
+	session_player_died = false
+	session_acquired_upgrades = []
+	# 连接升级获取信号（用于追踪当局获得的配件）
+	if not GameEvents.ability_upgrade_added.is_connected(_on_session_upgrade_added):
+		GameEvents.ability_upgrade_added.connect(_on_session_upgrade_added)
 	var mission_name: String = get_current_mission_name()
 	if not mission_name.is_empty():
 		_hud_mission_text = "执行中：" + mission_name
+
+func _on_session_upgrade_added(upgrade_id: String, _current: Dictionary) -> void:
+	"""当局获得升级时记录（用于结算后解锁配件）"""
+	if upgrade_id not in session_acquired_upgrades:
+		session_acquired_upgrades.append(upgrade_id)
+
+# ========== NPC 对话进度追踪（14.2） ==========
+
+func get_npc_dialogue_index(npc_id: String) -> int:
+	"""获取 NPC 当前对话序列索引"""
+	return int(npc_dialogues.get(npc_id, 0))
+
+func advance_npc_dialogue(npc_id: String) -> void:
+	"""推进 NPC 对话序列索引"""
+	var current_idx: int = get_npc_dialogue_index(npc_id)
+	npc_dialogues[npc_id] = current_idx + 1
+	print("[NPC] %s 对话推进: %d → %d" % [npc_id, current_idx, current_idx + 1])
+
+func get_npc_dialogue_title(npc_id: String, sequence: Array) -> String:
+	"""根据 NPC 进度获取当前对话标题。如已看完序列则循环最后一个。"""
+	if sequence.is_empty():
+		return "start"
+	var idx: int = get_npc_dialogue_index(npc_id)
+	# 如果超出序列范围，返回最后一个（可重复对话）
+	idx = min(idx, sequence.size() - 1)
+	return sequence[idx]
+
+func has_new_npc_dialogue(npc_id: String, sequence: Array) -> bool:
+	"""检查 NPC 是否有未看过的新对话"""
+	if sequence.is_empty():
+		return false
+	var idx: int = get_npc_dialogue_index(npc_id)
+	return idx < sequence.size() - 1
+
+func collect_session_material(material_type: String, amount: int = 1) -> void:
+	"""关卡中拾取素材时调用，累加到会话计数器。"""
+	if material_type.is_empty():
+		return
+	if not session_materials.has(material_type):
+		session_materials[material_type] = 0
+	session_materials[material_type] = int(session_materials[material_type]) + amount
 
 func apply_mission_result(result: String, completed_obj_ids: Array[String] = []) -> bool:
 	"""结算关卡（胜利/失败均推进时段并应用污染变化）。返回 true 表示首次结算。"""
@@ -505,15 +575,122 @@ func get_last_settlement() -> Dictionary:
 	return _last_settlement
 
 func _build_settlement(result: String, completed_obj_ids: Array[String]) -> Dictionary:
-	"""构建结算信息字典。奖励发放逻辑待 Mark C（带出物品系统）实现。
-	当前仅记录结算状态，不直接发放 money/素材。"""
+	"""构建结算信息字典并实际发放带出物品。
+	- 升级返还能量：品质基准 × 等级 / max(等级上限, 等级) × 10
+	- 素材带出：session_materials 按损失比例保留
+	- 损失规则：胜利 100%，失败存活损失 10-30%，失败死亡损失 60-90%"""
+
+	# 1. 计算升级返还能量
+	var total_upgrade_energy: int = 0
+	var upgrade_details: Array[Dictionary] = []
+	for upgrade_id in current_upgrades.keys():
+		var upgrade_entry: Dictionary = current_upgrades[upgrade_id]
+		var level: int = int(upgrade_entry.get("level", 0))
+		if level <= 0:
+			continue
+		# 查找升级数据以获取品质和等级上限
+		var data: Dictionary = _find_upgrade_data(upgrade_id)
+		var quality: String = data.get("quality", "white")
+		var max_level: int = int(data.get("max_level", -1))
+		var base_val: int = QUALITY_BASE_VALUE.get(quality, 1)
+		var denominator: int = max(max_level, level) if max_level > 0 else level
+		var energy: int = int(float(base_val) * float(level) / float(max(denominator, 1)) * 10.0)
+		total_upgrade_energy += energy
+		upgrade_details.append({
+			"id": upgrade_id,
+			"name": data.get("name", upgrade_id),
+			"quality": quality,
+			"level": level,
+			"energy": energy,
+		})
+
+	# 2. 计算损失比例
+	var keep_ratio: float = 1.0
+	var loss_desc: String = ""
+	if result == "victory":
+		keep_ratio = 1.0
+		loss_desc = "胜利：全部带出"
+	elif session_player_died:
+		# 失败 + 玩家死亡：损失 60-90%
+		var loss: float = randf_range(0.6, 0.9)
+		keep_ratio = 1.0 - loss
+		loss_desc = "失败（阵亡）：损失 %d%%" % int(loss * 100)
+	else:
+		# 失败 + 玩家存活：损失 10-30%
+		var loss: float = randf_range(0.1, 0.3)
+		keep_ratio = 1.0 - loss
+		loss_desc = "失败（存活）：损失 %d%%" % int(loss * 100)
+
+	# 3. 应用损失比例到能量
+	var final_energy: int = int(float(total_upgrade_energy) * keep_ratio)
+
+	# 4. 应用损失比例到素材
+	var final_materials: Dictionary = {}
+	var raw_materials: Dictionary = session_materials.duplicate()
+	for mat_type in raw_materials.keys():
+		var raw_count: int = int(raw_materials[mat_type])
+		var kept: int = max(int(float(raw_count) * keep_ratio), 0)
+		if kept > 0:
+			final_materials[mat_type] = kept
+
+	# 5. 实际发放到局外持久化数据
+	if final_energy > 0:
+		if not materials.has("pollution_energy"):
+			materials["pollution_energy"] = 0
+		materials["pollution_energy"] = int(materials["pollution_energy"]) + final_energy
+
+	for mat_type in final_materials.keys():
+		if not materials.has(mat_type):
+			materials[mat_type] = 0
+		materials[mat_type] = int(materials[mat_type]) + int(final_materials[mat_type])
+
+	# 6. 解锁配件（Mark E.1：在局内选取过的配件自动解锁）
+	var newly_unlocked: Array[String] = []
+	for uid in session_acquired_upgrades:
+		var udata: Dictionary = _find_upgrade_data(uid)
+		if udata.get("upgrade_type", "") == "accessory":
+			if not is_parts_unlocked("配件", uid):
+				if not unlocked_parts.has("配件"):
+					unlocked_parts["配件"] = []
+				unlocked_parts["配件"].append(uid)
+				newly_unlocked.append(uid)
+				print("[Unlock] 配件已解锁: %s (%s)" % [udata.get("name", uid), uid])
+
+	# 断开会话信号
+	if GameEvents.ability_upgrade_added.is_connected(_on_session_upgrade_added):
+		GameEvents.ability_upgrade_added.disconnect(_on_session_upgrade_added)
+
+	# 7. 构建结算字典
 	var settlement: Dictionary = {
 		"result": result,
 		"mission_id": current_mission_id,
 		"completed_obj_ids": completed_obj_ids,
+		"player_died": session_player_died,
+		"loss_desc": loss_desc,
+		"keep_ratio": keep_ratio,
+		# 升级返还能量
+		"total_upgrade_energy_raw": total_upgrade_energy,
+		"total_upgrade_energy_final": final_energy,
+		"upgrade_details": upgrade_details,
+		# 素材带出
+		"raw_materials": raw_materials,
+		"final_materials": final_materials,
+		# 配件解锁
+		"newly_unlocked": newly_unlocked,
 	}
-	print("[Settlement] %s — mission=%s, objs=%s" % [result, current_mission_id, str(completed_obj_ids)])
+	print("[Settlement] %s — mission=%s, energy=%d→%d, materials=%s, loss=%s" % [
+		result, current_mission_id, total_upgrade_energy, final_energy,
+		str(final_materials), loss_desc])
 	return settlement
+
+
+func _find_upgrade_data(upgrade_id: String) -> Dictionary:
+	"""在 AbilityUpgradeData 中查找升级条目数据"""
+	var entry: Variant = AbilityUpgradeData.get_entry(upgrade_id)
+	if entry != null and entry is Dictionary:
+		return entry as Dictionary
+	# fallback：返回白品质默认值
+	return {"quality": "white", "max_level": -1, "name": upgrade_id}
 
 func advance_time_without_mission() -> void:
 	"""不进行任务时推进一个时间段（仅污染+300）。"""

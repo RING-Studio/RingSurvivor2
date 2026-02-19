@@ -1,7 +1,7 @@
 extends Node
 class_name AutoTurretAbilityController
 
-const AutoTurret = preload("res://scenes/ability/auto_turret_ability/auto_turret.gd")
+const AutoTurretScene: PackedScene = preload("res://scenes/ability/auto_turret_ability/auto_turret.tscn")
 
 @export var base_cooldown_seconds: float = 40.0
 
@@ -60,9 +60,9 @@ func _on_cooldown():
 	if rate_lvl > 0:
 		turret_fire_rate += UpgradeEffectManager.get_effect("turret_rate", rate_lvl)
 	
-	var turret = AutoTurret.new()
-	turret.global_position = player.global_position
+	var turret: Node2D = AutoTurretScene.instantiate()
 	turret.setup(turret_damage, turret_fire_rate, turret_duration)
+	turret.global_position = player.global_position
 	
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:

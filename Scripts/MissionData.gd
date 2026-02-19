@@ -57,7 +57,7 @@ const MISSIONS: Array[Dictionary] = [
 	{
 		"id": "recon_patrol",
 		"name": "野外侦察",
-		"description": "在野外巡逻区域存活 90 秒，熟悉基本战斗。",
+		"description": "在广阔的沙漠巡逻区域存活 10 分钟，熟悉各类敌人。",
 		"destination_id": "patrol_zone",
 		"difficulty": 1,
 		"time_cost": 1,
@@ -69,13 +69,14 @@ const MISSIONS: Array[Dictionary] = [
 		},
 		"unlock_condition": {},
 		"objectives": [
-			{"id": "survive_90", "display_name": "在巡逻区存活 90 秒", "primary": true}
+			{"id": "survive_patrol", "display_name": "在沙漠巡逻区存活 600 秒", "primary": true},
+			{"id": "kill_30", "display_name": "击杀 60 只敌人（额外奖励）", "primary": false}
 		]
 	},
 	{
 		"id": "salvage_run",
 		"name": "残骸回收",
-		"description": "调查废弃工厂区域，击杀敌人收集能量核心。",
+		"description": "在废弃工厂区域击杀敌人，收集散落的能量核心。",
 		"destination_id": "scrapyard",
 		"difficulty": 1,
 		"time_cost": 1,
@@ -87,14 +88,14 @@ const MISSIONS: Array[Dictionary] = [
 		},
 		"unlock_condition": {"clear_mission": "recon_patrol", "clear_count": 1},
 		"objectives": [
-			{"id": "collect_cores", "display_name": "收集 20 个能量核心", "primary": true},
-			{"id": "kill_bonus", "display_name": "击杀 30 只敌人（额外奖励）", "primary": false}
+			{"id": "collect_cores", "display_name": "收集 80 个能量核心", "primary": true},
+			{"id": "kill_bonus", "display_name": "击杀 100 只敌人（额外奖励）", "primary": false}
 		]
 	},
 	{
 		"id": "containment",
 		"name": "污染封锁",
-		"description": "在高污染区域存活 120 秒，敌人更强更密。",
+		"description": "在高污染区域存活 10 分钟，毒雾区域需格外小心。",
 		"destination_id": "contamination_belt",
 		"difficulty": 2,
 		"time_cost": 1,
@@ -106,14 +107,14 @@ const MISSIONS: Array[Dictionary] = [
 		},
 		"unlock_condition": {"clear_mission": "recon_patrol", "clear_count": 1},
 		"objectives": [
-			{"id": "survive_120", "display_name": "在污染区存活 120 秒", "primary": true},
-			{"id": "kill_elites", "display_name": "击杀 5 只精英敌人（额外奖励）", "primary": false}
+			{"id": "survive_containment", "display_name": "在污染区存活 600 秒", "primary": true},
+			{"id": "kill_elites", "display_name": "击杀 15 只精英敌人（额外奖励）", "primary": false}
 		]
 	},
 	{
 		"id": "extermination",
 		"name": "歼灭行动",
-		"description": "在限定时间内击杀 50 只敌人。",
+		"description": "在 10 分钟内击杀 150 只敌人，构筑足够强力的升级组合。",
 		"destination_id": "contamination_belt",
 		"difficulty": 2,
 		"time_cost": 1,
@@ -125,13 +126,14 @@ const MISSIONS: Array[Dictionary] = [
 		},
 		"unlock_condition": {"clear_any": ["salvage_run", "containment"], "clear_count": 1},
 		"objectives": [
-			{"id": "kill_50", "display_name": "在 120 秒内击杀 50 只敌人", "primary": true}
+			{"id": "kill_80", "display_name": "在 600 秒内击杀 150 只敌人", "primary": true},
+			{"id": "kill_elites_bonus", "display_name": "击杀 10 只精英敌人（额外奖励）", "primary": false}
 		]
 	},
 	{
 		"id": "outpost_defense",
 		"name": "据点保卫",
-		"description": "保护通信据点 150 秒不被摧毁。",
+		"description": "保护通信据点 10 分钟不被摧毁，敌人会持续进攻。",
 		"destination_id": "comm_outpost",
 		"difficulty": 3,
 		"time_cost": 1,
@@ -143,7 +145,7 @@ const MISSIONS: Array[Dictionary] = [
 		},
 		"unlock_condition": {"clear_mission": "extermination", "clear_count": 1},
 		"objectives": [
-			{"id": "defend_outpost", "display_name": "保护通信据点 150 秒", "primary": true},
+			{"id": "defend_outpost", "display_name": "保护通信据点 600 秒", "primary": true},
 			{"id": "defend_no_hit", "display_name": "据点血量保持 50% 以上（额外奖励）", "primary": false}
 		]
 	},
@@ -191,7 +193,7 @@ const MISSIONS: Array[Dictionary] = [
 	{
 		"id": "high_risk_sweep",
 		"name": "高危清剿",
-		"description": "在极度危险的区域击杀大量敌人。精英出现率翻倍。",
+		"description": "在极度危险的区域击杀大量敌人。精英出现率翻倍，掉落能量核心。",
 		"destination_id": "contamination_belt",
 		"difficulty": 4,
 		"time_cost": 2,
@@ -203,13 +205,26 @@ const MISSIONS: Array[Dictionary] = [
 		},
 		"unlock_condition": {"clear_any": ["titan_hunt", "hive_assault"], "clear_count": 1},
 		"objectives": [
-			{"id": "kill_80", "display_name": "在 150 秒内击杀 80 只敌人", "primary": true},
-			{"id": "kill_10_elites", "display_name": "击杀 10 只精英敌人（额外奖励）", "primary": false}
+			{"id": "kill_120", "display_name": "击杀 200 只敌人", "primary": true},
+			{"id": "kill_15_elites", "display_name": "击杀 25 只精英敌人（额外奖励）", "primary": false}
 		]
 	}
 ]
 
 const DEFAULT_SCENE_PATH: String = "res://scenes/Levels/LevelTest/LevelTest.tscn"
+
+# ========== 场景路由 ==========
+# mission_id → 对应的关卡场景路径
+# 未配置的任务使用 DEFAULT_SCENE_PATH（LevelTest）
+const MISSION_SCENE_MAP: Dictionary = {
+	"recon_patrol": "res://scenes/Levels/LevelDesert/LevelDesert.tscn",
+	"salvage_run": "res://scenes/Levels/LevelDesert/LevelDesert.tscn",
+	"containment": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
+	"extermination": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
+	"outpost_defense": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
+	"high_risk_sweep": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
+	# titan_hunt / hive_assault 暂用 LevelTest（需要 Boss + Region3 机制）
+}
 
 const PHASE_LABELS: Dictionary = {
 	1: "早",
@@ -229,7 +244,8 @@ static func get_mission(mission_id: String) -> Dictionary:
 		if mission.get("id", "") == mission_id:
 			var result: Dictionary = mission.duplicate(true)
 			if not result.has("scene_path"):
-				result["scene_path"] = DEFAULT_SCENE_PATH
+				# 优先从场景路由表查找，否则使用默认
+				result["scene_path"] = MISSION_SCENE_MAP.get(mission_id, DEFAULT_SCENE_PATH)
 			return result
 	return {}
 

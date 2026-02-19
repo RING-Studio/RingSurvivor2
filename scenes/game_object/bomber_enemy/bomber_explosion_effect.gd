@@ -8,9 +8,10 @@ var _lifetime: float = 0.5
 var _elapsed: float = 0.0
 
 
+func setup(p_radius: float) -> void:
+	_radius = p_radius
+
 func _ready():
-	if has_meta("radius"):
-		_radius = get_meta("radius")
 	z_index = 5
 
 

@@ -76,12 +76,10 @@ func _on_cooldown():
 	var offset = Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, 80.0)
 	var spawn_pos = player.global_position + offset
 	
-	var trap = Node2D.new()
-	trap.set_script(preload("res://scenes/ability/grav_trap_ability/grav_trap.gd"))
+	var GravTrapScene: PackedScene = load("res://scenes/ability/grav_trap_ability/grav_trap.tscn")
+	var trap: Node2D = GravTrapScene.instantiate()
+	trap.setup(_get_trap_radius_px(), _get_trap_duration(), _get_pull_force())
 	trap.global_position = spawn_pos
-	trap.set_meta("_radius", _get_trap_radius_px())
-	trap.set_meta("_duration", _get_trap_duration())
-	trap.set_meta("_pull_force", _get_pull_force())
 	
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:

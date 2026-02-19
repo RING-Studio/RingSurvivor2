@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ability/cryo_canister_ability/cryo_zone.gd" id="1_cryo_zone"]
+
+[node name="CryoZone" type="Node2D"]
+script = ExtResource("1_cryo_zone")

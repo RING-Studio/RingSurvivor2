@@ -30,7 +30,7 @@ var _fire_timer: float = FIRE_INTERVAL
 var _is_moving: bool = true  # 内部移动状态
 var _aiming_disabled_until_msec: int = 0
 
-var SporeProjectileScript: GDScript = preload("res://scenes/game_object/spore_caster/spore_projectile.gd")
+var SporeProjectileScene: PackedScene = preload("res://scenes/game_object/spore_caster/spore_projectile.tscn")
 
 
 func _ready():
@@ -110,13 +110,9 @@ func _process(delta: float):
 
 func _fire_projectile(target: Node2D):
 	var direction: Vector2 = (target.global_position - global_position).normalized()
-	var projectile: Node2D = Node2D.new()
-	projectile.set_script(SporeProjectileScript)
+	var projectile: Node2D = SporeProjectileScene.instantiate()
+	projectile.setup(direction, PROJECTILE_SPEED, float(base_damage), PROJECTILE_LIFETIME)
 	projectile.global_position = global_position
-	projectile.set_meta("direction", direction)
-	projectile.set_meta("speed", PROJECTILE_SPEED)
-	projectile.set_meta("damage", float(base_damage))
-	projectile.set_meta("lifetime", PROJECTILE_LIFETIME)
 
 	var entities_layer: Node = get_tree().get_first_node_in_group("entities_layer")
 	if entities_layer:

@@ -10,15 +10,13 @@ var _elapsed: float = 0.0
 const HIT_RADIUS: float = 8.0
 
 
+func setup(p_direction: Vector2, p_speed: float, p_damage: float, p_lifetime: float) -> void:
+	_direction = p_direction
+	_speed = p_speed
+	_damage = p_damage
+	_lifetime = p_lifetime
+
 func _ready():
-	if has_meta("direction"):
-		_direction = get_meta("direction")
-	if has_meta("speed"):
-		_speed = get_meta("speed")
-	if has_meta("damage"):
-		_damage = get_meta("damage")
-	if has_meta("lifetime"):
-		_lifetime = get_meta("lifetime")
 	z_index = 3
 
 

@@ -32,6 +32,8 @@ GlobalFomulaManager="*res://Scripts/Managers/FomulaManager.gd"
 HUD="*res://scenes/Levels/HUD.tscn"
 AbilityUpgradeData="*res://Scripts/AbilityUpgradeData.gd"
 DamageTextHelper="*res://Scripts/DamageTextHelper.gd"
+DebugConsole="*res://scenes/autoload/debug_console.gd"
+DialogueRunner="*res://scenes/autoload/dialogue_runner.gd"
 
 [debug]
 

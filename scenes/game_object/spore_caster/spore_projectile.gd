@@ -9,11 +9,14 @@ var _elapsed: float = 0.0
 var _radius: float = 6.0  # 比酸液弹稍大
 
 
+func setup(p_direction: Vector2, p_speed: float, p_damage: float, p_lifetime: float) -> void:
+	_direction = p_direction
+	_speed = p_speed
+	_damage = p_damage
+	_lifetime = p_lifetime
+
 func _ready():
-	_direction = get_meta("direction") if has_meta("direction") else Vector2.RIGHT
-	_speed = get_meta("speed") if has_meta("speed") else 120.0
-	_damage = get_meta("damage") if has_meta("damage") else 1.0
-	_lifetime = get_meta("lifetime") if has_meta("lifetime") else 3.5
+	pass
 
 
 func _process(delta: float):

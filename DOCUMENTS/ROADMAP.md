@@ -274,23 +274,70 @@
   - 精英概率：12%/15%/20%/25%/30%
   - 高难度缩短生成间隔
 
-## 阶段 13：独立关卡场景
+## 阶段 13：独立关卡场景 ✅ 已完成
 目标
 - 为不同关卡创建独立场景，摆脱全部使用 LevelTest 的现状
 主要工作
-- 13.1 创建 2~3 个独立关卡场景（不同地形/区域/敌人组合）
-- 13.2 每个场景配置自己的 ObjectiveManager 目标（不再依赖 match mission_id）
-- 13.3 场景内特殊机制（不同地形效果、环境危害等）
+- 13.0 抽取 BaseLevel.gd 基类（通用生命周期、目标系统、收集物、敌人通知、Debug）
+- 13.1 创建 2 个大型独立关卡场景（LevelDesert、LevelContaminated）
+- 13.2 每个场景配置自己的 ObjectiveManager 目标
+- 13.3 场景路由（MissionData.MISSION_SCENE_MAP）+ 特殊机制
 验收标准
-- 至少 3 个独立关卡可进入并完成
+- 3 个关卡场景可进入（LevelTest/LevelDesert/LevelContaminated）
 
-## 阶段 14：NPC 对话与剧情推进
+**完成情况（2026-02-15）**：
+- 13.0 ✅ `BaseLevel.gd` 基类（`scenes/Levels/base_level.gd`）
+  - 任务生命周期、ObjectiveManager 信号连接、收集物掉落/拾取
+  - 通用敌人击杀路由、据点生成、区域检测辅助、Debug/暂停
+  - 子类通过虚方法覆写：`_setup_objectives()`、`_configure_level()`、
+    `_on_enemy_killed_objectives()`、`_on_collectible_collected_objectives()`、
+    `_on_area_reached()`、`_get_boss_id_for_objective()`
+- 13.0 ✅ `LevelTest.gd` 重构为 `extends BaseLevel`，保留全部原有功能
+- 13.1 ✅ **LevelDesert**（`scenes/Levels/LevelDesert/`）— 开阔沙漠
+  - 场地 9600×5400（LevelTest 的 ~5 倍）
+  - 单区域（PlayArea），中等敌人密度，SPAWN_RADIUS=750
+  - 敌人权重偏向基础近战（沙漠甲虫），无 Boss
+  - 任务：`recon_patrol`（存活 300 秒）、`salvage_run`（收集 40 核心）
+- 13.1 ✅ **LevelContaminated**（`scenes/Levels/LevelContaminated/`）— 污染带
+  - 场地 9600×5400，双区域（外围 + 核心区）
+  - 核心区更高污染/更多敌人、精英概率偏高
+  - **环境毒雾伤害**：2 个 HazardZone（600px 半径），每 2 秒对区域内玩家造成 2 点伤害
+  - 敌人权重均衡（更多危险敌人），SPAWN_RADIUS=700
+  - 任务：`containment`（360 秒生存）、`extermination`（480 秒 80 杀）、
+    `outpost_defense`（420 秒据点保卫）、`high_risk_sweep`（540 秒 120 杀）
+- 13.2 ✅ 每个关卡脚本各自覆写 `_setup_objectives()` 定义独立目标
+  - 目标数值已按大型关卡（~10 分钟）重新校准
+- 13.3 ✅ `MissionData.MISSION_SCENE_MAP` 场景路由表
+  - recon_patrol/salvage_run → LevelDesert
+  - containment/extermination/outpost_defense/high_risk_sweep → LevelContaminated
+  - titan_hunt/hive_assault → LevelTest（保留 Boss + Region3 机制）
+
+## 工具：DebugConsole 全局控制台 ✅ 已完成
+- 全局 autoload（CanvasLayer），任意场景可用
+- 输入 "DEBUG" 激活调试模式，按 ` 呼出/隐藏控制台
+- 命令：`unlock level <id>` / `add money <n>` / `add <mat> <n>` / `get <upgrade> [n]`
+  / `god` / `win` / `lose` / `xp <n>` / `pollution <n>` / `list missions` / `list upgrades` / `help`
+- 使用文档：`DOCUMENTS/DEBUG_CONSOLE.md`
+
+---
+
+## 阶段 14：NPC 对话系统 — 进行中
 目标
-- 实现 NPC 对话系统和主线/支线目标
+- 统一 AVG 对话系统，支持两种模式
 主要工作
-- 14.1 NPC 对话文本与进度追踪（npc_dialogues）
-- 14.2 主线/支线目标系统 UI 展示与奖励发放
-- 14.3 剧情推进触发（章节完成条件）
+- 14.1 ✅ DialogueRunner autoload — 统一 AVG 对话入口
+  - overlay 模式：对话气泡覆盖在当前场景上方
+  - fullscreen 模式：全屏遮罩 + 背景图 + 角色立绘 + 对话气泡
+  - 可选：暂停后方场景（默认暂停）、释放当前场景并跳转
+  - 军营 NPC 已切换到 DialogueRunner（不再切换场景）
+- 14.2 ✅ NPC 对话文本与进度追踪（npc_dialogues）— 已完成
+  - `GameManager.npc_dialogues` 追踪每个 NPC 对话序列索引
+  - `DialogueRunner` 新增 `npc_id` 配置项，对话结束自动推进
+  - 军营机械师 NPC 4 段对话序列：intro → day2 → day3 → idle
+  - 对话进度随存档持久化
+  - `MilitaryCamp.gd` 动态选取当前对话标题
+- 14.3 主线/支线目标系统 UI 展示与奖励发放 — 待实现
+- 14.4 剧情推进触发（章节完成条件）— 待实现
 
 ---
 
@@ -300,6 +347,8 @@
 - 目标：把"扩充数量"转化为"可读、可选、可玩"的稳定体感
 - 内容：构筑平衡、节奏校准、反馈特效、文案与提示优化
 - 来自阶段8遗留：✅ 弹道接口生效；✅ 机炮目标特定加成；⏳ 视觉占位替换；⏳ 地雷爆炸特效
+- ✅ 精英波事件（arena_difficulty 递增时触发精英波）
+- ✅ 素材掉落多样化（6 种素材按敌人类型过滤掉落）
 
 ### Mark V：美术与视觉
 - MissionMap 地图美化（背景图、目的地图标素材）
@@ -307,25 +356,33 @@
 - 敌人/配件视觉占位替换
 - 各种特效完善
 
-### Mark S：纯代码实体 → tscn 场景化（后置）
+### Mark S：纯代码实体 → tscn 场景化 ✅ 已完成
 - 目标：将当前通过 `.new()` 纯代码实例化的实体改为 `.tscn` 场景文件，方便手动编辑视觉/碰撞等
-- 优先级：低（当前功能正常，但不利于美术替换和编辑器调试）
-- 涉及实体（共 10 个）：
+- **完成情况**：10 个实体已全部转为 .tscn 场景化
+  - 创建了 10 个 `.tscn` 文件
+  - 所有 `Node2D.new() + set_script()` / `Script.new()` 改为 `load/preload().instantiate() + setup()`
+  - 7 个使用 `get_meta()` 传参的实体改为 `setup()` 方法
+  - 影响的控制器/敌人：auto_turret_controller、decoy_drone_controller、flare_dispenser_controller、
+    repair_beacon_controller、grav_trap_controller、incendiary_canister_controller、
+    cryo_canister_controller、radio_support_controller、bomber_enemy、spitter_enemy、spore_caster
 
-| # | 当前脚本路径 | 实例化方式 | 说明 |
-|---|-------------|-----------|------|
-| 1 | `scenes/ability/auto_turret_ability/auto_turret.gd` | `AutoTurret.new()` | 自动炮塔实体 |
-| 2 | `scenes/ability/decoy_drone_ability/decoy_drone.gd` | `DecoyDrone.new()` | 诱饵无人机实体 |
-| 3 | `scenes/ability/repair_beacon_ability/repair_beacon.gd` | `RepairBeacon.new()` | 修复信标实体 |
-| 4 | `scenes/ability/grav_trap_ability/grav_trap.gd` | `Node2D.new() + set_script` | 引力陷阱区域 |
-| 5 | `scenes/ability/incendiary_canister_ability/fire_zone.gd` | `Node2D.new() + set_script` | 燃烧区域 |
-| 6 | `scenes/ability/cryo_canister_ability/cryo_zone.gd` | `Node2D.new() + set_script` | 冰冻区域 |
-| 7 | `scenes/ability/radio_support_ability/radio_blink_circle.gd` | `Node2D.new() + set_script` | 炮击闪烁圈 |
-| 8 | `scenes/game_object/bomber_enemy/bomber_explosion_effect.gd` | `Node2D.new() + set_script` | 膨爆蜱爆炸特效 |
-| 9 | `scenes/game_object/spitter_enemy/spitter_projectile.gd` | `Node2D.new() + set_script` | 酸液射手弹丸 |
-| 10 | `scenes/game_object/spore_caster/spore_projectile.gd` | `Node2D.new() + set_script` | 孢子投手弹丸 |
+### Mark X：玩家升级与怪物经验掉落重做
+- 目标：修改经验掉落/升级曲线机制（用户有后续具体描述，待补充）
+- 触发时机：用户描述后实现
 
-- 改造步骤模板：创建 `.tscn` → 移入子节点（碰撞体/粒子/精灵）→ Controller 改用 `load().instantiate()` → 测试
+### Mark L：关卡规模与任务时长 ✅ 已完成
+- **场地扩大**：LevelDesert + LevelContaminated 均从 9600×5400 → 19200×10800（LevelTest ~10 倍）
+- **任务时间**：所有正式关卡任务统一为 ~600 秒（10 分钟）
+  - recon_patrol: 600s 存活 + 60 击杀
+  - salvage_run: 80 核心 + 100 击杀（掉率提升至 30%）
+  - containment: 600s 存活 + 15 精英击杀
+  - extermination: 600s 150 击杀 + 10 精英
+  - outpost_defense: 600s 据点保卫
+  - high_risk_sweep: 600s 200 击杀 + 25 精英
+- **生成参数**：SPAWN_RADIUS 1100-1200、map_center 调整到新地图中心
+- **Contaminated 增加 2 个毒雾区**：总共 4 个（四角分布），半径 1000
+- **MissionData 显示文本**已同步更新
+- LevelTest 保留作为迷你测试场景
 
 ### Test Mark（待测试）
 - 主武器弹道配件效果
@@ -344,17 +401,29 @@
 - 目标：让"打完一局回基地"有长期收益和策略价值
 - 内容：结算资源统一入账、成长曲线、失败补偿、存档扩展
 - 触发时机：任务系统最小闭环跑通后
+- **前置已完成**：
+  - ✅ 素材类型多样化：scarab_chitin / scrap_metal / bio_sample / spore_sample / acid_gland / energy_core
+  - ✅ 不同敌人掉落不同素材（enemy_filter 机制）
+  - ✅ 收集物自动记录到 session_materials → 结算带出
+  - ✅ SaveData 容错加固（兼容缺失字段的旧存档）
 
 ### Mark E：配装系统进阶
 - 目标：实现完整的"解锁 → 装备（预制造）→ 出击结算"配装闭环
 - 前置：Mark C（带出物品系统提供素材来源）
 - 详见策划书 5B
 
-#### E.1 解锁系统
-- 配件解锁条件：默认为"在某局任务中选择过一次该升级"
+#### E.1 解锁系统 ✅ 已完成
+- **配件解锁条件**：在任务中选取过该升级即自动解锁
+  - `GameManager.session_acquired_upgrades` 追踪当局获得的所有升级
+  - 连接 `GameEvents.ability_upgrade_added` 信号记录
+  - 结算时 `_build_settlement()` 扫描 accessory 类型升级并自动加入 `unlocked_parts["配件"]`
+- **CarEditor 显示**：
+  - 未解锁配件显示 🔒 前缀 + 灰色按钮
+  - ListDisplay 描述区域显示解锁条件文本（金色提示）
+  - 未解锁配件不允许装备（`equip_part()` 检查）
+- **结算画面**：显示新解锁的配件名称（金色高亮 Label）
+- **DebugConsole**：`unlock_acc <id>` / `unlock_acc all` 命令
 - 武器/装甲解锁条件：怪物素材 + 任务推进（各不相同，具体待定）
-- 未达成条件：显示"未解锁"+ 条件描述
-- 达成条件：显示解锁按钮
 
 #### E.2 装备 / 预制造
 - 解锁后的配件/武器/装甲可"装备"
@@ -371,44 +440,42 @@
 2. E.2 装备 / 预制造 + 出击资源检查
 3. E.3 配件预升级
 
-### Mark C：任务结算与带出物品系统
+### Mark C：任务结算与带出物品系统 ✅ 已完成
 - 目标：实现完整的"关卡结算 → 带出物品 → 局外资源积累"闭环
-- 触发时机：阶段 13~14 完成后，或 Mark B 启动时一并实现
+
+#### 已实现内容
+**1. 会话追踪**
+- `GameManager.session_materials`：记录当局收集的素材（类型 → 数量）
+- `GameManager.session_player_died`：标记玩家是否死亡（影响损失比例）
+- `GameManager.collect_session_material(type, amount)`：关卡中拾取素材时调用
+- `BaseLevel._on_collectible_collected()` 自动调用 `collect_session_material()`
+
+**2. 升级返还能量**
+- 公式：`品质基准 × 等级 / max(等级上限, 等级) × 10`
+- 品质基准值：白=1, 蓝=3, 紫=8, 红=20
+- 通过 `AbilityUpgradeData.get_entry()` 查找升级品质和等级上限
+
+**3. 损失规则**
+- 胜利：保留 100%
+- 失败 + 玩家存活：损失 10-30%（随机）
+- 失败 + 玩家死亡：损失 60-90%（随机）
+- 损失比例同时作用于能量和素材
+
+**4. 资源入账**
+- 结算后自动写入 `GameManager.materials`
+- 能量存为 `materials["pollution_energy"]`
+- 素材按类型累加
+
+**5. 结算画面**
+- `end_screen.gd` 新增 `show_settlement()` 方法
+- 显示：损失描述、污染能量获取、素材列表（含原始/最终数量对比）
+- BaseLevel 的 victory/defeat/player_died 三个出口均调用 `show_settlement()`
 
 #### 背景设定（污染能量）
 玩家阵营配备污染转换器，可将污染怪物身上提取的"污染能量"转换为可用能量。
 集齐一定能量即可进行一次"升级"。但升级在污染转换器过载后（即任务时限结束）会失效，
 返还一定数量能量并存入能量池（即局外能量）。
 
-#### 关卡结束结算规则
-在任务完成（无论胜负）后，进行"带出物品"结算：
-
-**1. 胜利情况**
-- 带出全部物品（怪物素材 + 升级返还能量）
-
-**2. 失败 + 玩家死亡**
-- 依照关卡规则损失随机比例的**大部分**物品（例如 60%~90% 损失）
-
-**3. 失败 + 玩家存活**
-- 依照关卡规则损失随机比例的**小部分**物品（例如 10%~30% 损失）
-
-**4. 规则由关卡脚本全权管理**
-- 不同关卡可自定义损失比例、免损物品等
-- 以上仅为默认参考规则
-
-#### 带出物品内容
-**a. 怪物素材**
-- 击杀敌人掉落的素材类收集物（bio_sample、energy_core 等）
-- 由关卡内实际收集到的数量决定
-
-**b. 升级返还能量**
-- 所有局内获得的升级（包括带入配件）按"价值"以随机比例返还为污染能量
-- 价值由**品质 × 等级 × 等级上限**唯一确定（具体公式待定，如 `价值 = 品质基准 × 等级 / 等级上限 × 10`）
-- 返还比例受关卡结果影响（胜利 100%、失败存活 70~90%、失败死亡 10~40%）
-
-#### 待定事项
-- [ ] 升级价值公式确定（品质基准值：白=1, 蓝=3, 紫=8, 红=20？）
-- [ ] end_mission 时机：当前在 start_mission 清空升级，考虑在 end_mission 计算返还后再清空
-- [x] 素材存档字段（`GameManager.materials` + `SaveData` 已加入）
-- [ ] 结算 UI：end_screen 扩展显示带出物品列表
+#### 未来扩展
 - [ ] 目标奖励由关卡脚本管理（可触发 money/素材/解锁/主线推进等多种组合）
+- [ ] 不同关卡可自定义损失比例、免损物品等（当前为全局默认规则）

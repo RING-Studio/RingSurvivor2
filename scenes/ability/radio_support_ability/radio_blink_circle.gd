@@ -5,11 +5,11 @@ var color: Color = Color(1.0, 0.2, 0.2, 32.0 / 255.0)
 var _blink_timer: float = 0.0
 var _visible_phase: bool = true
 
+func setup(p_radius: float, p_color: Color) -> void:
+	radius = p_radius
+	color = p_color
+
 func _ready():
-	if has_meta("_radius"):
-		radius = get_meta("_radius")
-	if has_meta("_color"):
-		color = get_meta("_color")
 	queue_redraw()
 
 func _process(delta: float):

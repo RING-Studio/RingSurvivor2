@@ -96,21 +96,23 @@ func load_game(file_path := "user://autosave.json") -> void:
 		print("Invalid save data.")
 		return
 
-	GameManager.day = save_data["game_state"]["day"]
-	GameManager.time_phase = save_data["game_state"]["time_phase"]
-	GameManager.pollution = save_data["game_state"]["pollution"]
-	GameManager.mission_progress = save_data["game_state"]["mission_progress"]
-	GameManager.chapter_progress = save_data["game_state"]["chapter_progress"]
-	GameManager.npc_dialogues = save_data["game_state"]["npc_dialogues"]
-	GameManager.objectives = save_data["game_state"]["objectives"]
-	GameManager.chapter = save_data["game_state"]["chapter"]
-	GameManager.current_vehicle = save_data["selection"]["current_vehicle"]
-	GameManager.current_skill = save_data["selection"]["current_skill"]
-	GameManager.vehicles_config = _normalize_vehicles_config(save_data["vehicles_config"])
-	GameManager.unlocked_vehicles = save_data["unlocked_vehicles"]
-	GameManager.unlocked_parts = _normalize_unlocked_parts(save_data["unlocked_parts"])
+	var gs: Dictionary = save_data.get("game_state", {})
+	GameManager.day = int(gs.get("day", 1))
+	GameManager.time_phase = int(gs.get("time_phase", 1))
+	GameManager.pollution = int(gs.get("pollution", 7000))
+	GameManager.mission_progress = gs.get("mission_progress", {})
+	GameManager.chapter_progress = gs.get("chapter_progress", {})
+	GameManager.npc_dialogues = gs.get("npc_dialogues", {})
+	GameManager.objectives = gs.get("objectives", {})
+	GameManager.chapter = int(gs.get("chapter", 1))
+	var sel: Dictionary = save_data.get("selection", {})
+	GameManager.current_vehicle = int(sel.get("current_vehicle", 0))
+	GameManager.current_skill = str(sel.get("current_skill", ""))
+	GameManager.vehicles_config = _normalize_vehicles_config(save_data.get("vehicles_config", {}))
+	GameManager.unlocked_vehicles = save_data.get("unlocked_vehicles", [0])
+	GameManager.unlocked_parts = _normalize_unlocked_parts(save_data.get("unlocked_parts", {}))
 	GameManager.materials = save_data.get("materials", {})
-	GameManager.money = save_data["money"]
+	GameManager.money = int(save_data.get("money", 100000))
 
 func HasSave(save_slot_name: String):
 	var file_path = "user://" + save_slot_name + ".json"

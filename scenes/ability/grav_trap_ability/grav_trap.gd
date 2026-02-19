@@ -10,10 +10,12 @@ var pull_force: float = 80.0  # px/sec
 var _area: Area2D
 var _expire_timer: Timer
 
+func setup(p_radius: float, p_duration: float, p_pull_force: float) -> void:
+	trap_radius_px = p_radius
+	trap_duration = p_duration
+	pull_force = p_pull_force
+
 func _ready():
-	trap_radius_px = get_meta("_radius", trap_radius_px)
-	trap_duration = get_meta("_duration", trap_duration)
-	pull_force = get_meta("_pull_force", pull_force)
 	
 	_area = Area2D.new()
 	_area.collision_layer = 0

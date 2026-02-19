@@ -56,16 +56,19 @@ func refresh_choice_list(slot:String) -> void:
 		for entry in AbilityUpgradeData.entries:
 			if entry.get("upgrade_type", "") != "accessory":
 				continue
-			var part_name = entry.get("name", "")
+			var part_name: String = entry.get("name", "")
 			var part_id: String = entry.get("id", "")
 			if first_accessory_id.is_empty():
 				first_accessory_id = part_id
-			var button = property_list_button.duplicate()
-			button.text = part_name
+			var button: Button = property_list_button.duplicate()
+			var unlocked: bool = GameManager.is_parts_unlocked(slot, part_id)
+			if unlocked:
+				button.text = part_name
+			else:
+				button.text = "🔒 " + part_name
 			button.button_up.connect(_bind_part_selected(part_id))
 			choice_list.add_child(button)
 			button.show()
-			var unlocked = GameManager.is_parts_unlocked(slot, part_id)
 			button.use_parent_material = !unlocked
 			if GameManager.is_vehicle_unlocked(selected_vehicle):
 				if unlocked:
@@ -73,6 +76,9 @@ func refresh_choice_list(slot:String) -> void:
 						button.modulate = Color(0.5, 1, 0, 1)
 					else:
 						button.modulate = Color(0.5, 1, 1, 1)
+				else:
+					# 未解锁：灰色显示
+					button.modulate = Color(0.4, 0.4, 0.4, 1)
 			else:
 				button.use_parent_material = true
 		# 保持当前选中项（如果仍在列表中），否则选第一个

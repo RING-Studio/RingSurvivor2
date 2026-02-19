@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ability/incendiary_canister_ability/fire_zone.gd" id="1_fire_zone"]
+
+[node name="FireZone" type="Node2D"]
+script = ExtResource("1_fire_zone")

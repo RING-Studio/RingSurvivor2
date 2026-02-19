@@ -12,13 +12,13 @@ var _area: Area2D
 var _tick_timer: Timer
 var _expire_timer: Timer
 
+func setup(p_radius: float, p_duration: float, p_slow_percent: float, p_slow_duration: float) -> void:
+	zone_radius_px = p_radius
+	zone_duration = p_duration
+	slow_percent = p_slow_percent
+	slow_duration = p_slow_duration
+
 func _ready():
-	# Read params from meta (set by controller before add_child)
-	zone_radius_px = get_meta("_radius", zone_radius_px)
-	zone_duration = get_meta("_duration", zone_duration)
-	slow_percent = get_meta("_slow_percent", slow_percent)
-	slow_duration = get_meta("_slow_duration", slow_duration)
-	
 	# Area2D for HurtboxComponent detection
 	_area = Area2D.new()
 	_area.collision_layer = 0

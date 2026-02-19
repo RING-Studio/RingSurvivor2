@@ -186,9 +186,8 @@ func _apply_strike(center: Vector2, radius_px: float, base_damage: float):
 
 func _create_blinking_circle(pos: Vector2, radius: float, color: Color) -> Node2D:
 	"""创建闪烁预警圆（0.3s 亮 / 0.3s 暗循环）"""
-	var node: Node2D = Node2D.new()
+	var BlinkCircleScene: PackedScene = load("res://scenes/ability/radio_support_ability/radio_blink_circle.tscn")
+	var node: Node2D = BlinkCircleScene.instantiate()
+	node.setup(radius, color)
 	node.global_position = pos
-	node.set_meta("_radius", radius)
-	node.set_meta("_color", color)
-	node.set_script(load("res://scenes/ability/radio_support_ability/radio_blink_circle.gd"))
 	return node

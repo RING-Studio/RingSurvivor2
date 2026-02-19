@@ -97,13 +97,10 @@ func _on_cooldown():
 	else:
 		spawn_pos = player.global_position + Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, 100.0)
 	
-	var zone = Node2D.new()
-	zone.set_script(preload("res://scenes/ability/cryo_canister_ability/cryo_zone.gd"))
+	var CryoZoneScene: PackedScene = load("res://scenes/ability/cryo_canister_ability/cryo_zone.tscn")
+	var zone: Node2D = CryoZoneScene.instantiate()
+	zone.setup(_get_zone_radius_px(), _get_zone_duration(), _get_slow_percent(), _get_slow_duration())
 	zone.global_position = spawn_pos
-	zone.set_meta("_radius", _get_zone_radius_px())
-	zone.set_meta("_duration", _get_zone_duration())
-	zone.set_meta("_slow_percent", _get_slow_percent())
-	zone.set_meta("_slow_duration", _get_slow_duration())
 	
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:

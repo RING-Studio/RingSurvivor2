@@ -16,6 +16,13 @@ func _ready():
 
 func damage(damage_amount: float, context: Dictionary = {}):
 	var final_amount: float = damage_amount
+	# God Mode: 调试模式下玩家无敌
+	if final_amount > 0 and owner != null and owner.is_in_group("player"):
+		var console: Node = Engine.get_singleton("DebugConsole") if Engine.has_singleton("DebugConsole") else null
+		if console == null:
+			console = owner.get_tree().root.get_node_or_null("DebugConsole")
+		if console != null and console.has_method("is_god_mode") and console.is_god_mode():
+			return
 	# 在进入 HealthComponent 前，允许 owner 拦截/修改伤害（用于一次性免死等）
 	if final_amount > 0 and owner != null and owner.has_method("before_take_damage"):
 		final_amount = owner.before_take_damage(final_amount, self, context)

@@ -1,0 +1,195 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scenes/Levels/LevelContaminated/level_contaminated.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://7axbopas4824" path="res://scenes/ui/end_screen.tscn" id="2_endscr"]
+[ext_resource type="PackedScene" uid="uid://gddxr6myrw3c" path="res://scenes/ui/arena_time_ui.tscn" id="3_timeui"]
+[ext_resource type="PackedScene" uid="uid://musqopj5jgj3" path="res://scenes/manager/arena_time_manager.tscn" id="4_timemgr"]
+[ext_resource type="PackedScene" path="res://scenes/Levels/LevelContaminated/contaminated_enemy_manager.tscn" id="5_emmgr"]
+[ext_resource type="PackedScene" uid="uid://lnbdf4stuwxn" path="res://scenes/manager/experience_manager.tscn" id="6_expmgr"]
+[ext_resource type="PackedScene" uid="uid://bt5jv4ycv6g0c" path="res://scenes/manager/upgrade_manager.tscn" id="7_upgmgr"]
+[ext_resource type="PackedScene" uid="uid://bnl28d230kkir" path="res://scenes/game_object/game_camera/game_camera.tscn" id="8_cam"]
+[ext_resource type="PackedScene" uid="uid://r6s7eqk3etrs" path="res://scenes/game_object/player/player.tscn" id="9_player"]
+[ext_resource type="PackedScene" uid="uid://dwqj1cmy27rl3" path="res://scenes/ui/user_interface.tscn" id="10_ui"]
+[ext_resource type="Script" path="res://scenes/manager/objective_manager.gd" id="11_objmgr"]
+[ext_resource type="Script" path="res://scenes/ui/objective_hud.gd" id="12_objhud"]
+
+[sub_resource type="RectangleShape2D" id="outer_shape"]
+size = Vector2(19200, 10800)
+
+[sub_resource type="RectangleShape2D" id="core_shape"]
+size = Vector2(6400, 3600)
+
+[sub_resource type="CircleShape2D" id="hazard_shape"]
+radius = 1000.0
+
+[node name="LevelContaminated" type="Node" node_paths=PackedStringArray("objective_manager")]
+script = ExtResource("1_level")
+end_screen_scene = ExtResource("2_endscr")
+objective_manager = NodePath("ObjectiveManager")
+
+[node name="ArenaTimeUI" parent="." node_paths=PackedStringArray("arena_time_manager") instance=ExtResource("3_timeui")]
+arena_time_manager = NodePath("../ArenaTimeManager")
+
+[node name="ArenaTimeManager" parent="." instance=ExtResource("4_timemgr")]
+
+[node name="EnemyManager" parent="." node_paths=PackedStringArray("arena_time_manager") instance=ExtResource("5_emmgr")]
+arena_time_manager = NodePath("../ArenaTimeManager")
+
+[node name="ExperienceManager" parent="." instance=ExtResource("6_expmgr")]
+
+[node name="UpgradeManager" parent="." node_paths=PackedStringArray("experience_manager") instance=ExtResource("7_upgmgr")]
+experience_manager = NodePath("../ExperienceManager")
+
+[node name="GameCamera" parent="." instance=ExtResource("8_cam")]
+physics_interpolation_mode = 1
+position = Vector2(9600, 5400)
+scale = Vector2(0.36, 0.36)
+zoom = Vector2(3.5, 3.5)
+process_callback = 0
+limit_left = 0
+limit_top = 0
+limit_right = 19200
+limit_bottom = 10800
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -10
+offset_right = 19200.0
+offset_bottom = 10800.0
+color = Color(0.35, 0.28, 0.22, 1)
+
+[node name="CoreBackground" type="ColorRect" parent="."]
+z_index = -9
+offset_left = 6400.0
+offset_top = 3600.0
+offset_right = 12800.0
+offset_bottom = 7200.0
+color = Color(0.25, 0.18, 0.15, 1)
+
+[node name="Entities" type="Node2D" parent="." groups=["entities_layer"]]
+
+[node name="Player" parent="Entities" node_paths=PackedStringArray("arena_time_manager") instance=ExtResource("9_player")]
+unique_name_in_owner = true
+position = Vector2(4800, 5400)
+scale = Vector2(0.36, 0.36)
+collision_layer = 2
+arena_time_manager = NodePath("../../ArenaTimeManager")
+rotation_speed = 1.0
+
+[node name="Foreground" type="Node2D" parent="." groups=["foreground_layer"]]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UserInterface" parent="CanvasLayer" instance=ExtResource("10_ui")]
+
+[node name="Regions" type="Node2D" parent="."]
+
+[node name="OuterZone" type="Area2D" parent="Regions"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Regions/OuterZone"]
+position = Vector2(9600, 5400)
+shape = SubResource("outer_shape")
+
+[node name="CoreZone" type="Area2D" parent="Regions"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Regions/CoreZone"]
+position = Vector2(9600, 5400)
+shape = SubResource("core_shape")
+
+[node name="HazardZones" type="Node2D" parent="."]
+
+[node name="Hazard1" type="Area2D" parent="HazardZones"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HazardZones/Hazard1"]
+position = Vector2(4800, 2400)
+shape = SubResource("hazard_shape")
+
+[node name="HazardVisual" type="ColorRect" parent="HazardZones/Hazard1"]
+z_index = -8
+offset_left = 3800.0
+offset_top = 1400.0
+offset_right = 5800.0
+offset_bottom = 3400.0
+color = Color(0.3, 0.7, 0.1, 0.15)
+
+[node name="Hazard2" type="Area2D" parent="HazardZones"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HazardZones/Hazard2"]
+position = Vector2(14400, 8400)
+shape = SubResource("hazard_shape")
+
+[node name="HazardVisual" type="ColorRect" parent="HazardZones/Hazard2"]
+z_index = -8
+offset_left = 13400.0
+offset_top = 7400.0
+offset_right = 15400.0
+offset_bottom = 9400.0
+color = Color(0.3, 0.7, 0.1, 0.15)
+
+[node name="Hazard3" type="Area2D" parent="HazardZones"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HazardZones/Hazard3"]
+position = Vector2(14400, 2400)
+shape = SubResource("hazard_shape")
+
+[node name="HazardVisual" type="ColorRect" parent="HazardZones/Hazard3"]
+z_index = -8
+offset_left = 13400.0
+offset_top = 1400.0
+offset_right = 15400.0
+offset_bottom = 3400.0
+color = Color(0.3, 0.7, 0.1, 0.15)
+
+[node name="Hazard4" type="Area2D" parent="HazardZones"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HazardZones/Hazard4"]
+position = Vector2(4800, 8400)
+shape = SubResource("hazard_shape")
+
+[node name="HazardVisual" type="ColorRect" parent="HazardZones/Hazard4"]
+z_index = -8
+offset_left = 3800.0
+offset_top = 7400.0
+offset_right = 5800.0
+offset_bottom = 9400.0
+color = Color(0.3, 0.7, 0.1, 0.15)
+
+[node name="ObjectiveManager" type="Node" parent="."]
+script = ExtResource("11_objmgr")
+
+[node name="ObjectiveHUDLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="ObjectiveHUD" type="PanelContainer" parent="ObjectiveHUDLayer" node_paths=PackedStringArray("objective_manager")]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 280.0
+grow_horizontal = 0
+script = ExtResource("12_objhud")
+objective_manager = NodePath("../../ObjectiveManager")
+
+[node name="MarginContainer" type="MarginContainer" parent="ObjectiveHUDLayer/ObjectiveHUD"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ObjectiveHUDLayer/ObjectiveHUD/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4

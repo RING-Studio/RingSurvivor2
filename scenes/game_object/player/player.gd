@@ -243,16 +243,22 @@ func _process(delta):
 	# 纤维内衬 / 爆反 复位
 	_handle_passive_rearm()
 	
-	var rotation_input = Input.get_action_strength("right") - Input.get_action_strength("left")
-	rotation += rotation_input * rotation_speed * delta
-	
-	var move_input = Input.get_action_strength("up") - Input.get_action_strength("down")
-	var direction = Vector2.ZERO
-	if move_input != 0:
-		direction = transform.x * sign(move_input)
+	# 有 GUI 正在接收输入时（如控制台），跳过移动
+	var console: Node = get_node_or_null("/root/DebugConsole")
+	if console != null and console.get("is_consuming_input"):
+		velocity_component.accelerate_in_direction(Vector2.ZERO)
+		velocity_component.move(self)
+	else:
+		var rotation_input = Input.get_action_strength("right") - Input.get_action_strength("left")
+		rotation += rotation_input * rotation_speed * delta
+		
+		var move_input = Input.get_action_strength("up") - Input.get_action_strength("down")
+		var direction = Vector2.ZERO
+		if move_input != 0:
+			direction = transform.x * sign(move_input)
 
-	velocity_component.accelerate_in_direction(direction.normalized())
-	velocity_component.move(self)
+		velocity_component.accelerate_in_direction(direction.normalized())
+		velocity_component.move(self)
 	
 	# cabin_ac buff 结束时，刷新维护工具箱间隔（避免一直保持加速）
 	var cabin_ac_active_now: bool = (Time.get_ticks_msec() < cabin_ac_active_until_msec)

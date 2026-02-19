@@ -11,10 +11,12 @@ var _area: Area2D
 var _tick_timer: Timer
 var _expire_timer: Timer
 
+func setup(p_radius: float, p_duration: float, p_dmg_per_tick: float) -> void:
+	zone_radius_px = p_radius
+	zone_duration = p_duration
+	damage_per_half_second = p_dmg_per_tick
+
 func _ready():
-	zone_radius_px = get_meta("_radius", zone_radius_px)
-	zone_duration = get_meta("_duration", zone_duration)
-	damage_per_half_second = get_meta("_dmg_per_tick", damage_per_half_second)
 	
 	_area = Area2D.new()
 	_area.collision_layer = 0

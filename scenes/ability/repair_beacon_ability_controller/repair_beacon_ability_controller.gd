@@ -2,7 +2,7 @@ extends Node
 class_name RepairBeaconAbilityController
 
 const AoECircleEffect = preload("res://scenes/effects/aoe_circle_effect.gd")
-const RepairBeacon = preload("res://scenes/ability/repair_beacon_ability/repair_beacon.gd")
+const RepairBeaconScene: PackedScene = preload("res://scenes/ability/repair_beacon_ability/repair_beacon.tscn")
 
 @export var base_cooldown_seconds: float = 35.0
 
@@ -60,9 +60,9 @@ func _on_cooldown():
 	if heal_lvl > 0:
 		heal_per_second += UpgradeEffectManager.get_effect("beacon_heal", heal_lvl)
 	
-	var beacon = RepairBeacon.new()
-	beacon.global_position = player.global_position
+	var beacon: Node2D = RepairBeaconScene.instantiate()
 	beacon.setup(heal_per_second, beacon_duration)
+	beacon.global_position = player.global_position
 	
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:

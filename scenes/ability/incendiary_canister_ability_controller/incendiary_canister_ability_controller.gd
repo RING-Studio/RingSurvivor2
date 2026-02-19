@@ -96,12 +96,10 @@ func _on_cooldown():
 	else:
 		spawn_pos = player.global_position + Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(0.0, 100.0)
 	
-	var zone = Node2D.new()
-	zone.set_script(preload("res://scenes/ability/incendiary_canister_ability/fire_zone.gd"))
+	var FireZoneScene: PackedScene = load("res://scenes/ability/incendiary_canister_ability/fire_zone.tscn")
+	var zone: Node2D = FireZoneScene.instantiate()
+	zone.setup(_get_zone_radius_px(), _get_zone_duration(), _get_damage_per_second() * 0.5)
 	zone.global_position = spawn_pos
-	zone.set_meta("_radius", _get_zone_radius_px())
-	zone.set_meta("_duration", _get_zone_duration())
-	zone.set_meta("_dmg_per_tick", _get_damage_per_second() * 0.5)
 	
 	var layer = get_tree().get_first_node_in_group("foreground_layer")
 	if layer:
