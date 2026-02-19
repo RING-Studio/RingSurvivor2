@@ -1005,6 +1005,134 @@ static var upgrade_configs: Dictionary = {
 		"type": "linear",
 		"per_level_value": 1.0,
 		"max_level": 4
+	},
+
+	# ========== 阶段十五：扩充第三批（升级合集遗留） ==========
+
+	# 先进热成像仪：暴击率 +5%，唯一
+	"thermal_imager": {
+		"type": "custom",
+		"level_effects": { 1: 0.05 }
+	},
+
+	# 激光测距仪：暴击率 +4%，唯一
+	"laser_rangefinder": {
+		"type": "custom",
+		"level_effects": { 1: 0.04 }
+	},
+
+	# 半穿甲弹：对轻甲/无甲伤害 +10%*lv，暴伤 +30%*lv（多维效果，主值为伤害加成）
+	"sap_round": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5,
+		"crit_damage_per_level": 0.30
+	},
+
+	# 额外弹药架：耐久 -5lv，移速 -10%，装填/射速 +10%*lv（主值为射速/装填加成）
+	"extra_ammo_rack": {
+		"type": "linear",
+		"per_level_value": 0.10,
+		"max_level": 5,
+		"hp_penalty_per_level": 5.0,
+		"speed_penalty": 0.10
+	},
+
+	# 长倍径炮管：穿透 +1lv，伤害 -5%*lv，射速 +10%*lv
+	"long_barrel": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5,
+		"damage_penalty_per_level": 0.05,
+		"fire_rate_per_level": 0.10
+	},
+
+	# 串联破甲：穿透 +1lv，对护甲目标穿甲倍率 +20%*lv
+	"tandem_heat": {
+		"type": "linear",
+		"per_level_value": 1.0,
+		"max_level": 5,
+		"pierce_multiplier_per_level": 0.20
+	},
+
+	# 破障设备：撞击伤害系数 0.5*lv
+	"breach_equip": {
+		"type": "linear",
+		"per_level_value": 0.5,
+		"max_level": 4
+	},
+
+	# 机炮·编程弹：对轻甲/无甲 +20%*lv，射速 +10%*lv
+	"mg_programmed": {
+		"type": "linear",
+		"per_level_value": 0.20,
+		"max_level": 5,
+		"fire_rate_per_level": 0.10
+	},
+
+	# ========== 阶段十五：扩充第三批（升级扩充清单v1 B区） ==========
+
+	# 压制网：同时命中3+敌人时射速 +5%*lv
+	"suppressive_net": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 5
+	},
+
+	# 弹链优化：装填速度 +6%*lv
+	"ammo_belt": {
+		"type": "linear",
+		"per_level_value": 0.06,
+		"max_level": 5
+	},
+
+	# 稳定平台：移动射击伤害衰减减少 8%*lv
+	"stable_platform": {
+		"type": "linear",
+		"per_level_value": 0.08,
+		"max_level": 5
+	},
+
+	# 多路供弹：概率不消耗触发计数 15%*lv
+	"multi_feed": {
+		"type": "linear",
+		"per_level_value": 0.15,
+		"max_level": 4
+	},
+
+	# 精密膛线：暴击时额外穿深 +5%*lv
+	"precision_bore": {
+		"type": "linear",
+		"per_level_value": 0.05,
+		"max_level": 5
+	},
+
+	# 连锁起爆：暴击击杀爆破造成 20%*lv 武器伤害
+	"detonation_link": {
+		"type": "linear",
+		"per_level_value": 0.20,
+		"max_level": 3
+	},
+
+	# 破片喷流：穿透后附加 30%*lv 破片伤害
+	"shock_fragment": {
+		"type": "linear",
+		"per_level_value": 0.30,
+		"max_level": 5
+	},
+
+	# 备用点射：未命中返还 20%*lv 下一发伤害加成
+	"fallback_firing": {
+		"type": "linear",
+		"per_level_value": 0.20,
+		"max_level": 5
+	},
+
+	# 热切换枪机：连续暴击每层射速 +3%*lv
+	"thermal_bolt": {
+		"type": "linear",
+		"per_level_value": 0.03,
+		"max_level": 5
 	}
 }
 

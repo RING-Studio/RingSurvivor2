@@ -117,6 +117,22 @@ func get_fire_rate_modifier() -> float:
 			if hc and hc.current_health >= hc.max_health:
 				modifier += 0.07 * overdrive_level
 	
+	# 额外弹药架：射速/装填 +10%*lv
+	var extra_ammo_level = current_upgrades.get("extra_ammo_rack", {}).get("level", 0)
+	if extra_ammo_level > 0:
+		modifier += UpgradeEffectManager.get_effect("extra_ammo_rack", extra_ammo_level)
+	
+	# 长倍径炮管：射速 +10%*lv
+	var long_barrel_level = current_upgrades.get("long_barrel", {}).get("level", 0)
+	if long_barrel_level > 0:
+		var cfg: Dictionary = UpgradeEffectManager.get_config("long_barrel")
+		modifier += float(cfg.get("fire_rate_per_level", 0.10)) * float(long_barrel_level)
+	
+	# 弹链优化：装填/射速 +6%*lv
+	var ammo_belt_level = current_upgrades.get("ammo_belt", {}).get("level", 0)
+	if ammo_belt_level > 0:
+		modifier += UpgradeEffectManager.get_effect("ammo_belt", ammo_belt_level)
+	
 	# 临时射速加成（配件触发）
 	if _temp_fire_rate_bonus > 0.0:
 		if Time.get_ticks_msec() >= _temp_fire_rate_bonus_until_msec:
@@ -188,6 +204,13 @@ func get_damage_modifier(base_damage: float, target: Node2D = null) -> float:
 	if kill_chain_level > 0 and Time.get_ticks_msec() < kill_chain_active_until_msec:
 		damage *= (1.0 + 0.06 * kill_chain_level)
 	
+	# 长倍径炮管：伤害 -5%*lv
+	var long_barrel_level = current_upgrades.get("long_barrel", {}).get("level", 0)
+	if long_barrel_level > 0:
+		var cfg: Dictionary = UpgradeEffectManager.get_config("long_barrel")
+		var penalty: float = float(cfg.get("damage_penalty_per_level", 0.05)) * float(long_barrel_level)
+		damage *= (1.0 - penalty)
+	
 	if target != null:
 		damage = _apply_target_damage_modifiers(damage, target)
 	
@@ -222,6 +245,29 @@ func _apply_target_damage_modifiers(base_damage: float, target: Node2D) -> float
 	if wp_level > 0 and target == weakpoint_strike_target:
 		var bonus = 0.03 * float(weakpoint_strike_counter) * float(wp_level)
 		damage *= (1.0 + min(bonus, 0.30))
+	
+	# 机炮·编程弹：对无护甲/轻甲 +20%*lv
+	var mg_prog_level = current_upgrades.get("mg_programmed", {}).get("level", 0)
+	if mg_prog_level > 0:
+		var t_armor_mg = target.get("armor_thickness")
+		if t_armor_mg == null or int(t_armor_mg) <= 30:
+			damage *= (1.0 + UpgradeEffectManager.get_effect("mg_programmed", mg_prog_level))
+	
+	# 半穿甲弹：对无护甲/轻甲（armor_thickness <= 30）伤害 +10%*lv
+	var sap_level = current_upgrades.get("sap_round", {}).get("level", 0)
+	if sap_level > 0:
+		var armor = target.get("armor_thickness")
+		if armor == null or int(armor) <= 30:
+			damage *= (1.0 + UpgradeEffectManager.get_effect("sap_round", sap_level))
+	
+	# 串联破甲：对护甲目标（armor_thickness > 30）穿甲倍率 +20%*lv
+	var tandem_level = current_upgrades.get("tandem_heat", {}).get("level", 0)
+	if tandem_level > 0:
+		var t_armor = target.get("armor_thickness")
+		if t_armor != null and int(t_armor) > 30:
+			var cfg: Dictionary = UpgradeEffectManager.get_config("tandem_heat")
+			var pierce_mult: float = float(cfg.get("pierce_multiplier_per_level", 0.20)) * float(tandem_level)
+			damage *= (1.0 + pierce_mult)
 	
 	return damage
 
@@ -287,6 +333,12 @@ func get_crit_damage_modifier(base_crit_damage: float, crit_rate_bonus: float = 
 	if conversion_level > 0:
 		modifier += crit_rate_bonus  # 暴击率加成转换为暴击伤害加成
 	
+	# 半穿甲弹：暴击伤害 +30%*lv
+	var sap_level = current_upgrades.get("sap_round", {}).get("level", 0)
+	if sap_level > 0:
+		var cfg: Dictionary = UpgradeEffectManager.get_config("sap_round")
+		modifier += float(cfg.get("crit_damage_per_level", 0.30)) * float(sap_level)
+	
 	return modifier
 
 func is_lethal_strike_active() -> bool:
@@ -298,9 +350,21 @@ func is_lethal_strike_active() -> bool:
 func get_penetration_modifier(base_penetration: int) -> int:
 	"""获取穿透修正"""
 	var modifier = base_penetration
-	var penetration_level = GameManager.current_upgrades.get("penetration", {}).get("level", 0)
+	var current_upgrades = GameManager.current_upgrades
+	var penetration_level = current_upgrades.get("penetration", {}).get("level", 0)
 	if penetration_level > 0:
 		modifier += penetration_level
+	
+	# 长倍径炮管：穿透 +1*lv
+	var long_barrel_level = current_upgrades.get("long_barrel", {}).get("level", 0)
+	if long_barrel_level > 0:
+		modifier += int(UpgradeEffectManager.get_effect("long_barrel", long_barrel_level))
+	
+	# 串联破甲：穿透 +1*lv
+	var tandem_level = current_upgrades.get("tandem_heat", {}).get("level", 0)
+	if tandem_level > 0:
+		modifier += int(UpgradeEffectManager.get_effect("tandem_heat", tandem_level))
+	
 	return modifier
 
 func get_spread_modifier(base_spread: int) -> int:

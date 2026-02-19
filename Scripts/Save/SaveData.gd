@@ -1,7 +1,7 @@
 class_name SaveData
 extends Node
 
-func save_game(file_path := "user://autosave.json") -> void:
+func save_game(file_path: String = "user://autosave.json") -> void:
 	var now: Dictionary = Time.get_datetime_dict_from_system()
 	# {year:2024, month:12, day:22, hour:19, minute:10, second:33, ...}
 
@@ -83,7 +83,7 @@ func _normalize_unlocked_parts(parts) -> Dictionary:
 		out["配件"] = valid
 	return out
 
-func load_game(file_path := "user://autosave.json") -> void:
+func load_game(file_path: String = "user://autosave.json") -> void:
 	if not FileAccess.file_exists(file_path):
 		print("Save file not found.")
 		return

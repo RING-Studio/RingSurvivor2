@@ -266,12 +266,7 @@ func _process(delta):
 		_update_repair_kit_timer()
 	_cabin_ac_last_active = cabin_ac_active_now
 	
-	# if move_input != 0:
-	# 	# animation_player.play("walk")
-	# 	pass
-	# else:
-	# 	# animation_player.play("RESET")
-	# 	pass
+	pass
 
 func _handle_passive_rearm() -> void:
 	var now = Time.get_ticks_msec()
@@ -410,15 +405,6 @@ func check_deal_damage():
 			
 			damage += raw_damage
 
-			# print( body.name )
-			# print("armor thickness:", body.armor_thickness)
-			# print("armor coverage:", body.armorCoverage)
-			# print("base damage:", body.base_damage)
-			# print("soft attack multiplier percent:", body.soft_attack_multiplier_percent)
-			# print("hard attack multiplier percent:", body.hardAttackMultiplierPercent)
-			# print("hard attack depth mm:", body.hard_attack_depth_mm)
-
-	print("enemy damage to player:", damage)
 	health_component.damage(damage, {"is_pierced": pierced_any, "damage_source": "enemy_collision"})
 	damage_interval_timer.start()
 
@@ -474,17 +460,6 @@ func on_ability_upgrade_added(upgrade_id: String, current_upgrades: Dictionary):
 			if not controller_exists and upgrade_id in equipped_accessories:
 				_instantiate_accessory_controller(upgrade_id)
 	
-	print("-------------------")	
-	print("基础伤害: " + str(GameManager.get_player_base_damage()))
-	print("硬攻倍率: " + str(GameManager.get_player_hard_attack_multiplier_percent()))
-	print("软攻倍率: " + str(GameManager.get_player_soft_attack_multiplier_percent()))
-	print("硬攻深度: " + str(GameManager.get_player_hard_attack_depth_mm()))
-	print("装甲厚度: " + str(GameManager.get_player_armor_thickness()))
-	print("覆甲率: " + str(GameManager.get_player_armor_coverage()))
-	print("击穿伤害减免: " + str(GameManager.get_player_armor_damage_reduction_percent()))
-	print("全局暴击率: " + str(global_crit_rate_bonus * 100) + "%")
-	print("耐久加成: " + str(global_health_bonus))
-	print("-------------------")
 
 func _reset_to_base_values():
 	"""重置所有属性到基础值"""
@@ -523,6 +498,8 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 			# 阶段八
 			"emergency_repair", "reinforced_bulkhead", "kinetic_buffer",
 			"overpressure_limiter", "mobility_servos", "target_computer",
+			# 阶段十五
+			"thermal_imager", "laser_rangefinder", "extra_ammo_rack",
 		]
 		
 		if not is_global_upgrade and not is_new_global_upgrade:
@@ -535,9 +512,9 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 		var effect_value = UpgradeEffectManager.get_effect(upgrade_id, level)
 		
 		match upgrade_id:
-			"global_health_1", "global_health_2", "global_health_3", "global_health_4", "health":
+			"health":
 				global_health_bonus += int(effect_value)
-			"global_crit_rate_1", "global_crit_rate_2", "crit_rate":
+			"crit_rate":
 				global_crit_rate_bonus += effect_value
 			# ===== 阶段三 =====
 			"repair_kit":
@@ -574,6 +551,17 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 				mobility_servos_level = level
 			"target_computer":
 				target_computer_level = level
+			# ===== 阶段十五 =====
+			"thermal_imager":
+				global_crit_rate_bonus += effect_value
+			"laser_rangefinder":
+				global_crit_rate_bonus += effect_value
+			"extra_ammo_rack":
+				var cfg: Dictionary = UpgradeEffectManager.get_config("extra_ammo_rack")
+				var hp_penalty: float = float(cfg.get("hp_penalty_per_level", 5.0)) * float(level)
+				global_health_bonus -= int(hp_penalty)
+				var speed_penalty: float = float(cfg.get("speed_penalty", 0.10))
+				move_speed_multiplier -= speed_penalty
 	
 	# 应用耐久加成
 	_apply_health_bonus()
@@ -670,19 +658,15 @@ func setup_equipped_abilities():
 			"machine_gun":
 				var machine_gun_controller = preload("res://scenes/ability/machine_gun_ability_controller/machine_gun_ability_controller.tscn").instantiate()
 				abilities.add_child(machine_gun_controller)
-				print("已装备机炮")
 			"howitzer":
 				var howitzer_controller = preload("res://scenes/ability/howitzer_ability_controller/howitzer_ability_controller.tscn").instantiate()
 				abilities.add_child(howitzer_controller)
-				print("已装备榴弹炮")
 			"tank_gun":
 				var tank_gun_controller = preload("res://scenes/ability/tank_gun_ability_controller/tank_gun_ability_controller.tscn").instantiate()
 				abilities.add_child(tank_gun_controller)
-				print("已装备坦克炮")
 			"missile":
 				var missile_controller = preload("res://scenes/ability/missile_weapon_ability_controller/missile_weapon_ability_controller.tscn").instantiate()
 				abilities.add_child(missile_controller)
-				print("已装备导弹主武器")
 	
 	# 配件：带入的（从 GameManager 读）+ 局内选的（从 UpgradeManager session 读）
 	var equipped_accessories: Array = []
@@ -779,7 +763,7 @@ func _on_emergency_repair_timeout():
 # ========== 配件控制器映射表 ==========
 
 # { accessory_id: [class_name_type, preload_path] }
-const ACCESSORY_CONTROLLER_MAP := {
+const ACCESSORY_CONTROLLER_MAP: Dictionary = {
 	"mine": ["MineAbilityController", "res://scenes/ability/mine_ability_controller/mine_ability_controller.tscn"],
 	"smoke_grenade": ["SmokeGrenadeAbilityController", "res://scenes/ability/smoke_grenade_ability_controller/smoke_grenade_ability_controller.tscn"],
 	"radio_support": ["RadioSupportAbilityController", "res://scenes/ability/radio_support_ability_controller/radio_support_ability_controller.tscn"],
@@ -888,7 +872,6 @@ func _instantiate_accessory_controller(accessory_id: String) -> void:
 	var scene_path: String = entry[1]
 	var controller = load(scene_path).instantiate()
 	abilities.add_child(controller)
-	print("已装备配件: %s" % accessory_id)
 
 # ========== 护盾吸收（shield_emitter） ==========
 

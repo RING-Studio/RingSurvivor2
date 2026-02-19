@@ -10,7 +10,7 @@ signal upgrade_selected(upgrade: String)
 var upgrade_manager: Node = null
 var current_upgrades: Array[Dictionary] = []
 var is_roll_busy: bool = false
-const ROLL_BUSY_TIME := 0.05
+const ROLL_BUSY_TIME: float = 0.05
 
 func _ready():
 	get_tree().paused = true

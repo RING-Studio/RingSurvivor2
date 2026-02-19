@@ -291,8 +291,9 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 				# 基础伤害+3，穿透固定为1
 				base_damage += 3.0
 				bullet_penetration = 1  # 固定为1
-			# mg_rapid_fire_1/2/3 是特殊效果，在这里不处理
-			# mg_overload 在 WeaponUpgradeHandler 中处理
+			"mg_programmed":
+				var cfg: Dictionary = UpgradeEffectManager.get_config("mg_programmed")
+				fire_rate_bonus += float(cfg.get("fire_rate_per_level", 0.10)) * float(level)
 	
 	# 使用 WeaponUpgradeHandler 获取穿透和弹道修正
 	if WeaponUpgradeHandler.instance:

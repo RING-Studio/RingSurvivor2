@@ -1,6 +1,6 @@
 # 交接文档 — 供下次对话使用
 
-更新日期：2026-02-15（Mark L + Mark E.1 + Phase 14.2 完成 — 关卡扩大 + 配件解锁 + NPC 进度）
+更新日期：2026-02-19（阶段15 升级扩充第三批 + Mark D 代码清理）
 
 ## 如何使用本文档
 在新的对话开始时，请 AI 阅读以下文件以快速恢复上下文：
@@ -16,7 +16,7 @@
 - **类型**：类幸存者 Roguelike + AVG + 基地经营
 - **背景**：沙漠末世，军营绿洲小城，驾驶改装车辆在污染区执行任务
 
-## 当前完成状态（截至 Mark L + Mark E.1 + Phase 14.2）
+## 当前完成状态（截至 Mark D 代码清理 + 2026-02-19 审查）
 
 ### 核心系统已实现
 - **升级系统**：Roguelike 单局升级池（白/蓝/紫/红品质）、配件+强化、互斥升级
@@ -98,6 +98,14 @@
   - 沙漠敌人管理器：每 10 个 arena_difficulty 触发精英波（2+ 只精英）
   - 污染敌人管理器：每 8 个 arena_difficulty 触发精英波（3+ 只精英）
 - **存档系统加固**：SaveData.load_game 使用 `.get()` 容错，兼容缺失字段
+- **代码健康度清理**（Mark D，2026-02-19）：
+  - 删除孤立场景 `Contamination/`、`SalvageRun/`（早期原型，有脚本引用错误）
+  - 修复 4 处 `:=` 违规（`player.gd`、`SaveData.gd`×2、`upgrade_screen.gd`）
+  - 清理 `player.gd` 中 7+ 处 debug print、死代码分支、注释动画代码
+- **升级扩充第三批**（阶段15，2026-02-19）：
+  - 17 个升级（升级合集遗留8 + 扩充清单v1 B区9）数据entry + config + 图标映射
+  - stat类gameplay效果已实现（暴击率/穿透/射速/伤害修正等）
+  - 9 个复杂运行时机制升级待后续
 
 ### 关键架构决策
 1. **MissionData 是纯数据**：不含逻辑参数（params/trigger），只存显示文本
@@ -148,10 +156,16 @@
 | BossTitan | `scenes/game_object/boss_titan/` |
 | BossHive | `scenes/game_object/boss_hive/` |
 
-## 下一步（阶段 14 续）
-阶段 14.1（DialogueRunner）+ 14.2（NPC 进度追踪）已完成。待续：
+## 下一步
+### 阶段 14 续
 - 14.3 主线/支线目标系统 UI 展示与奖励发放
 - 14.4 剧情推进触发（章节完成条件）
+
+### 阶段 15 遗留（复杂运行时机制）
+9 个升级已有数据entry+config+图标，但gameplay效果需底层系统支持：
+- `suppressive_net`（命中计数）、`stable_platform`（移动射击判定）、`multi_feed`（射击计数）
+- `precision_bore`（暴击穿深hook）、`detonation_link`（暴击击杀AoE）、`shock_fragment`（穿透破片）
+- `fallback_firing`（未命中检测）、`thermal_bolt`（连续暴击追踪）、`breach_equip`（碰撞伤害）
 
 ### 待实现的重要 Mark
 - **Mark S**：✅ 已完成 — 10 个纯代码实体已转为 .tscn 场景化
@@ -161,7 +175,14 @@
 - **Mark E.2**：装备/预制造 + 出击资源检查（详见 ROADMAP + 策划书 5B）
 - **Mark E.3**：配件预升级
 - **Mark X**：玩家升级与怪物经验掉落重做（待用户描述后实现）
-- **Mark T**：科技处废除 ✅ 已完成
+- **Mark T**：✅ 已完成 — 科技处废除
+- **Mark D**：✅ 已完成 — 代码健康度清理（孤立场景删除、`:=` 修复、debug print 清理）
+
+### 已知问题与注意事项
+- 3 个升级 (`windmill_spread`、`windmill_speed`、`mine_multi_deploy`) 在 `UpgradeEffectManager` 中无配置，但由各自控制器/WeaponUpgradeHandler 直接处理，无运行时错误
+- 9 个阶段15升级的gameplay效果待实现（数据/图标已就位）
+- 62 个后置专属升级缺少图标（详见 `DOCUMENTS/HANDOFFS/UPGRADE_ICON_DRAWING.md`）
+- `titan_hunt`/`hive_assault` 任务无独立场景，fallback 到 LevelTest（设计上为 Boss 关卡，依赖 Region3 机制，保留合理）
 
 ## 编码规范速查
 1. **禁止 `:=`**：一律 `var x: Type = expr`
