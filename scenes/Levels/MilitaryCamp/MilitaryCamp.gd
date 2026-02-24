@@ -5,27 +5,34 @@ extends Node2D
 @export var npc_scene: StringName = &""
 @export var car_editor_scene: StringName = &""
 @export var save_scene: StringName = &""
-## NPC 对话资源（.dialogue 文件）
+## 机械师对话资源
 @export var npc_dialogue_resource: DialogueResource
-## NPC 对话背景图（全屏模式下使用，留空则使用纯色背景）
+## 机械师对话背景图
 @export var npc_bg_texture: Texture2D
-## NPC 左侧角色立绘
+## 机械师左侧角色立绘
 @export var npc_char_left: Texture2D
-## NPC 右侧角色立绘
+## 机械师右侧角色立绘
 @export var npc_char_right: Texture2D
+## 军需官对话资源
+@export var qm_dialogue_resource: DialogueResource
 
 const MissionMapScene: PackedScene = preload("res://scenes/ui/mission_map.tscn")
+const ProgressionHUDScript: GDScript = preload("res://scenes/ui/progression_hud.gd")
 var _mission_map: MissionMap = null
+var _progression_hud: ProgressionHUD = null
 
 # NPC 对话序列定义（14.2）— 按顺序播放，每次对话推进索引
 # 格式: { "npc_id": [Array of dialogue title strings] }
 const NPC_DIALOGUE_SEQUENCES: Dictionary = {
 	"npc_mechanic": ["intro", "day2", "day3", "idle"],
+	"npc_quartermaster": ["intro", "day2", "day3", "day4", "idle"],
 }
 
 
 func _ready() -> void:
 	Transitions.transition( Transitions.transition_type.Diamond , true)
+	_progression_hud = ProgressionHUDScript.new()
+	add_child(_progression_hud)
 	
 func depart():
 	if not can_depart():
@@ -47,14 +54,22 @@ func _open_mission_map() -> void:
 		_mission_map.canceled.connect(_on_mission_canceled)
 	_mission_map.open()
 	_set_player_control(false)
+	if _progression_hud:
+		_progression_hud.visible = false
 
 func _on_mission_confirmed(mission_id: String) -> void:
 	_set_player_control(true)
+	if _progression_hud:
+		_progression_hud.visible = true
+		_progression_hud.refresh()
 	if GameManager.select_mission(mission_id):
 		_start_depart()
 
 func _on_mission_canceled() -> void:
 	_set_player_control(true)
+	if _progression_hud:
+		_progression_hud.visible = true
+		_progression_hud.refresh()
 
 func _set_player_control(enabled: bool) -> void:
 	"""启用或禁用玩家移动与交互"""
@@ -64,9 +79,11 @@ func _set_player_control(enabled: bool) -> void:
 		player.set_process(enabled)
 
 func _start_depart() -> void:
-	# 检查主武器是否为空，如果为空则设置为机炮
 	ensure_main_weapon()
-	# 根据选中关卡的 scene_path 跳转（如果有），否则使用默认 next_scene
+	# Mark E.2：出击时扣除配装费用
+	if not GameManager.deduct_sortie_cost():
+		push_warning("[Depart] 资源不足，无法出击")
+		return
 	var mission: Dictionary = MissionData.get_mission(GameManager.current_mission_id)
 	var scene_path: String = mission.get("scene_path", "")
 	if scene_path.is_empty():
@@ -88,35 +105,41 @@ func ensure_main_weapon():
 		print("主武器为空，已自动设置为机炮")
 
 func npc():
-	if npc_dialogue_resource:
-		# 获取 NPC 当前对话标题（14.2 进度追踪）
-		var npc_id: String = "npc_mechanic"
-		var sequence: Array = NPC_DIALOGUE_SEQUENCES.get(npc_id, ["start"])
-		var title: String = GameManager.get_npc_dialogue_title(npc_id, sequence)
+	_start_npc_dialogue("npc_mechanic", npc_dialogue_resource)
 
-		# 使用 DialogueRunner 全屏模式对话（不离开军营场景）
-		var config: Dictionary = {
-			"mode": "fullscreen",
-			"pause_scene": true,
-			"free_scene": false,
-			"npc_id": npc_id,  # 对话结束后自动推进进度
-		}
-		if npc_bg_texture:
-			config["bg_texture"] = npc_bg_texture
-		if npc_char_left:
-			config["char_left"] = npc_char_left
-		if npc_char_right:
-			config["char_right"] = npc_char_right
-		_set_player_control(false)
-		DialogueRunner.dialogue_ended.connect(_on_npc_dialogue_ended, CONNECT_ONE_SHOT)
-		DialogueRunner.start(npc_dialogue_resource, title, config)
-	else:
-		# 后备：使用旧的场景切换方式
-		Transitions.set_next_scene(npc_scene)
-		Transitions.transition( Transitions.transition_type.Diamond )
+func npc_quartermaster():
+	_start_npc_dialogue("npc_quartermaster", qm_dialogue_resource)
+
+func _start_npc_dialogue(npc_id: String, resource: DialogueResource) -> void:
+	if not resource:
+		push_warning("[MilitaryCamp] 对话资源为空: %s" % npc_id)
+		return
+	var sequence: Array = NPC_DIALOGUE_SEQUENCES.get(npc_id, ["start"])
+	var title: String = GameManager.get_npc_dialogue_title(npc_id, sequence)
+
+	var config: Dictionary = {
+		"mode": "fullscreen",
+		"pause_scene": true,
+		"free_scene": false,
+		"npc_id": npc_id,
+	}
+	if npc_bg_texture:
+		config["bg_texture"] = npc_bg_texture
+	if npc_char_left:
+		config["char_left"] = npc_char_left
+	if npc_char_right:
+		config["char_right"] = npc_char_right
+	_set_player_control(false)
+	if _progression_hud:
+		_progression_hud.visible = false
+	DialogueRunner.dialogue_ended.connect(_on_npc_dialogue_ended, CONNECT_ONE_SHOT)
+	DialogueRunner.start(resource, title, config)
 
 func _on_npc_dialogue_ended(_resource: DialogueResource) -> void:
 	_set_player_control(true)
+	if _progression_hud:
+		_progression_hud.visible = true
+		_progression_hud.refresh()
 
 func car_editor():
 	Transitions.set_next_scene(car_editor_scene)
@@ -140,6 +163,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				depart()
 			elif building.name == "npc":
 				npc()
+			elif building.name == "npc_quartermaster":
+				npc_quartermaster()
 			elif building.name == "Save":
 				save()
 			elif building.name == "CarEditor":

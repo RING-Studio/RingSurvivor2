@@ -135,8 +135,11 @@ func _on_destination_clicked(dest_id: String) -> void:
 		if clear_count > 0:
 			label_text += "  (已通关 %d 次)" % clear_count
 		if not unlocked:
+			var unlock_hint: String = _get_unlock_hint(m)
 			label_text += "  [未解锁]"
-			btn.disabled = true
+			if not unlock_hint.is_empty():
+				btn.tooltip_text = unlock_hint
+			btn.modulate = Color(0.6, 0.6, 0.6)
 		btn.text = label_text
 		btn.pressed.connect(_on_mission_button_pressed.bind(i))
 		detail_missions.add_child(btn)
@@ -181,6 +184,12 @@ func _update_mission_info(index: int) -> void:
 	text += "难度：%s\n" % MissionData.get_difficulty_stars(mission)
 	text += "%s\n\n" % desc
 
+	# 奖励预览
+	var reward_preview: String = str(mission.get("reward_preview", ""))
+	if not reward_preview.is_empty():
+		text += "[u]通关奖励[/u]\n"
+		text += "  [color=#88cc88]%s[/color]\n\n" % reward_preview
+
 	# 目标列表
 	text += "[u]目标[/u]\n"
 	var objectives: Array = MissionData.get_objectives(mission)
@@ -197,6 +206,22 @@ func _update_mission_info(index: int) -> void:
 		else:
 			text += "  %s %s\n" % [tag, obj_name]
 
+	# 出击费用
+	var sortie_cost: Dictionary = GameManager.get_total_sortie_cost()
+	var cost_text: String = EquipmentCostData.format_cost(sortie_cost)
+	text += "\n[u]出击费用[/u]\n"
+	text += "  %s\n" % cost_text
+	if not sortie_cost.is_empty():
+		text += "  金币余额：%d\n" % GameManager.money
+		for res_type in sortie_cost:
+			if res_type == "money":
+				continue
+			var owned: int = int(GameManager.materials.get(res_type, 0))
+			var needed: int = int(sortie_cost[res_type])
+			var color: String = "green" if owned >= needed else "red"
+			text += "  %s：[color=%s]%d[/color] / %d\n" % [
+				EquipmentCostData.get_material_name(res_type), color, owned, needed]
+
 	text += "\n消耗时段：%s\n" % str(time_cost)
 	text += "可出击时段：%s\n" % phase_labels_text
 	text += "胜利污染：%s → %s\n" % [str(current_pollution), str(victory_pollution)]
@@ -204,6 +229,16 @@ func _update_mission_info(index: int) -> void:
 
 	detail_info.bbcode_enabled = true
 	detail_info.text = text
+
+	# 未解锁任务显示解锁条件
+	if not GameManager.is_mission_unlocked(mid):
+		var unlock_hint: String = _get_unlock_hint(mission)
+		if not unlock_hint.is_empty():
+			text += "\n[color=#ffcc00]🔒 %s[/color]\n" % unlock_hint
+		detail_info.text = text
+		confirm_button.disabled = true
+		confirm_button.text = "尚未解锁"
+		return
 
 	# 检查能否出击
 	var reason: String = _get_unavailable_reason(mission)
@@ -215,6 +250,27 @@ func _update_mission_info(index: int) -> void:
 		confirm_button.text = reason
 
 
+func _get_unlock_hint(mission: Dictionary) -> String:
+	var condition: Dictionary = mission.get("unlock_condition", {})
+	if condition.is_empty():
+		return ""
+	var required_count: int = int(condition.get("clear_count", 1))
+	if condition.has("clear_mission"):
+		var req_id: String = str(condition["clear_mission"])
+		var req_mission: Dictionary = MissionData.get_mission(req_id)
+		var req_name: String = str(req_mission.get("name", req_id))
+		if required_count <= 1:
+			return "需要通关「%s」" % req_name
+		return "需要通关「%s」%d 次" % [req_name, required_count]
+	if condition.has("clear_any"):
+		var req_ids: Array = condition["clear_any"]
+		var names: Array[String] = []
+		for rid in req_ids:
+			var req_m: Dictionary = MissionData.get_mission(str(rid))
+			names.append(str(req_m.get("name", rid)))
+		return "需要通关以下任一：%s" % ", ".join(names)
+	return ""
+
 func _get_unavailable_reason(mission: Dictionary) -> String:
 	var mid: String = str(mission.get("id", ""))
 	if not GameManager.is_mission_unlocked(mid):
@@ -224,6 +280,8 @@ func _get_unavailable_reason(mission: Dictionary) -> String:
 	var time_cost: int = MissionData.get_time_cost(mission)
 	if time_cost > GameManager.get_remaining_time_phases():
 		return "剩余时段不足"
+	if not GameManager.can_afford_sortie():
+		return "资源不足"
 	return ""
 
 

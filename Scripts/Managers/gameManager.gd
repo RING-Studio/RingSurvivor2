@@ -174,14 +174,27 @@ func get_brought_in_accessories() -> Array:
 	return out
 
 func get_brought_in_accessory_level(vehicle_id: int, accessory_id: String) -> int:
-	"""带入配件的等级。当前固定为 1；之后可从 vehicles_config[vehicle_id][\"配件等级\"][accessory_id] 读取。"""
+	"""带入配件的预升级等级。"""
 	var config = get_vehicle_config(vehicle_id)
 	if config == null:
 		return 1
 	var levels = config.get("配件等级", {})
 	if typeof(levels) != TYPE_DICTIONARY:
 		return 1
-	return int(levels.get(accessory_id, 1))
+	return clampi(int(levels.get(accessory_id, 1)), 1, EquipmentCostData.MAX_ACCESSORY_LEVEL)
+
+func set_accessory_level(vehicle_id: int, accessory_id: String, level: int) -> void:
+	"""设置配件预升级等级（策划书 5B.4）。"""
+	var config = get_vehicle_config(vehicle_id)
+	if config == null:
+		return
+	if not config.has("配件等级"):
+		config["配件等级"] = {}
+	var clamped: int = clampi(level, 1, EquipmentCostData.MAX_ACCESSORY_LEVEL)
+	if clamped <= 1:
+		(config["配件等级"] as Dictionary).erase(accessory_id)
+	else:
+		config["配件等级"][accessory_id] = clamped
 
 func is_equipped( vehicle_id:int, slot:String, part_id: Variant ):
 	var vehicle_data = get_vehicle_config(vehicle_id)
@@ -243,6 +256,8 @@ func unload_part( vehicle_id:int, slot:String, part_id: Variant ):
 				vehicle_data.erase(slot)
 		"配件":
 			vehicle_data["配件"].erase(part_id)
+			if vehicle_data.has("配件等级") and vehicle_data["配件等级"] is Dictionary:
+				(vehicle_data["配件等级"] as Dictionary).erase(part_id)
 		_:
 			push_warning("未知装备槽: %s" % slot)
 	return true
@@ -413,6 +428,8 @@ func record_mission_clear(mission_id: String, score: int = 0, completed_obj_ids:
 	entry["completed_objectives"] = existing_objs
 	# 自动检查并解锁后续关卡
 	_auto_unlock_missions()
+	# 14.4：检查章节完成与剧情推进
+	check_chapter_completion()
 
 
 func get_mission_completed_objectives(mission_id: String) -> Array:
@@ -449,10 +466,157 @@ func advance_objective(objective_id: String, amount: int = 1) -> void:
 	if progress_val >= target_val:
 		obj["completed"] = true
 		print("[Objective] 完成目标: %s" % objective_id)
-		# TODO: 触发奖励/进度推进
+		_check_story_progression()
 
 func get_hud_mission_text() -> String:
 	return _hud_mission_text
+
+# ========== 14.3 章节奖励 + 14.4 剧情推进 ==========
+
+const CHAPTER_DEFINITIONS: Dictionary = {
+	"1": {
+		"name": "第一章：初入荒野",
+		"required_missions": ["recon_patrol", "salvage_run"],
+		"rewards": {"money": 500, "materials": {"scrap_metal": 5}},
+		"unlock_npc_dialogues": {"npc_mechanic": 2, "npc_quartermaster": 1},
+	},
+	"2": {
+		"name": "第二章：深入污染",
+		"required_missions": ["containment", "extermination", "outpost_defense"],
+		"rewards": {"money": 1000, "materials": {"bio_sample": 5, "acid_gland": 3}},
+		"unlock_npc_dialogues": {"npc_mechanic": 3, "npc_quartermaster": 2},
+	},
+	"3": {
+		"name": "第三章：终局之战",
+		"required_missions": ["titan_hunt", "hive_assault"],
+		"rewards": {"money": 2000, "materials": {"spore_sample": 5, "energy_core": 5}},
+		"unlock_npc_dialogues": {"npc_quartermaster": 3},
+	}
+}
+
+func check_chapter_completion() -> void:
+	"""检查所有章节是否满足完成条件，自动推进。"""
+	for ch_id in CHAPTER_DEFINITIONS:
+		var ch_data: Dictionary = CHAPTER_DEFINITIONS[ch_id]
+		var ch_entry: Dictionary = chapter_progress.get(ch_id, {"unlocked": false, "completed": false})
+		if ch_entry.get("completed", false):
+			continue
+		if not ch_entry.get("unlocked", false):
+			continue
+		var required: Array = ch_data.get("required_missions", [])
+		var all_cleared: bool = true
+		for mid in required:
+			if get_mission_clear_count(mid) <= 0:
+				all_cleared = false
+				break
+		if all_cleared:
+			_complete_chapter(ch_id)
+
+func _complete_chapter(ch_id: String) -> void:
+	"""完成章节：发放奖励、解锁下一章、推进 NPC 对话。"""
+	if not chapter_progress.has(ch_id):
+		chapter_progress[ch_id] = {"unlocked": true, "completed": false}
+	chapter_progress[ch_id]["completed"] = true
+	chapter = max(chapter, int(ch_id) + 1)
+	print("[Chapter] 完成章节: %s" % ch_id)
+	
+	var ch_data: Dictionary = CHAPTER_DEFINITIONS.get(ch_id, {})
+	
+	# 发放奖励
+	var rewards: Dictionary = ch_data.get("rewards", {})
+	if rewards.has("money"):
+		money += int(rewards["money"])
+	var mat_rewards: Dictionary = rewards.get("materials", {})
+	for mat_type in mat_rewards:
+		if not materials.has(mat_type):
+			materials[mat_type] = 0
+		materials[mat_type] = int(materials[mat_type]) + int(mat_rewards[mat_type])
+	
+	# 解锁下一章
+	var next_ch: String = str(int(ch_id) + 1)
+	if CHAPTER_DEFINITIONS.has(next_ch):
+		if not chapter_progress.has(next_ch):
+			chapter_progress[next_ch] = {"unlocked": true, "completed": false}
+		else:
+			chapter_progress[next_ch]["unlocked"] = true
+		print("[Chapter] 解锁下一章: %s" % next_ch)
+	
+	# 推进 NPC 对话
+	var npc_unlocks: Dictionary = ch_data.get("unlock_npc_dialogues", {})
+	for npc_id in npc_unlocks:
+		var min_index: int = int(npc_unlocks[npc_id])
+		var current_index: int = int(npc_dialogues.get(npc_id, 0))
+		if current_index < min_index:
+			npc_dialogues[npc_id] = min_index
+
+func _check_story_progression() -> void:
+	"""在目标/任务完成后调用，检查是否需要推进剧情。"""
+	check_chapter_completion()
+
+func get_progression_summary() -> Dictionary:
+	"""获取整体游戏进度摘要（供 UI 使用）。"""
+	var total_missions: int = MissionData.get_all_missions().size()
+	var cleared_count: int = 0
+	for mid in mission_progress:
+		if int(mission_progress[mid].get("clear_count", 0)) > 0:
+			cleared_count += 1
+	
+	var current_chapter_name: String = ""
+	for ch_id in CHAPTER_DEFINITIONS:
+		var ch_entry: Dictionary = chapter_progress.get(ch_id, {})
+		if ch_entry.get("unlocked", false) and not ch_entry.get("completed", false):
+			current_chapter_name = CHAPTER_DEFINITIONS[ch_id].get("name", "")
+			break
+	if current_chapter_name.is_empty():
+		current_chapter_name = "全部章节已完成"
+	
+	return {
+		"total_missions": total_missions,
+		"cleared_missions": cleared_count,
+		"current_chapter": current_chapter_name,
+		"chapter_progress": chapter_progress.duplicate(),
+		"day": day,
+		"pollution": pollution
+	}
+
+# ========== 出击费用系统（Mark E.2：策划书 5B.3） ==========
+
+func get_total_sortie_cost() -> Dictionary:
+	"""根据当前车辆配装计算出击总费用。"""
+	var config: Dictionary = get_vehicle_config(current_vehicle)
+	if config == null:
+		return {}
+	return EquipmentCostData.calc_total_sortie_cost(config)
+
+func can_afford_sortie() -> bool:
+	"""检查当前配装能否负担出击费用。"""
+	var cost: Dictionary = get_total_sortie_cost()
+	if cost.is_empty():
+		return true
+	return EquipmentCostData.can_afford(cost, money, materials)
+
+func deduct_sortie_cost() -> bool:
+	"""扣除出击费用。返回 true 表示扣除成功。"""
+	var cost: Dictionary = get_total_sortie_cost()
+	if cost.is_empty():
+		return true
+	if not EquipmentCostData.can_afford(cost, money, materials):
+		return false
+	for resource_type in cost:
+		var amount: int = int(cost[resource_type])
+		if resource_type == "money":
+			money -= amount
+		else:
+			if not materials.has(resource_type):
+				materials[resource_type] = 0
+			materials[resource_type] = int(materials[resource_type]) - amount
+	print("[Sortie] 出击费用已扣除: %s" % EquipmentCostData.format_cost(cost))
+	return true
+
+func get_sortie_missing_resources() -> Array[String]:
+	"""获取出击费用不足的资源列表（供 UI 提示）。"""
+	var cost: Dictionary = get_total_sortie_cost()
+	return EquipmentCostData.get_missing_resources(cost, money, materials)
 
 # ========== 关卡选择/出击/结算 ==========
 
@@ -533,7 +697,7 @@ func collect_session_material(material_type: String, amount: int = 1) -> void:
 		session_materials[material_type] = 0
 	session_materials[material_type] = int(session_materials[material_type]) + amount
 
-func apply_mission_result(result: String, completed_obj_ids: Array[String] = []) -> bool:
+func apply_mission_result(result: String, completed_obj_ids: Array[String] = [], victory_bonus: Dictionary = {}, objective_rewards: Dictionary = {}) -> bool:
 	"""结算关卡（胜利/失败均推进时段并应用污染变化）。返回 true 表示首次结算。"""
 	if mission_resolved:
 		return false
@@ -550,7 +714,7 @@ func apply_mission_result(result: String, completed_obj_ids: Array[String] = [])
 	if result == "victory" and not current_mission_id.is_empty():
 		record_mission_clear(current_mission_id, 0, completed_obj_ids)
 	# 结算信息（供 end_screen 等显示）
-	_last_settlement = _build_settlement(result, completed_obj_ids)
+	_last_settlement = _build_settlement(result, completed_obj_ids, victory_bonus, objective_rewards)
 	# HUD 文本
 	var result_text: String = "完成"
 	match result:
@@ -574,11 +738,12 @@ func get_last_settlement() -> Dictionary:
 	"""获取最近一次关卡结算详情（供 end_screen 显示）。"""
 	return _last_settlement
 
-func _build_settlement(result: String, completed_obj_ids: Array[String]) -> Dictionary:
+func _build_settlement(result: String, completed_obj_ids: Array[String], victory_bonus: Dictionary = {}, objective_rewards: Dictionary = {}) -> Dictionary:
 	"""构建结算信息字典并实际发放带出物品。
 	- 升级返还能量：品质基准 × 等级 / max(等级上限, 等级) × 10
 	- 素材带出：session_materials 按损失比例保留
-	- 损失规则：胜利 100%，失败存活损失 10-30%，失败死亡损失 60-90%"""
+	- 损失规则：胜利 100%，失败存活损失 10-30%，失败死亡损失 60-90%
+	- 胜利奖励：victory_bonus 通关奖励 + objective_rewards 次要目标奖励"""
 
 	# 1. 计算升级返还能量
 	var total_upgrade_energy: int = 0
@@ -588,7 +753,6 @@ func _build_settlement(result: String, completed_obj_ids: Array[String]) -> Dict
 		var level: int = int(upgrade_entry.get("level", 0))
 		if level <= 0:
 			continue
-		# 查找升级数据以获取品质和等级上限
 		var data: Dictionary = _find_upgrade_data(upgrade_id)
 		var quality: String = data.get("quality", "white")
 		var max_level: int = int(data.get("max_level", -1))
@@ -611,12 +775,10 @@ func _build_settlement(result: String, completed_obj_ids: Array[String]) -> Dict
 		keep_ratio = 1.0
 		loss_desc = "胜利：全部带出"
 	elif session_player_died:
-		# 失败 + 玩家死亡：损失 60-90%
 		var loss: float = randf_range(0.6, 0.9)
 		keep_ratio = 1.0 - loss
 		loss_desc = "失败（阵亡）：损失 %d%%" % int(loss * 100)
 	else:
-		# 失败 + 玩家存活：损失 10-30%
 		var loss: float = randf_range(0.1, 0.3)
 		keep_ratio = 1.0 - loss
 		loss_desc = "失败（存活）：损失 %d%%" % int(loss * 100)
@@ -656,11 +818,59 @@ func _build_settlement(result: String, completed_obj_ids: Array[String]) -> Dict
 				newly_unlocked.append(uid)
 				print("[Unlock] 配件已解锁: %s (%s)" % [udata.get("name", uid), uid])
 
+	# 7. 处理通关奖励 + 次要目标奖励（仅胜利时发放，不受损失比例影响）
+	var victory_bonus_money: int = 0
+	var victory_bonus_materials: Dictionary = {}
+	var obj_reward_details: Array[Dictionary] = []
+	var total_obj_money: int = 0
+	var total_obj_materials: Dictionary = {}
+
+	if result == "victory":
+		# 基础通关奖励
+		victory_bonus_money = int(victory_bonus.get("money", 0))
+		var vb_mats: Dictionary = victory_bonus.get("materials", {})
+		for mat_type in vb_mats:
+			victory_bonus_materials[mat_type] = int(vb_mats[mat_type])
+
+		# 次要目标奖励
+		for obj_id in completed_obj_ids:
+			if not objective_rewards.has(obj_id):
+				continue
+			var reward: Dictionary = objective_rewards[obj_id]
+			var reward_money: int = int(reward.get("money", 0))
+			var reward_mats: Dictionary = reward.get("materials", {})
+			var display_name: String = str(reward.get("display_name", obj_id))
+			total_obj_money += reward_money
+			obj_reward_details.append({
+				"obj_id": obj_id,
+				"display_name": display_name,
+				"money": reward_money,
+				"materials": reward_mats.duplicate(),
+			})
+			for mat_type in reward_mats:
+				if not total_obj_materials.has(mat_type):
+					total_obj_materials[mat_type] = 0
+				total_obj_materials[mat_type] += int(reward_mats[mat_type])
+
+		# 发放通关奖励
+		money += victory_bonus_money
+		for mat_type in victory_bonus_materials:
+			if not materials.has(mat_type):
+				materials[mat_type] = 0
+			materials[mat_type] = int(materials[mat_type]) + int(victory_bonus_materials[mat_type])
+
+		# 发放次要目标奖励
+		money += total_obj_money
+		for mat_type in total_obj_materials:
+			if not materials.has(mat_type):
+				materials[mat_type] = 0
+			materials[mat_type] = int(materials[mat_type]) + int(total_obj_materials[mat_type])
+
 	# 断开会话信号
 	if GameEvents.ability_upgrade_added.is_connected(_on_session_upgrade_added):
 		GameEvents.ability_upgrade_added.disconnect(_on_session_upgrade_added)
 
-	# 7. 构建结算字典
+	# 8. 构建结算字典
 	var settlement: Dictionary = {
 		"result": result,
 		"mission_id": current_mission_id,
@@ -668,19 +878,22 @@ func _build_settlement(result: String, completed_obj_ids: Array[String]) -> Dict
 		"player_died": session_player_died,
 		"loss_desc": loss_desc,
 		"keep_ratio": keep_ratio,
-		# 升级返还能量
 		"total_upgrade_energy_raw": total_upgrade_energy,
 		"total_upgrade_energy_final": final_energy,
 		"upgrade_details": upgrade_details,
-		# 素材带出
 		"raw_materials": raw_materials,
 		"final_materials": final_materials,
-		# 配件解锁
 		"newly_unlocked": newly_unlocked,
+		"victory_bonus_money": victory_bonus_money,
+		"victory_bonus_materials": victory_bonus_materials,
+		"obj_reward_details": obj_reward_details,
+		"total_obj_money": total_obj_money,
+		"total_obj_materials": total_obj_materials,
 	}
-	print("[Settlement] %s — mission=%s, energy=%d→%d, materials=%s, loss=%s" % [
+	var total_reward_money: int = victory_bonus_money + total_obj_money
+	print("[Settlement] %s — mission=%s, energy=%d→%d, materials=%s, rewards=%d金币, loss=%s" % [
 		result, current_mission_id, total_upgrade_energy, final_energy,
-		str(final_materials), loss_desc])
+		str(final_materials), total_reward_money, loss_desc])
 	return settlement
 
 

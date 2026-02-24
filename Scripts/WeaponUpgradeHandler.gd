@@ -30,6 +30,12 @@ var _bleed_stacks: Dictionary = {}  # enemy_id -> {stacks: int, timer: Timer}
 var _temp_fire_rate_bonus: float = 0.0
 var _temp_fire_rate_bonus_until_msec: int = 0
 
+# 阶段十五：复杂运行时机制状态
+var _suppressive_net_hit_times: Array = []
+var _suppressive_net_active_until_msec: int = 0
+var _thermal_bolt_stacks: int = 0
+var _fallback_firing_bonus: float = 0.0
+
 # 计时器
 var chain_fire_timer: Timer
 var burst_fire_timer: Timer
@@ -133,6 +139,16 @@ func get_fire_rate_modifier() -> float:
 	if ammo_belt_level > 0:
 		modifier += UpgradeEffectManager.get_effect("ammo_belt", ammo_belt_level)
 	
+	# 压制网：同时命中3+敌人时射速加成（3秒持续）
+	var suppressive_level = current_upgrades.get("suppressive_net", {}).get("level", 0)
+	if suppressive_level > 0 and Time.get_ticks_msec() < _suppressive_net_active_until_msec:
+		modifier += UpgradeEffectManager.get_effect("suppressive_net", suppressive_level)
+	
+	# 热切换枪机：连续暴击层数射速加成
+	var thermal_bolt_level = current_upgrades.get("thermal_bolt", {}).get("level", 0)
+	if thermal_bolt_level > 0 and _thermal_bolt_stacks > 0:
+		modifier += UpgradeEffectManager.get_effect("thermal_bolt", thermal_bolt_level) * float(_thermal_bolt_stacks)
+	
 	# 临时射速加成（配件触发）
 	if _temp_fire_rate_bonus > 0.0:
 		if Time.get_ticks_msec() >= _temp_fire_rate_bonus_until_msec:
@@ -210,6 +226,17 @@ func get_damage_modifier(base_damage: float, target: Node2D = null) -> float:
 		var cfg: Dictionary = UpgradeEffectManager.get_config("long_barrel")
 		var penalty: float = float(cfg.get("damage_penalty_per_level", 0.05)) * float(long_barrel_level)
 		damage *= (1.0 - penalty)
+	
+	# 稳定平台：移动时伤害 +8%*lv
+	var stable_level = current_upgrades.get("stable_platform", {}).get("level", 0)
+	if stable_level > 0:
+		var player = get_tree().get_first_node_in_group("player")
+		if player and player.velocity.length_squared() > 100.0:
+			damage *= (1.0 + UpgradeEffectManager.get_effect("stable_platform", stable_level))
+	
+	# 备用点射：未命中积累的伤害加成
+	if _fallback_firing_bonus > 0.0:
+		damage *= (1.0 + _fallback_firing_bonus)
 	
 	if target != null:
 		damage = _apply_target_damage_modifiers(damage, target)
@@ -464,6 +491,20 @@ func on_weapon_hit(target: Node2D):
 		var slow_duration: float = 0.4 * float(shock_level)
 		if target.has_method("apply_slow"):
 			target.apply_slow(0.5, slow_duration)  # 50% 减速
+	
+	# 压制网：记录命中时间戳
+	var suppressive_level = current_upgrades.get("suppressive_net", {}).get("level", 0)
+	if suppressive_level > 0:
+		var now: int = Time.get_ticks_msec()
+		_suppressive_net_hit_times.append(now)
+		while _suppressive_net_hit_times.size() > 0 and _suppressive_net_hit_times[0] < now - 500:
+			_suppressive_net_hit_times.pop_front()
+		if _suppressive_net_hit_times.size() >= 3:
+			_suppressive_net_active_until_msec = now + 3000
+			_suppressive_net_hit_times.clear()
+	
+	# 备用点射：命中时消耗积累加成
+	_fallback_firing_bonus = 0.0
 
 func on_weapon_critical(target: Node2D):
 	"""武器暴击时调用"""
@@ -479,6 +520,11 @@ func on_weapon_critical(target: Node2D):
 	var sharpened_level = current_upgrades.get("sharpened", {}).get("level", 0)
 	if sharpened_level > 0 and is_instance_valid(target):
 		_apply_bleed_stacks(target, sharpened_level)
+	
+	# 热切换枪机：暴击+1层（上限10）
+	var thermal_bolt_level = current_upgrades.get("thermal_bolt", {}).get("level", 0)
+	if thermal_bolt_level > 0:
+		_thermal_bolt_stacks = min(_thermal_bolt_stacks + 1, 10)
 
 func on_enemy_killed_by_critical(target: Node2D):
 	"""敌人被暴击击杀时调用（在伤害应用后调用）"""
@@ -492,6 +538,11 @@ func on_enemy_killed_by_critical(target: Node2D):
 			var player_health = player.get_node_or_null("HealthComponent")
 			if player_health:
 				player_health.heal(harvest_level)
+	
+	# 连锁起爆：暴击击杀后小范围爆破
+	var det_level = current_upgrades.get("detonation_link", {}).get("level", 0)
+	if det_level > 0 and is_instance_valid(target):
+		_spawn_detonation_explosion(target.global_position, det_level)
 
 func on_enemy_killed(_target: Node2D):
 	"""任意敌人被击杀时调用（供外部调用）"""
@@ -770,3 +821,66 @@ func _process_bleed_ticks(delta: float):
 	
 	for tid in to_remove:
 		_bleed_stacks.erase(tid)
+
+# ========== 阶段十五：复杂运行时机制接口 ==========
+
+func on_non_crit_hit():
+	"""非暴击命中时调用（thermal_bolt 层数衰减）"""
+	if _thermal_bolt_stacks > 0:
+		_thermal_bolt_stacks -= 1
+
+func on_weapon_miss():
+	"""弹丸未命中（超时消失）时调用"""
+	var fallback_level = GameManager.current_upgrades.get("fallback_firing", {}).get("level", 0)
+	if fallback_level > 0:
+		_fallback_firing_bonus += UpgradeEffectManager.get_effect("fallback_firing", fallback_level)
+		_fallback_firing_bonus = min(_fallback_firing_bonus, 1.0)
+
+func check_multi_feed() -> bool:
+	"""多路供弹：概率返回 true 表示本次射击免费（可立即再射一发）"""
+	var level: int = GameManager.current_upgrades.get("multi_feed", {}).get("level", 0)
+	if level <= 0:
+		return false
+	return randf() < UpgradeEffectManager.get_effect("multi_feed", level)
+
+func get_precision_bore_depth_bonus(is_crit: bool) -> float:
+	"""精密膛线：暴击时额外穿深（返回额外 mm 值）"""
+	if not is_crit:
+		return 0.0
+	var level: int = GameManager.current_upgrades.get("precision_bore", {}).get("level", 0)
+	if level <= 0:
+		return 0.0
+	return UpgradeEffectManager.get_effect("precision_bore", level) * float(GameManager.get_player_hard_attack_depth_mm())
+
+func get_shock_fragment_damage(base_damage: float, has_remaining_penetration: bool) -> float:
+	"""破片喷流：穿透后附加破片伤害（返回额外伤害值）"""
+	if not has_remaining_penetration:
+		return 0.0
+	var level: int = GameManager.current_upgrades.get("shock_fragment", {}).get("level", 0)
+	if level <= 0:
+		return 0.0
+	return base_damage * UpgradeEffectManager.get_effect("shock_fragment", level)
+
+func _spawn_detonation_explosion(pos: Vector2, det_level: int):
+	"""连锁起爆：在击杀位置生成小范围爆破"""
+	var layer = get_tree().get_first_node_in_group("foreground_layer")
+	if layer == null:
+		return
+	var radius: float = 60.0
+	var damage_ratio: float = UpgradeEffectManager.get_effect("detonation_link", det_level)
+	var base_dmg: float = GameManager.get_player_base_damage() * damage_ratio
+	
+	var AoECircleEffectScript = load("res://scenes/effects/aoe_circle_effect.gd")
+	var fx: Node2D = AoECircleEffectScript.new()
+	fx.global_position = pos
+	fx.setup(radius, Color(1.0, 0.5, 0.1, 0.3), 0.18)
+	layer.add_child(fx)
+	
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if not is_instance_valid(enemy):
+			continue
+		if enemy.global_position.distance_squared_to(pos) > radius * radius:
+			continue
+		var hb = enemy.get_node_or_null("HurtboxComponent")
+		if hb:
+			hb.apply_damage(base_dmg, "weapon", false)

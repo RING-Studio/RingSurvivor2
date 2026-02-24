@@ -93,6 +93,11 @@ func on_timer_timeout():
 	for i in range(extra_shot_count):
 		var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
 		_fire_shot(player_position, random_direction)
+	
+	# 多路供弹：概率免费额外射击
+	if WeaponUpgradeHandler.instance and WeaponUpgradeHandler.instance.check_multi_feed():
+		var bonus_dir = _resolve_fire_direction(player_position, enemies)
+		_fire_shot(player_position, bonus_dir)
 
 func _get_spread_pattern() -> SpreadPattern:
 	"""根据当前升级返回弹道分布模式"""

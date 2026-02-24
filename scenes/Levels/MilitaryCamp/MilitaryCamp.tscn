@@ -1,8 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://bfv1b28x6gory"]
+[gd_scene load_steps=12 format=3 uid="uid://bfv1b28x6gory"]
 
 [ext_resource type="Script" uid="uid://bhlwj7houqqaf" path="res://scenes/Levels/MilitaryCamp/MilitaryCamp.gd" id="1_usjsl"]
 [ext_resource type="PackedScene" uid="uid://d2yk5w6oa7ajm" path="res://scenes/Levels/MilitaryCamp/Player.tscn" id="2_17cg1"]
 [ext_resource type="Texture2D" uid="uid://g0xf5lmh33e8" path="res://Assets/MilitaryBackground.png" id="2_nt0gt"]
+[ext_resource type="Resource" uid="uid://bpgyeu0l4ve0j" path="res://DialogueData/Dialogue3.dialogue" id="2_wpgox"]
 [ext_resource type="Script" uid="uid://bd8r4dnrd28hr" path="res://scenes/Levels/MilitaryCamp/Building.gd" id="3_nt0gt"]
 [ext_resource type="Texture2D" uid="uid://b7vv05gqjgmy7" path="res://Assets/车.png" id="6_miboc"]
 [ext_resource type="Texture2D" uid="uid://dlkmdsdekvi3g" path="res://Assets/NPC.png" id="7_g38c5"]
@@ -22,6 +23,7 @@ next_scene = &"res://scenes/Levels/LevelTest/LevelTest.tscn"
 npc_scene = &"res://scenes/Levels/Avg.tscn"
 car_editor_scene = &"res://scenes/Levels/CarEditor.tscn"
 save_scene = &"res://scenes/Levels/SaveUI.tscn"
+qm_dialogue_resource = ExtResource("2_wpgox")
 
 [node name="Background" type="Sprite2D" parent="."]
 scale = Vector2(1.875, 1.875)
@@ -112,4 +114,24 @@ shape = SubResource("RectangleShape2D_gmq1o")
 [node name="Area2D" type="Area2D" parent="Buildings/CarEditor"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/CarEditor/Area2D"]
+shape = SubResource("RectangleShape2D_mj6vd")
+
+[node name="npc_quartermaster" type="Node2D" parent="Buildings" node_paths=PackedStringArray("image") groups=["building_portal"]]
+position = Vector2(280, 590)
+script = ExtResource("3_nt0gt")
+image = NodePath("Area2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="Buildings/npc_quartermaster"]
+modulate = Color(0.9, 0.8, 0.6, 1)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("7_g38c5")
+
+[node name="Collision" type="StaticBody2D" parent="Buildings/npc_quartermaster"]
+
+[node name="Shape" type="CollisionShape2D" parent="Buildings/npc_quartermaster/Collision"]
+shape = SubResource("RectangleShape2D_gmq1o")
+
+[node name="Area2D" type="Area2D" parent="Buildings/npc_quartermaster"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Buildings/npc_quartermaster/Area2D"]
 shape = SubResource("RectangleShape2D_mj6vd")

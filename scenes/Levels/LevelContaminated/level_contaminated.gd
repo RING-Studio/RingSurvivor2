@@ -165,6 +165,39 @@ func _setup_objectives() -> void:
 	})
 
 
+func _get_victory_bonus() -> Dictionary:
+	match GameManager.current_mission_id:
+		"containment":
+			return {"money": 300}
+		"extermination":
+			return {"money": 320}
+		"outpost_defense":
+			return {"money": 350}
+		"high_risk_sweep":
+			return {"money": 500}
+	return {}
+
+func _get_objective_rewards() -> Dictionary:
+	match GameManager.current_mission_id:
+		"containment":
+			return {
+				"kill_elites": {"display_name": "击杀 15 只精英敌人", "money": 200, "materials": {"bio_sample": 2}},
+			}
+		"extermination":
+			return {
+				"kill_elites_bonus": {"display_name": "击杀 10 只精英敌人", "money": 180},
+			}
+		"outpost_defense":
+			return {
+				"defend_no_hit": {"display_name": "据点血量保持 50% 以上", "money": 250, "materials": {"energy_core": 1}},
+			}
+		"high_risk_sweep":
+			return {
+				"kill_15_elites": {"display_name": "击杀 25 只精英敌人", "money": 300, "materials": {"acid_gland": 2}},
+			}
+	return {}
+
+
 func _on_enemy_killed_objectives(enemy: Node2D, is_elite: bool, is_boss: bool, enemy_class: String) -> void:
 	for obj in objective_manager.get_all_objectives():
 		var oid: String = obj["id"]

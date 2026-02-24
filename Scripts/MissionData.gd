@@ -223,7 +223,8 @@ const MISSION_SCENE_MAP: Dictionary = {
 	"extermination": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
 	"outpost_defense": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
 	"high_risk_sweep": "res://scenes/Levels/LevelContaminated/LevelContaminated.tscn",
-	# titan_hunt / hive_assault 暂用 LevelTest（需要 Boss + Region3 机制）
+	"titan_hunt": "res://scenes/Levels/LevelBoss/LevelBoss.tscn",
+	"hive_assault": "res://scenes/Levels/LevelBoss/LevelBoss.tscn",
 }
 
 const PHASE_LABELS: Dictionary = {

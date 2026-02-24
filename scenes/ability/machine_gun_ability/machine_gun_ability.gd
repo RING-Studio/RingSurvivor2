@@ -23,15 +23,21 @@ var _hit_hurtboxes: Array[HurtboxComponent] = []
 var _controller: MachineGunAbilityController = null  # Controller引用，用于通知暴击
 var is_split_bullet: bool = false  # 是否是分裂子弹
 var ricochet_attempted: bool = false  # 是否已尝试弹射
-var has_spread_effect: bool = false  # 是否有扩散效果
-var spread_damage_ratio: float = 1.0  # 扩散伤害比例
-var lethal_strike_active: bool = false  # 致命一击是否激活
+var has_spread_effect: bool = false
+var spread_damage_ratio: float = 1.0
+var lethal_strike_active: bool = false
+var _has_hit_anything: bool = false
 
 func _ready():
 	var timer = get_tree().create_timer(bullet_lifetime)
-	timer.timeout.connect(queue_free)
+	timer.timeout.connect(_on_lifetime_expired)
 	hitbox_component.area_entered.connect(_on_hitbox_area_entered)
 	set_hits_remaining()
+
+func _on_lifetime_expired():
+	if not _has_hit_anything and WeaponUpgradeHandler.instance:
+		WeaponUpgradeHandler.instance.on_weapon_miss()
+	queue_free()
 
 func _process(delta):
 	global_position += direction.normalized() * bullet_speed * delta

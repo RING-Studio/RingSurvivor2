@@ -8,6 +8,76 @@ class_name ListDisplay
 @export var load_button: Button
 @export var unload_button: Button
 
+signal accessory_level_changed(accessory_id: String, new_level: int)
+
+var _level_container: HBoxContainer = null
+var _level_label: Label = null
+var _level_up_button: Button = null
+var _level_down_button: Button = null
+var _current_accessory_id: String = ""
+var _current_vehicle_id: int = 0
+
+func _ready() -> void:
+	_create_level_controls()
+
+func _create_level_controls() -> void:
+	_level_container = HBoxContainer.new()
+	_level_container.name = "LevelContainer"
+	_level_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	_level_container.visible = false
+
+	_level_down_button = Button.new()
+	_level_down_button.text = "-"
+	_level_down_button.custom_minimum_size = Vector2(32, 32)
+	_level_down_button.pressed.connect(_on_level_down)
+
+	_level_label = Label.new()
+	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_level_label.custom_minimum_size = Vector2(120, 0)
+
+	_level_up_button = Button.new()
+	_level_up_button.text = "+"
+	_level_up_button.custom_minimum_size = Vector2(32, 32)
+	_level_up_button.pressed.connect(_on_level_up)
+
+	_level_container.add_child(_level_down_button)
+	_level_container.add_child(_level_label)
+	_level_container.add_child(_level_up_button)
+
+	var insert_idx: int = label.get_index() + 1 if label else get_child_count()
+	add_child(_level_container)
+	move_child(_level_container, insert_idx)
+
+func _on_level_up() -> void:
+	if _current_accessory_id.is_empty():
+		return
+	var cur: int = GameManager.get_brought_in_accessory_level(_current_vehicle_id, _current_accessory_id)
+	if cur < EquipmentCostData.MAX_ACCESSORY_LEVEL:
+		GameManager.set_accessory_level(_current_vehicle_id, _current_accessory_id, cur + 1)
+		accessory_level_changed.emit(_current_accessory_id, cur + 1)
+
+func _on_level_down() -> void:
+	if _current_accessory_id.is_empty():
+		return
+	var cur: int = GameManager.get_brought_in_accessory_level(_current_vehicle_id, _current_accessory_id)
+	if cur > 1:
+		GameManager.set_accessory_level(_current_vehicle_id, _current_accessory_id, cur - 1)
+		accessory_level_changed.emit(_current_accessory_id, cur - 1)
+
+func _update_level_controls(accessory_id: String, vehicle_id: int, equipped: bool) -> void:
+	if _level_container == null:
+		return
+	_current_accessory_id = accessory_id
+	_current_vehicle_id = vehicle_id
+	if not equipped or accessory_id.is_empty():
+		_level_container.visible = false
+		return
+	var lv: int = GameManager.get_brought_in_accessory_level(vehicle_id, accessory_id)
+	_level_container.visible = true
+	_level_label.text = "预升级 Lv.%d / %d" % [lv, EquipmentCostData.MAX_ACCESSORY_LEVEL]
+	_level_down_button.disabled = (lv <= 1)
+	_level_up_button.disabled = (lv >= EquipmentCostData.MAX_ACCESSORY_LEVEL)
+
 func set_title(text:String) -> void:
 	title.text = text
 
@@ -57,22 +127,36 @@ func update_info(id: Variant, table_name: String, vehicle_id: int) -> Dictionary
 		icon_texture = load("res://Assets/UIAssets/Unavailable.png")
 	set_icon(icon_texture)
 
-	# 描述：应用参数替换 + BBCode 富文本
+	var unlocked: bool = GameManager.is_parts_unlocked(table_name, id)
+	var equipped: bool = GameManager.is_equipped(vehicle_id, table_name, id)
+
+	# 描述：配件根据预升级等级展示数值
+	var display_level: int = 1
+	if table_name == "配件" and not upgrade_id.is_empty() and equipped:
+		display_level = GameManager.get_brought_in_accessory_level(vehicle_id, upgrade_id)
 	var raw_description: String = field.get("Remarks", "")
 	if not upgrade_id.is_empty():
-		raw_description = _process_description(raw_description, upgrade_id, 1)
+		raw_description = _process_description(raw_description, upgrade_id, display_level)
 	set_label_bbcode(raw_description)
 
-	var unlocked: bool = GameManager.is_parts_unlocked(table_name, id)
-	parts_unlock_button.visible = false  # 手动解锁按钮不再使用（配件通过任务内选取自动解锁）
+	parts_unlock_button.visible = false
 
-	# 未解锁配件显示解锁条件提示
 	if not unlocked and table_name == "配件":
 		set_label_bbcode("[color=#888888]" + raw_description + "[/color]\n\n[color=#ffcc00]🔒 解锁条件：在任务中选取过此配件[/color]")
 	elif not unlocked:
 		parts_unlock_button.visible = true
+	elif unlocked:
+		var cost_text: String = _get_cost_bbcode(id, table_name, vehicle_id, equipped)
+		if not cost_text.is_empty():
+			var current_text: String = label.text
+			set_label_bbcode(current_text + "\n\n" + cost_text)
 
-	var equipped: bool = GameManager.is_equipped(vehicle_id, table_name, id)
+	# 预升级等级控件（仅已装备的配件）
+	if table_name == "配件":
+		_update_level_controls(upgrade_id, vehicle_id, equipped)
+	else:
+		_update_level_controls("", vehicle_id, false)
+
 	load_button.visible = unlocked and !equipped
 	unload_button.visible = unlocked and equipped
 
@@ -284,7 +368,7 @@ func _process_description(description: String, upgrade_id: String, display_level
 		"windmill_speed":
 			special["windmill_speed_fire_rate_value"] = str(10 * display_level)
 			special["windmill_speed_rotation_value"] = str(30 * display_level)
-	
+
 	# 百分比类占位符（effect_value 需 *100）
 	var pct_ids: Array = [
 		"crit_rate", "crit_damage", "damage_bonus", "rapid_fire",
@@ -301,21 +385,20 @@ func _process_description(description: String, upgrade_id: String, display_level
 		"cooling_share", "cooling_safeguard", "laser_overheat_cut",
 		"turret_pierce", "cryo_slow", "acid_armor_break",
 	]
-	
+
 	# 通用正则替换
 	var regex: RegEx = RegEx.new()
 	regex.compile("\\{([^}]+)\\}")
 	var matches: Array = regex.search_all(result)
-	
+
 	for m in matches:
 		var ph_name: String = m.get_string(1)
 		var placeholder: String = "{%s}" % ph_name
 		var display_value: String = ""
-		
+
 		if special.has(ph_name):
 			display_value = str(special[ph_name])
 		elif ph_name.ends_with("_value"):
-			# 尝试从 UpgradeEffectManager 获取
 			var effect_val: float = UpgradeEffectManager.get_effect(upgrade_id, display_level)
 			if effect_val != 0.0:
 				if upgrade_id in pct_ids:
@@ -326,8 +409,41 @@ func _process_description(description: String, upgrade_id: String, display_level
 				display_value = "?"
 		else:
 			continue
-		
+
 		var colored: String = "[color=#00ff00]%s[/color]" % display_value
 		result = result.replace(placeholder, colored)
-	
+
 	return result
+
+func _get_cost_bbcode(id: Variant, table_name: String, vehicle_id: int = 0, equipped: bool = false) -> String:
+	"""获取装备出击费用的 BBCode 文本（Mark E.2 + E.3 预升级费用）。"""
+	var cost: Dictionary = {}
+	if table_name == "配件" and id is String:
+		if equipped:
+			var lv: int = GameManager.get_brought_in_accessory_level(vehicle_id, id as String)
+			cost = EquipmentCostData.get_accessory_total_cost(id as String, lv)
+		else:
+			cost = EquipmentCostData.get_accessory_cost(id as String)
+	elif table_name == "主武器类型":
+		var weapon_id: String = ""
+		var table = JsonManager.get_category(table_name)
+		if table != null:
+			if id is int and id >= 0 and id < table.size():
+				weapon_id = str(table[id].get("Id", ""))
+			elif id is String:
+				weapon_id = id
+		if not weapon_id.is_empty():
+			cost = EquipmentCostData.get_weapon_cost(weapon_id)
+	elif table_name == "装甲类型":
+		var armor_id: String = ""
+		var table = JsonManager.get_category(table_name)
+		if table != null:
+			if id is int and id >= 0 and id < table.size():
+				armor_id = str(table[id].get("Id", ""))
+			elif id is String:
+				armor_id = id
+		if not armor_id.is_empty():
+			cost = EquipmentCostData.get_armor_cost(armor_id)
+	if cost.is_empty():
+		return "[color=#aaaaaa]出击费用：免费[/color]"
+	return "[color=#ffcc00]出击费用：%s[/color]" % EquipmentCostData.format_cost(cost)

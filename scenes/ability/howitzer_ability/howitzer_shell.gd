@@ -92,8 +92,13 @@ func _explode():
 			dmg *= crit_mult
 			if WeaponUpgradeHandler.instance:
 				WeaponUpgradeHandler.instance.on_weapon_critical(enemy)
+				var bore_bonus: float = WeaponUpgradeHandler.instance.get_precision_bore_depth_bonus(true)
+				if bore_bonus > 0.0:
+					dmg *= (1.0 + bore_bonus)
+		else:
+			if WeaponUpgradeHandler.instance:
+				WeaponUpgradeHandler.instance.on_non_crit_hit()
 		
-		# 命中通知
 		if WeaponUpgradeHandler.instance:
 			WeaponUpgradeHandler.instance.on_weapon_hit(enemy)
 		

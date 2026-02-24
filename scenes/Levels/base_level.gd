@@ -104,6 +104,14 @@ func _get_boss_id_for_objective(obj_id: String) -> String:
 	"""子类覆写：返回目标对应的 Boss ID，空字符串表示无"""
 	return ""
 
+func _get_victory_bonus() -> Dictionary:
+	"""子类覆写：返回基础通关奖励 {"money": int, "materials": {type: amount}}"""
+	return {}
+
+func _get_objective_rewards() -> Dictionary:
+	"""子类覆写：返回次要目标奖励表 {obj_id: {"money": int, "materials": {}, "display_name": str}}"""
+	return {}
+
 
 # ========== 胜利/失败 ==========
 
@@ -112,7 +120,9 @@ func _on_victory() -> void:
 	var completed_objs: Array[String] = []
 	if objective_manager:
 		completed_objs = objective_manager.get_completed_secondary_ids()
-	if not GameManager.apply_mission_result("victory", completed_objs):
+	var victory_bonus: Dictionary = _get_victory_bonus()
+	var obj_rewards: Dictionary = _get_objective_rewards()
+	if not GameManager.apply_mission_result("victory", completed_objs, victory_bonus, obj_rewards):
 		return
 	GlobalSaveData.save_game()
 	var end_screen_instance: Node = end_screen_scene.instantiate()

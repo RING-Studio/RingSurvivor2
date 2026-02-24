@@ -1,6 +1,6 @@
 # ROADMAP
 
-更新日期：2026-02-19
+更新日期：2026-02-19（阶段16-D完成 + 阶段16-C完成 + 阶段16-A完成 + 阶段15完整 + 阶段14完成）
 
 ## 资料口径与过期说明
 - 主口径：`DOCUMENTS/升级合集.md`、`DOCUMENTS/配件系统实现方案.md`、`DOCUMENTS/关卡.md`、`DOCUMENTS/策划书v2.md`
@@ -321,7 +321,7 @@
 
 ---
 
-## 阶段 14：NPC 对话系统 — 进行中
+## 阶段 14：NPC 对话系统 ✅ 已完成
 目标
 - 统一 AVG 对话系统，支持两种模式
 主要工作
@@ -330,14 +330,21 @@
   - fullscreen 模式：全屏遮罩 + 背景图 + 角色立绘 + 对话气泡
   - 可选：暂停后方场景（默认暂停）、释放当前场景并跳转
   - 军营 NPC 已切换到 DialogueRunner（不再切换场景）
-- 14.2 ✅ NPC 对话文本与进度追踪（npc_dialogues）— 已完成
+- 14.2 ✅ NPC 对话文本与进度追踪（npc_dialogues）
   - `GameManager.npc_dialogues` 追踪每个 NPC 对话序列索引
   - `DialogueRunner` 新增 `npc_id` 配置项，对话结束自动推进
   - 军营机械师 NPC 4 段对话序列：intro → day2 → day3 → idle
   - 对话进度随存档持久化
-  - `MilitaryCamp.gd` 动态选取当前对话标题
-- 14.3 主线/支线目标系统 UI 展示与奖励发放 — 待实现
-- 14.4 剧情推进触发（章节完成条件）— 待实现
+- 14.3 ✅ 章节奖励与剧情推进框架
+  - `CHAPTER_DEFINITIONS` 定义 3 个章节（初入荒野 / 深入污染 / 终局之战）
+  - 每章含必须通关的任务列表、金币/素材奖励、NPC 对话解锁
+  - `check_chapter_completion()` 在通关后自动检测章节是否完成
+  - `_complete_chapter()` 发放奖励 + 解锁下一章 + 推进 NPC 对话
+  - `get_progression_summary()` 提供进度摘要供 UI 使用
+- 14.4 ✅ 剧情推进触发
+  - `_check_story_progression()` 在目标完成后调用
+  - `record_mission_clear()` 中自动检查章节完成
+  - 章节完成自动推进 `chapter` 变量和 NPC 对话索引
 
 ---
 
@@ -351,12 +358,89 @@
 - 15.4 player.gd 实现全局stat类升级（thermal_imager, laser_rangefinder, extra_ammo_rack）— ✅
 - 15.5 WeaponUpgradeHandler 实现武器stat类（long_barrel, tandem_heat, sap_round, ammo_belt, extra_ammo_rack 射速）— ✅
 - 15.6 machine_gun_ability_controller 实现 mg_programmed 机炮专属效果 — ✅
-遗留
-- 9 个复杂运行时机制升级的gameplay效果待后续阶段（需命中计数/暴击hook/碰撞伤害等底层支持）
+- 15.7 ✅ 9 个复杂运行时机制升级全部实现
+  - WeaponUpgradeHandler: suppressive_net/thermal_bolt(射速) + stable_platform/fallback_firing(伤害) + on_non_crit_hit/on_weapon_miss/check_multi_feed 回调
+  - 弹体脚本: precision_bore(暴击穿深) + shock_fragment(穿透破片) + 未命中检测
+  - machine_gun_controller: multi_feed 免费射击
+  - player.gd: breach_equip 碰撞伤害 + detonation_link 暴击击杀AoE
 验收标准
 - 升级池可刷出所有 17 个新升级，显示正确图标和描述
 - stat类升级对玩家属性/武器参数有正确数值影响
+- 运行时机制升级在战斗中正确触发
 - 无新增 lint/parse error
+
+---
+
+## 阶段 16-A：Bug 修复 + 章节进度 UI ✅ 已完成（2026-02-19）
+目标
+- 修复已知 Bug，实现章节进度 UI
+主要工作
+- 16-A.1 ✅ 修复机炮弹体全局伤害加成不生效 Bug
+  - `machine_gun_ability.gd` 的 `_compute_damage_against()` 从 `get_target_damage_modifier()` 切换为 `get_damage_modifier()`
+  - 现在 `stable_platform`/`fallback_firing`/`kill_chain`/`damage_bonus`/`overdrive_trigger`/`long_barrel` 等全局伤害词条对机炮正确生效
+- 16-A.2 ✅ 军营章节进度 HUD（`ProgressionHUD`）
+  - `scenes/ui/progression_hud.gd`：CanvasLayer 常驻面板，显示在军营右上角
+  - 显示：当前章节名称、任务通关数/总数、逐章节任务完成状态（✓/○/🔒）
+  - 可折叠/展开、任务地图/NPC 对话时自动隐藏
+  - 数据源：`GameManager.get_progression_summary()` + `CHAPTER_DEFINITIONS`
+  - 集成到 `MilitaryCamp.gd`：`_ready()` 创建，overlay 切换时控制可见性
+- 16-A.3 ✅ 更新 UPGRADE_ICON_DRAWING.md（7.2 节 17 个升级状态从"无 entry"更新为"已完成"）
+
+---
+
+## 阶段 16-C：目标奖励系统 + 军需官 NPC ✅ 已完成（2026-02-19）
+目标
+- 实现关卡目标奖励系统，让次要目标有实际收益
+- 添加第二个 NPC（军需官），丰富军营交互
+主要工作
+- 16-C.1 ✅ 目标奖励系统
+  - `BaseLevel` 新增虚方法 `_get_victory_bonus()` + `_get_objective_rewards()`
+  - `GameManager._build_settlement()` 扩展：处理通关奖励 + 次要目标奖励（金币+素材，不受损失比例影响）
+  - `GameManager.apply_mission_result()` 签名扩展为 4 参数（兼容旧调用）
+  - LevelDesert / LevelContaminated / LevelBoss 各自覆写两个虚方法，定义 8 个任务的通关奖励和 9 个次要目标的额外奖励
+  - `end_screen.gd` 新增通关奖励显示（绿色）+ 次要目标奖励逐条显示（金色 ✓）
+- 16-C.2 ✅ 军需官 NPC
+  - `DialogueData/Dialogue3.dialogue`：5 段对话（intro → day2 → day3 → day4 → idle）
+  - `MilitaryCamp.tscn` 新增 `npc_quartermaster` Building 节点（沙黄色调 NPC 精灵）
+  - `MilitaryCamp.gd` 重构 NPC 对话为通用方法 `_start_npc_dialogue(npc_id, resource)`
+  - `NPC_DIALOGUE_SEQUENCES` 新增 `npc_quartermaster` 条目
+  - `CHAPTER_DEFINITIONS` 的 `unlock_npc_dialogues` key 修正为 `npc_mechanic`/`npc_quartermaster`
+验收标准
+- 胜利结算画面显示通关奖励和已完成次要目标的额外奖励
+- 金币/素材正确入账到 `GameManager.money` / `materials`
+- 军需官 NPC 可在军营中交互，对话按进度推进
+
+---
+
+## 阶段 16-D：配件预升级 + Bug修复 + QoL改进 ✅ 已完成（2026-02-19）
+目标
+- 实现配件预升级系统（策划书 5B.4），让已装备配件可提升等级
+- 修复损坏的 PNG 图标文件导致的编译失败
+- 修复 `level_desert.gd` 的 Parse Error
+- 任务地图和进度面板 QoL 改进
+主要工作
+- 16-D.1 ✅ Bug修复
+  - 32 个升级图标 PNG 为非法文件（非 PNG 格式），导致 `AbilityUpgradeData.gd` preload 失败，级联使整个项目无法编译
+  - 解决方案：删除损坏文件及 `.import`，将 32 个 preload 替换为 `null`
+  - `level_desert.gd` 第 84 行：`_:` match case 被放在 match 块外部导致 Parse Error → 已删除孤立代码
+- 16-D.2 ✅ 配件预升级系统
+  - `EquipmentCostData.gd`：新增 `MAX_ACCESSORY_LEVEL = 3`、`get_accessory_total_cost()`；`calc_total_sortie_cost()` 读取 `"配件等级"` 字典
+  - `GameManager.gd`：新增 `set_accessory_level()`，修改 `get_brought_in_accessory_level()` 增加 clamp，`unload_part()` 卸载时重置等级
+  - `ListDisplay.gd`：动态创建预升级控件（HBoxContainer + Label + ±按钮），已装备配件显示等级调整UI + 等级调整后费用 + 按等级展示能力数值
+  - `CarEditor.gd`：连接 `accessory_level_changed` 信号刷新配装面板
+  - `debug_console.gd`：新增 `acclv <id> <lv>` 命令
+- 16-D.3 ✅ QoL 改进
+  - `mission_map.gd`：任务详情面板新增通关奖励预览（`reward_preview`），未解锁任务显示解锁条件并可查看详情
+  - `progression_hud.gd`：新增资源一览区域（金币 + 所有素材），方便在军营查看当前资源
+  - 文件删除策略写入 `注意事项.md` 和 `.cursor/rules/`，建立 `.trash/` 假删除机制
+验收标准
+- 车辆编辑器中已装备配件显示预升级控件，可升至 Lv.3
+- 出击费用随配件等级增长
+- 描述文本按当前等级展示数值
+- 卸载配件后等级重置为 1
+- Debug 命令 `acclv` 可正常使用
+- 任务地图显示通关奖励预览和解锁条件
+- 进度面板显示金币和素材
 
 ---
 
@@ -374,7 +458,7 @@
 |------|------|------|
 | `:=` 违规使用（4处） | ✅ 已修复 | `player.gd` (const)、`SaveData.gd` (2x函数默认参数)、`upgrade_screen.gd` (const) |
 | 3 个升级缺少 UpgradeEffectManager 配置 | ⚠️ 低风险 | `windmill_spread`、`windmill_speed`、`mine_multi_deploy` 效果由各自控制器/WeaponUpgradeHandler 直接处理，不走 UpgradeEffectManager |
-| 17 个文档设计升级未实现到代码 | ✅ 阶段15已落地 | 数据entry+效果config+图标映射已完成；stat类gameplay效果已实现，8个复杂运行时机制待后续 |
+| 17 个文档设计升级未实现到代码 | ✅ 全部完成 | 数据entry+效果config+图标映射+全部gameplay效果（含9个复杂运行时机制）均已实现 |
 | 62 个后置专属升级缺少图标 | 📋 待绘制 | 见 `DOCUMENTS/HANDOFFS/UPGRADE_ICON_DRAWING.md` |
 
 #### 低优先级
@@ -395,16 +479,16 @@
 - `sap_round`（对轻甲伤害+，暴伤+）、`ammo_belt`（射速/装填+）— WeaponUpgradeHandler
 - `mg_programmed`（对轻甲伤害+，射速+）— machine_gun_ability_controller + WeaponUpgradeHandler
 
-**待实现gameplay效果（复杂运行时机制）：**
-- `suppressive_net` — 需命中计数系统（同时命中3+敌人触发）
-- `stable_platform` — 需移动射击衰减判定
-- `multi_feed` — 需射击触发计数系统
-- `precision_bore` — 需暴击时穿深叠加hook
-- `detonation_link` — 需暴击击杀事件+AoE生成
-- `shock_fragment` — 需穿透事件hook+破片生成
-- `fallback_firing` — 需未命中检测
-- `thermal_bolt` — 需连续暴击状态追踪
-- `breach_equip` — 需车辆碰撞伤害系统
+**运行时机制升级（已全部实现）：**
+- `suppressive_net` — ✅ 500ms窗口内3+命中触发3秒射速加成
+- `stable_platform` — ✅ 移动时伤害加成（velocity > threshold）
+- `multi_feed` — ✅ 机炮射击后概率免费额外射击
+- `precision_bore` — ✅ 暴击时额外穿深转伤害加成
+- `detonation_link` — ✅ 暴击击杀后60px范围AoE爆破
+- `shock_fragment` — ✅ 穿透后对同一目标附加破片伤害
+- `fallback_firing` — ✅ 未命中积累加成，命中时消耗
+- `thermal_bolt` — ✅ 暴击+1层非暴击-1层，层数×射速加成
+- `breach_equip` — ✅ 碰撞时对敌人造成(速度×耐久×系数)伤害
 
 ---
 
@@ -502,14 +586,20 @@
 - 资源在**出击时结算**而非装备时扣除
 - 出击时资源不足 → 提示并禁止出击
 
-#### E.3 配件升级 / 预升级（E.2 完成后设计）
-- 装备某配件后可选择对其升级
-- 升级同样为预升级，出击时结算
+#### E.3 配件预升级 ✅ 已完成（阶段16-D，2026-02-19）
+- 装备某配件后可在车辆编辑器中升级至 Lv.1~3
+- 费用在出击时结算：Lv2 = +50%金币 +1×素材，Lv3 = +100%金币 +2×素材
+- `EquipmentCostData.get_accessory_total_cost()` 计算等级费用
+- `calc_total_sortie_cost()` 自动读取 `"配件等级"` 字典
+- `ListDisplay` 动态创建预升级控件（+/- 按钮 + 等级标签）
+- 卸载配件自动重置等级
+- 局内 `upgrade_manager.equip_brought_in_accessories()` 按等级初始化
+- Debug 命令：`acclv <id> <lv>`
 
 #### 实现顺序
-1. E.1 解锁系统（含 UI 改造）
-2. E.2 装备 / 预制造 + 出击资源检查
-3. E.3 配件预升级
+1. E.1 解锁系统（含 UI 改造） ✅
+2. E.2 装备 / 预制造 + 出击资源检查 ✅
+3. E.3 配件预升级 ✅
 
 ### Mark D：代码健康度清理 ✅ 已完成（2026-02-19）
 - 删除孤立场景 `scenes/Levels/Contamination/`、`scenes/Levels/SalvageRun/`（早期原型，无任务路由，有脚本引用错误）
@@ -553,5 +643,5 @@
 返还一定数量能量并存入能量池（即局外能量）。
 
 #### 未来扩展
-- [ ] 目标奖励由关卡脚本管理（可触发 money/素材/解锁/主线推进等多种组合）
+- [x] 目标奖励由关卡脚本管理（可触发 money/素材/解锁/主线推进等多种组合）→ 阶段16-C 已完成
 - [ ] 不同关卡可自定义损失比例、免损物品等（当前为全局默认规则）

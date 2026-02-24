@@ -14,11 +14,12 @@ var depth_bonus_mm: float = 0.0
 
 var _hits_remaining: int = 1
 var _hit_hurtboxes: Array[HurtboxComponent] = []
+var _has_hit_anything: bool = false
 
 func _ready():
 	queue_redraw()
 	var t = get_tree().create_timer(lifetime_seconds)
-	t.timeout.connect(queue_free)
+	t.timeout.connect(_on_lifetime_expired)
 	hitbox_component.area_entered.connect(_on_hitbox_area_entered)
 	hitbox_component.damage_type = "weapon"
 	_set_hits_remaining()
@@ -55,8 +56,8 @@ func _on_hitbox_area_entered(area: Area2D):
 		return
 	_hit_hurtboxes.append(hurtbox)
 	_hits_remaining -= 1
+	_has_hit_anything = true
 	
-	# 命中通知（用于专注等）
 	if WeaponUpgradeHandler.instance:
 		WeaponUpgradeHandler.instance.on_weapon_hit(target)
 	
@@ -77,6 +78,12 @@ func _on_hitbox_area_entered(area: Area2D):
 		dmg *= crit_mult
 		if WeaponUpgradeHandler.instance:
 			WeaponUpgradeHandler.instance.on_weapon_critical(target)
+			var bore_bonus: float = WeaponUpgradeHandler.instance.get_precision_bore_depth_bonus(true)
+			if bore_bonus > 0.0:
+				dmg *= (1.0 + bore_bonus)
+	else:
+		if WeaponUpgradeHandler.instance:
+			WeaponUpgradeHandler.instance.on_non_crit_hit()
 	
 	var armor_coverage: float = 0.0
 	if target.get("armorCoverage") != null:
@@ -95,7 +102,12 @@ func _on_hitbox_area_entered(area: Area2D):
 	)
 	hurtbox.apply_damage(final_damage, "weapon", is_critical)
 	
-	# 击杀检测
+	# 破片喷流：穿透后附加破片伤害
+	if WeaponUpgradeHandler.instance and _hits_remaining > 0:
+		var fragment_dmg: float = WeaponUpgradeHandler.instance.get_shock_fragment_damage(final_damage, true)
+		if fragment_dmg > 0.0:
+			hurtbox.apply_damage(fragment_dmg, "weapon", false)
+	
 	var t_hc = target.get_node_or_null("HealthComponent")
 	if t_hc and t_hc.current_health <= 0:
 		if WeaponUpgradeHandler.instance:
@@ -105,3 +117,8 @@ func _on_hitbox_area_entered(area: Area2D):
 	
 	if _hits_remaining <= 0:
 		queue_free()
+
+func _on_lifetime_expired():
+	if not _has_hit_anything and WeaponUpgradeHandler.instance:
+		WeaponUpgradeHandler.instance.on_weapon_miss()
+	queue_free()

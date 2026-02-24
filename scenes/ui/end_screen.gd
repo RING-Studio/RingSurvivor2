@@ -92,6 +92,43 @@ func show_settlement(settlement: Dictionary) -> void:
 				parts.append("%s ×%d（原 %d）" % [display_name, final_count, raw_count])
 		materials_label.text = "素材：" + "，".join(parts)
 
+	# 通关奖励
+	var vb_money: int = int(settlement.get("victory_bonus_money", 0))
+	var vb_mats: Dictionary = settlement.get("victory_bonus_materials", {})
+	if vb_money > 0 or not vb_mats.is_empty():
+		var vb_parts: Array[String] = []
+		if vb_money > 0:
+			vb_parts.append("金币 +%d" % vb_money)
+		for mat_type in vb_mats:
+			var display_name: String = MATERIAL_DISPLAY_NAMES.get(mat_type, mat_type)
+			vb_parts.append("%s ×%d" % [display_name, int(vb_mats[mat_type])])
+		var vb_label: Label = Label.new()
+		vb_label.text = "通关奖励：" + "，".join(vb_parts)
+		vb_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.4))
+		settlement_container.add_child(vb_label)
+
+	# 次要目标奖励
+	var obj_details: Array = settlement.get("obj_reward_details", [])
+	if not obj_details.is_empty():
+		var obj_header: Label = Label.new()
+		obj_header.text = "── 额外目标奖励 ──"
+		obj_header.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+		obj_header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		settlement_container.add_child(obj_header)
+		for detail in obj_details:
+			var obj_parts: Array[String] = []
+			var obj_money: int = int(detail.get("money", 0))
+			if obj_money > 0:
+				obj_parts.append("金币 +%d" % obj_money)
+			var obj_mats: Dictionary = detail.get("materials", {})
+			for mat_type in obj_mats:
+				var display_name: String = MATERIAL_DISPLAY_NAMES.get(mat_type, mat_type)
+				obj_parts.append("%s ×%d" % [display_name, int(obj_mats[mat_type])])
+			var obj_label: Label = Label.new()
+			obj_label.text = "✓ %s：%s" % [str(detail.get("display_name", "")), "，".join(obj_parts)]
+			obj_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+			settlement_container.add_child(obj_label)
+
 	# 新解锁配件（Mark E.1）
 	var newly_unlocked: Array = settlement.get("newly_unlocked", [])
 	if not newly_unlocked.is_empty():

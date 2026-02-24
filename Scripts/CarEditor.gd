@@ -26,10 +26,13 @@ var max_vehicles = 4
 
 func _ready() -> void:
 	Transitions.transition(Transitions.transition_type.Diamond, true)
-
+	if list_display:
+		list_display.accessory_level_changed.connect(_on_accessory_level_changed)
 	_update_vehicle_selection()
-
 	switch_to_main_weapon(true)
+
+func _on_accessory_level_changed(_accessory_id: String, _new_level: int) -> void:
+	_update_vehicle_selection()
 
 func switch_to_Accessories(_id: int = 0):
 	selected_slot = "配件"

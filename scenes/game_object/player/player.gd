@@ -65,6 +65,9 @@ var _overpressure_active_until_msec: int = 0
 var mobility_servos_level: int = 0
 var target_computer_level: int = 0
 
+# 阶段十五：破障设备
+var breach_equip_level: int = 0
+
 # 临时移动速度加成
 var _temp_speed_multiplier: float = 1.0
 var _temp_speed_bonus_until_msec: int = 0
@@ -418,6 +421,18 @@ func on_body_entered(other_body: Node2D):
 	if enemys_in_contact.has(other_body):
 		return
 	enemys_in_contact.append(other_body)
+	
+	# 破障设备：撞击对敌人造成伤害（移速×耐久×系数）
+	if breach_equip_level > 0 and other_body.is_in_group("enemy"):
+		var spd: float = velocity.length()
+		var hp: float = float(health_component.current_health)
+		var coeff: float = UpgradeEffectManager.get_effect("breach_equip", breach_equip_level)
+		var ram_damage: float = spd * hp * coeff * 0.01
+		if ram_damage > 0.0:
+			var hb = other_body.get_node_or_null("HurtboxComponent")
+			if hb:
+				hb.apply_damage(ram_damage, "ram", false)
+	
 	check_deal_damage()
 
 
@@ -500,6 +515,7 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 			"overpressure_limiter", "mobility_servos", "target_computer",
 			# 阶段十五
 			"thermal_imager", "laser_rangefinder", "extra_ammo_rack",
+			"breach_equip",
 		]
 		
 		if not is_global_upgrade and not is_new_global_upgrade:
@@ -562,6 +578,8 @@ func _recalculate_all_attributes(current_upgrades: Dictionary):
 				global_health_bonus -= int(hp_penalty)
 				var speed_penalty: float = float(cfg.get("speed_penalty", 0.10))
 				move_speed_multiplier -= speed_penalty
+			"breach_equip":
+				breach_equip_level = level
 	
 	# 应用耐久加成
 	_apply_health_bonus()

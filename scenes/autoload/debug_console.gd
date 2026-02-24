@@ -264,6 +264,10 @@ func _execute_command(cmd: String) -> void:
 			_cmd_info()
 		"unlock_acc", "ua":
 			_cmd_unlock_accessory(parts)
+		"cost":
+			_cmd_cost()
+		"acclv":
+			_cmd_acclv(parts)
 		_:
 			_print_output("[color=red]未知命令: %s。输入 help 查看帮助。[/color]" % command)
 
@@ -291,6 +295,8 @@ func _cmd_help() -> void:
 [color=cyan]list materials[/color] — 列出素材库
 [color=cyan]npc[/color] — 查看NPC对话进度
 [color=cyan]npc <id> <n>[/color] — 设置NPC对话索引
+[color=cyan]cost[/color] — 查看当前配装出击费用
+[color=cyan]acclv <id> <lv>[/color] — 设置配件预升级等级
 [color=cyan]info[/color] — 游戏状态总览
 [color=cyan]save[/color] — 立即存档
 [color=cyan]clear[/color] — 清空输出
@@ -568,6 +574,47 @@ func _cmd_info() -> void:
 		if GameManager.get_mission_clear_count(str(m.get("id", ""))) > 0:
 			cleared_count += 1
 	_print_output("关卡通关: %d / %d" % [cleared_count, MissionData.get_all_missions().size()])
+	# 出击费用
+	var cost: Dictionary = GameManager.get_total_sortie_cost()
+	var cost_str: String = EquipmentCostData.format_cost(cost)
+	var afford: String = "[color=green]✓[/color]" if GameManager.can_afford_sortie() else "[color=red]✗[/color]"
+	_print_output("出击费用: %s %s" % [cost_str, afford])
+
+
+func _cmd_cost() -> void:
+	var cost: Dictionary = GameManager.get_total_sortie_cost()
+	_print_output("[color=cyan]===== 出击费用 =====[/color]")
+	if cost.is_empty():
+		_print_output("  免费")
+	else:
+		_print_output("  总计: %s" % EquipmentCostData.format_cost(cost))
+		var config: Dictionary = GameManager.get_vehicle_config(GameManager.current_vehicle)
+		if config != null:
+			var accs: Variant = config.get("配件", [])
+			if accs is Array:
+				for acc_id in accs:
+					if acc_id is String:
+						var lv: int = GameManager.get_brought_in_accessory_level(GameManager.current_vehicle, acc_id)
+						var acc_cost: Dictionary = EquipmentCostData.get_accessory_total_cost(acc_id, lv)
+						_print_output("    %s Lv.%d: %s" % [acc_id, lv, EquipmentCostData.format_cost(acc_cost)])
+		var affordable: bool = GameManager.can_afford_sortie()
+		if affordable:
+			_print_output("  [color=green]资源充足，可出击[/color]")
+		else:
+			var missing: Array[String] = GameManager.get_sortie_missing_resources()
+			_print_output("  [color=red]资源不足：[/color]")
+			for m in missing:
+				_print_output("    [color=red]%s[/color]" % m)
+
+func _cmd_acclv(parts: PackedStringArray) -> void:
+	if parts.size() < 3:
+		_print_output("[color=red]用法: acclv <accessory_id> <level(1-%d)>[/color]" % EquipmentCostData.MAX_ACCESSORY_LEVEL)
+		return
+	var acc_id: String = parts[1]
+	var lv: int = int(parts[2])
+	GameManager.set_accessory_level(GameManager.current_vehicle, acc_id, lv)
+	var actual: int = GameManager.get_brought_in_accessory_level(GameManager.current_vehicle, acc_id)
+	_print_output("[color=lime]%s 预升级等级已设置为 Lv.%d[/color]" % [acc_id, actual])
 
 
 func _cmd_unlock_accessory(parts: PackedStringArray) -> void:

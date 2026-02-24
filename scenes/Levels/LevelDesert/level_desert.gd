@@ -81,9 +81,27 @@ func _setup_objectives() -> void:
 		"drop_chance": 0.06,
 		"enemy_filter": "DuneBeetle"
 	})
-		_:
-			# fallback: 无限生存
-			pass
+
+
+func _get_victory_bonus() -> Dictionary:
+	match GameManager.current_mission_id:
+		"recon_patrol":
+			return {"money": 200}
+		"salvage_run":
+			return {"money": 260}
+	return {}
+
+func _get_objective_rewards() -> Dictionary:
+	match GameManager.current_mission_id:
+		"recon_patrol":
+			return {
+				"kill_30": {"display_name": "击杀 60 只敌人", "money": 100},
+			}
+		"salvage_run":
+			return {
+				"kill_bonus": {"display_name": "击杀 100 只敌人", "money": 150, "materials": {"scrap_metal": 1}},
+			}
+	return {}
 
 
 func _on_enemy_killed_objectives(enemy: Node2D, is_elite: bool, is_boss: bool, enemy_class: String) -> void:
